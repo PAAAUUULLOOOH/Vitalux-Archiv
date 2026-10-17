@@ -16,6 +16,7 @@ from .glass import AmbientScene, GlassSidebar, GlassSurface
 from .sidebar_transition import SidebarTransition, SidebarFreeze
 from .alerts import AlertMonitor, readings_from_sample
 from .tray_preview import TrayPreview, tray_tooltip
+from .wallpaper_accents import resolve_accent
 
 
 class Sampler(QThread):
@@ -599,7 +600,7 @@ class MainWindow(QMainWindow):
         """Restyle in-place; keep selected page, benchmark worker and scroll intact."""
         theme.set_mode(settings.get('theme', 'glass'))
         user_accent = settings.get('accent', '#4f8cff')
-        theme.set_accent(self.distro['color'] if user_accent == 'auto' else user_accent)
+        theme.set_accent(resolve_accent(user_accent, self.distro['color']))
         QApplication.instance().setStyleSheet(theme.stylesheet())
         self.brand_mark.setPixmap(wordmark_pixmap(200, 42))
         self.pulse_core.sync_theme()
