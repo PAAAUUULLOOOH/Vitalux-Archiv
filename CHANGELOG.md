@@ -5,6 +5,13 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.71] - 2026-10-17
+- Systemleisten-Hover repariert: KDE zeigt wieder CPU-, GPU- und RAM-Auslastung sowie verfügbare CPU-/GPU-Temperaturen aus den laufenden Messdaten an.
+- Kompakte Live-Vorschau im Tray-Kontextmenü ergänzt, mit aktualisierten Prozentbalken und Temperaturen. Unter Wayland wird der native KDE-Tooltip für den Hover verwendet.
+- Eigene PNG-, JPG-, WebP- und BMP-Hintergründe importieren, auswählen und löschen. Die Originaldateien bleiben unverändert.
+- Bildplatzierung: Bildschirmfüllend, Einpassen, Strecken, Zentriert oder Kacheln, mit Vorschau.
+- Deutsch/Englisch, Anleitung und Tests erweitert. Die 630 integrierten Farbkombinationen bleiben erhalten.
+
 ## [v0.9.3.70] - 2026-10-17
 - Protokolle vereinheitlicht: `vitalux.log`, `errors.log`, `installation.log` und `restart.log` erhalten lokale ISO-Zeitstempel einschließlich Zeitzone und Kennzeichnungen der Vitalux-Version. Native Crashframes werden mit einem zeitgestempelten Startmarker und Absturzabschluss eingerahmt.
 - Alte animierte Hintergrundeffekte „Nordlicht“, „Nachtwellen“ und „Violetter Nebel“ sowie deren Farbpaletten und Renderlogik vollständig entfernt. Nur „Funkeln“ bleibt animiert.
