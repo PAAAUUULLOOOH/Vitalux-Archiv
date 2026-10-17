@@ -1,5 +1,11 @@
 """Extra English translations for dashboard, settings, sensors and disk tests."""
 EN_MORE = {
+    'Qt Quick · GPU-Test (experimentell)': 'Qt Quick · GPU test (experimental)',
+    'OpenGL nutzt die GPU für den Hintergrund. Qt Quick rendert den Hintergrund über einen echten GPU-Scene-Graph. Diagramme und normale Qt-Bedienelemente bleiben vorerst CPU-gerendert.': 'OpenGL uses the GPU for the background. Qt Quick renders the background with a real GPU scene graph. Charts and normal Qt widgets still use the CPU.',
+    'Zum Wechseln Jetzt neu starten klicken. Bei Grafikfehlern CPU · Standard auswählen; ein fehlgeschlagener GPU-Start wird automatisch zurückgesetzt.': 'Click Restart now to switch. For graphical problems select CPU · Standard; failed GPU starts automatically revert to the CPU.',
+    'Aktiv: Qt Quick GPU-Scene-Graph (experimentell)': 'Active: Qt Quick GPU scene graph (experimental)',
+    'Danke an TimBooH für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering).': 'Thanks to TimBooH for supporting the integration of custom wallpapers and graphics output (OpenGL/CPU rendering).',
+    'Du kannst in Grafik-Rendering direkt zwischen CPU, OpenGL und Qt Quick wählen. Bei der neuen Qt-Quick-Option wird der Hintergrund über den GPU-Scene-Graph angezeigt; Diagramme und Bedienelemente bleiben zunächst Qt-Widgets. Der Button Jetzt neu starten wendet die Auswahl kontrolliert an.': 'Graphics rendering lets you choose CPU, OpenGL or Qt Quick. The Qt Quick option uses a GPU scene graph for the wallpaper; charts and controls remain Qt widgets for now. Restart now applies the selection safely.',
     'Die Akzentfarbe lässt sich wie bisher direkt auswählen; die zusätzliche Option Hintergrundfarbe automatisch folgt deinem gewählten Hintergrund. Unter Grafik-Rendering kannst du zwischen CPU und OpenGL wechseln und über Jetzt neu starten sofort anwenden.': 'As before, select an accent color directly; the additional Automatically match background option follows your selected wallpaper. Under Graphics rendering you can switch CPU/OpenGL and apply it immediately with Restart now.',
     'Grafik-Rendering': 'Graphics rendering',
     'Render-Methode': 'Rendering method',
