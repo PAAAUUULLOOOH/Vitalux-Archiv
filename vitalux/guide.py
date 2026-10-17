@@ -77,7 +77,7 @@ SLIDES = [
         "Darstellung und Einstellungen",
         "Standardmäßig startet Vitalux mit Glass und Vitalux Blau. Gespeicherte persönliche Einstellungen bleiben erhalten.",
         "Wähle einen von 14 integrierten Hintergründen oder importiere eigene Bilder mit Füllen, Einpassen, Strecken, Zentrieren oder Kacheln. Nur Funkeln ist animiert.",
-        "Die Akzentfarbe lässt sich wie bisher direkt auswählen; die zusätzliche Option Hintergrundfarbe automatisch folgt deinem gewählten Hintergrund. Unter Grafik-Rendering kannst du zwischen CPU und OpenGL wechseln und über Jetzt neu starten sofort anwenden.",
+        "Du kannst in Grafik-Rendering direkt zwischen CPU, OpenGL und Qt Quick wählen. Bei der neuen Qt-Quick-Option wird der Hintergrund über den GPU-Scene-Graph angezeigt; Diagramme und Bedienelemente bleiben zunächst Qt-Widgets. Der Button Jetzt neu starten wendet die Auswahl kontrolliert an.",
         "Du kannst 5 Farbschemas, 14 Hintergrundeinstellungen und 9 Akzentoptionen kombinieren: 5 × 14 × 9 = 630 Auswahlkombinationen, davon 560 mit festen Akzentfarben. Eigene Farben bieten weitere Möglichkeiten.",
         "settings",
     ),
