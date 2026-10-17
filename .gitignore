@@ -1,0 +1,15 @@
+# Runtime dependencies are downloaded during GitHub Actions builds; only source and assets are tracked.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.runtime/
+runtime/
+lib/
+tools-lib/
+*.AppImage
+*.zip
+build/
+dist/
+*.log
+.DS_Store
