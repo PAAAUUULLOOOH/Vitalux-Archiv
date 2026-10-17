@@ -55,9 +55,9 @@
 | **Einstellungen** | Akzentfarben, Animationen, Messintervalle und Dashboard-Anordnung |
 | **Updates & Info** | Automatische Versionsprüfung, Aktualisierung auf Wunsch und integrierte Anleitung |
 
-**Farbschemata:** Dark, Light, Glass, Black Glass und Minimalistisch. Glass und Black Glass bieten Glasoptik mit weichgezeichnetem Hintergrund. Die Dropdown-Menüs passen sich farblich an das gewählte Design an. Eigene Akzentfarben kannst du benennen und speichern. Wähle eine gespeicherte eigene Farbe aus, um sie über **„Bearbeiten“** umzubenennen oder neu einzufärben und über **„Löschen“** zu entfernen. Beide Schaltflächen erscheinen nur bei eigenen Farben.
+**Farbschemata:** Dark, Light, Glass, Black Glass und Minimalistisch. Glass und Black Glass bieten Glasoptik mit weichgezeichnetem Hintergrund. Dropdown-Felder und ihre aufgeklappten Listen werden schmaler und farblich an Dark, Light, Glass, Black Glass und Minimalistisch angepasst. Eigene Akzentfarben kannst du benennen und speichern. Wähle eine gespeicherte eigene Farbe aus, um sie über **„Bearbeiten“** umzubenennen oder neu einzufärben und über **„Löschen“** zu entfernen. Die Reihenfolge lautet **Bearbeiten → Löschen → Eigene Farbe …**. Bearbeiten und Löschen erscheinen nur bei eigenen Farben.
 
-**Hardware-Warnungen:** In **Einstellungen → Hardware-Warnungen** aktivierst du Grenzwerte. Die kompakten Eingabefelder für CPU-/GPU-Temperatur, RAM-Auslastung und Systemlaufwerk stehen rechts hinter ihren Beschriftungen.
+**Hardware-Warnungen:** In **Einstellungen → Hardware-Warnungen** aktivierst du Grenzwerte. Die kompakten Eingabefelder für CPU-/GPU-Temperatur, RAM-Auslastung und Systemlaufwerk stehen direkt mit einem einheitlichen kleinen Abstand neben ihren Beschriftungen und nicht mehr am rechten Kartenrand.
 
 **Laufwerks-Benchmark:** Sequenzielle und zufällige Lese-/Schreibtests mit anpassbaren Testprofilen. Angezeigt werden unter anderem **MB/s** (Datenrate), **IOPS** (Ein-/Ausgabevorgänge pro Sekunde) und **Latenz** (Verzögerung).
 
