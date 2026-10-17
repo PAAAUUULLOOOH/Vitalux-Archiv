@@ -3,6 +3,7 @@
 Reports are written locally; the application never uploads them.
 """
 import json
+import faulthandler
 import os
 import platform
 import sys
@@ -14,6 +15,22 @@ from . import __version__
 
 LOG_PATH = (Path(os.environ.get('XDG_STATE_HOME') or Path.home()/'.local'/'state') /
             'vitalux' / 'errors.log')
+
+
+_fatal_log = None
+
+
+def enable_native_crash_trace():
+    """Capture fatal Qt/native stack traces when the GUI crashes."""
+    global _fatal_log
+    if _fatal_log is not None:
+        return
+    try:
+        LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _fatal_log = LOG_PATH.open('a', encoding='utf-8')
+        faulthandler.enable(file=_fatal_log, all_threads=True)
+    except (OSError, RuntimeError, ValueError):
+        _fatal_log = None
 
 
 def log_exception(kind, value, tb=None):
