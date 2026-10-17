@@ -1,14 +1,38 @@
 #!/usr/bin/env bash
 set -euo pipefail
 BASE="${APPDIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
+INTEGRATOR="$BASE/packaging/appimage-integration.sh"
 case "${1:-}" in
-  --install|--uninstall) exec bash "$BASE/packaging/appimage-integration.sh" "$1" ;;
+  --install|--uninstall) exec bash "$INTEGRATOR" "$1" ;;
   --portable|--launch) shift; exec "$BASE/run.sh" "$@" ;;
 esac
-if [[ -n "${APPIMAGE:-}" && ! -f "${XDG_DATA_HOME:-$HOME/.local/share}/applications/vitalux.desktop" && -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
-  if LD_LIBRARY_PATH="$BASE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$BASE/runtime/bin/python3.12" "$BASE/packaging/appimage-first-run.py"; then
-    bash "$BASE/packaging/appimage-integration.sh" --install
-    exec "$HOME/.local/opt/vitalux/Vitalux.AppImage" --launch "$@"
+TARGET="$HOME/.local/opt/vitalux/Vitalux.AppImage"
+LAUNCHER="$HOME/.local/bin/vitalux"
+DESKTOP="${XDG_DATA_HOME:-$HOME/.local/share}/applications/vitalux.desktop"
+integrated() {
+  [[ -s "$TARGET" && -x "$TARGET" && -s "$DESKTOP" && -x "$LAUNCHER" ]] && grep -Fq "$LAUNCHER" "$DESKTOP"
+}
+if [[ -n "${APPIMAGE:-}" && -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]] && ! integrated; then
+  STATE="${XDG_STATE_HOME:-$HOME/.local/state}/vitalux"
+  mkdir -p "$STATE"
+  set +e
+  LD_LIBRARY_PATH="$BASE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$BASE/runtime/bin/python3.12" "$BASE/packaging/appimage-first-run.py" 2>>"$STATE/installation.log"
+  CHOICE=$?
+  set -e
+  if [[ "$CHOICE" == 80 ]]; then
+    if command -v kdialog >/dev/null 2>&1; then
+      if kdialog --title 'Vitalux – Erster Start' --yesno 'Vitalux im Anwendungsmenü installieren?' ; then CHOICE=0; else CHOICE=1; fi
+    elif command -v zenity >/dev/null 2>&1; then
+      if zenity --question --title='Vitalux – Erster Start' --text='Vitalux im Anwendungsmenü installieren?'; then CHOICE=0; else CHOICE=1; fi
+    else
+      echo "Vitalux: Installationsdialog nicht verfügbar. Manuelle Installation: AppImage --install (Log: $STATE/installation.log)" >&2
+    fi
+  fi
+  if [[ "$CHOICE" == 0 ]]; then
+    if bash "$INTEGRATOR" --install >>"$STATE/installation.log" 2>&1 && integrated; then
+      exec "$TARGET" --launch "$@"
+    fi
+    echo "Vitalux: Desktop-Installation fehlgeschlagen; Log: $STATE/installation.log" >&2
   fi
 fi
 exec "$BASE/run.sh" "$@"
