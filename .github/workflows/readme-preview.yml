@@ -1,0 +1,83 @@
+name: Vitalux – README-Programmfoto
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/capture-readme.py"
+      - ".github/workflows/readme-preview.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vitalux-readme-preview
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Repository abrufen
+        uses: actions/checkout@v4
+
+      - name: Qt- und Bildbibliotheken bereitstellen
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libopengl0 libxkbcommon-x11-0 libxcb-cursor0 unzip file
+
+      - name: Offizielles aktuelles Vitalux-Paket holen
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="$(gh release view --json tagName --jq '.tagName')"
+          echo "VITALUX_TAG=$TAG" >> "$GITHUB_ENV"
+          mkdir -p build/preview
+          gh release download "$TAG" --pattern "Vitalux-${TAG}-linux-x86_64.zip" --dir build/preview
+          unzip -tq "build/preview/Vitalux-${TAG}-linux-x86_64.zip"
+          unzip -q "build/preview/Vitalux-${TAG}-linux-x86_64.zip" -d build/preview
+          test -x "build/preview/Vitalux-${TAG}/runtime/bin/python3.12"
+
+      - name: Reales Dashboard mit gebündeltem Qt aufnehmen
+        shell: bash
+        env:
+          QT_QPA_PLATFORM: offscreen
+          XDG_CONFIG_HOME: ${{ runner.temp }}/vitalux-readme-config
+          XDG_STATE_HOME: ${{ runner.temp }}/vitalux-readme-state
+        run: |
+          set -euo pipefail
+          STAGED="$PWD/build/preview/Vitalux-${VITALUX_TAG}"
+          mkdir -p "$XDG_CONFIG_HOME" "$XDG_STATE_HOME"
+          (cd "$STAGED" && LD_LIBRARY_PATH="$STAGED/lib" \
+            "$STAGED/runtime/bin/python3.12" \
+            "$GITHUB_WORKSPACE/scripts/capture-readme.py" \
+            "$GITHUB_WORKSPACE/assets/vitalux-dashboard-preview.png")
+          test -s assets/vitalux-dashboard-preview.png
+          file assets/vitalux-dashboard-preview.png
+          python3 - <<'PY'
+          from pathlib import Path
+          f = Path("assets/vitalux-dashboard-preview.png")
+          assert f.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+          assert f.stat().st_size > 30000
+          print("Real Qt dashboard preview verified.")
+          PY
+
+      - name: Screenshot auf GitHub veröffentlichen
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/vitalux-dashboard-preview.png
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: refresh authentic Vitalux dashboard screenshot"
+            git push origin HEAD:main
+          else
+            echo "Screenshot unchanged"
+          fi
