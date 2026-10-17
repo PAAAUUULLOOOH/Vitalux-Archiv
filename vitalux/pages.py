@@ -79,11 +79,25 @@ class OverviewPage(Page):
         row = QHBoxLayout()
         row.setContentsMargins(4, 0, 4, 2)
         row.setSpacing(20)
+        # The distribution logo is an independent visibility option *inside*
+        # the hero tile: its name and system-information chips stay intact.
+        self.distro_logo_host = QWidget(head)
+        self.distro_logo_host.setFixedSize(96, 96)
         pic = label()
-        pic.setFixedSize(96, 96)
+        pic.setParent(self.distro_logo_host)
+        pic.setGeometry(0, 0, 96, 96)
         pic.setAlignment(Qt.AlignCenter)
         pic.setPixmap(logo)
-        row.addWidget(pic, 0, Qt.AlignVCenter)
+        self.distro_logo_remove = QToolButton(self.distro_logo_host)
+        self.distro_logo_remove.setObjectName('tileRemoveHint')
+        self.distro_logo_remove.setProperty('distroLogoRemove', True)
+        self.distro_logo_remove.setText('×')
+        self.distro_logo_remove.setToolTip(tr('Distributionslogo ausblenden'))
+        self.distro_logo_remove.setCursor(Qt.PointingHandCursor)
+        self.distro_logo_remove.setFixedSize(25, 25)
+        self.distro_logo_remove.move(70, 1)
+        self.distro_logo_remove.raise_()
+        row.addWidget(self.distro_logo_host, 0, Qt.AlignVCenter)
         distro_name = label(distro["name"], "heroTitle", wrap=True)
         distro_name.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         row.addWidget(distro_name, 1, Qt.AlignVCenter)
@@ -173,6 +187,9 @@ class OverviewPage(Page):
         self.content.addWidget(self.board)
         self.layout_toggle.clicked.connect(self.toggle_editor)
         self.board.changed.connect(self._refresh_editor_actions)
+        self.board.changed.connect(self._sync_distro_logo)
+        self.distro_logo_remove.clicked.connect(self.board.hide_distro_logo)
+        self._sync_distro_logo()
         self._position_editor_controls()
         QTimer.singleShot(0,self.board.refresh_geometry)
 
@@ -249,6 +266,11 @@ class OverviewPage(Page):
         group.finished.connect(completed)
         group.start()
 
+    def _sync_distro_logo(self):
+        visible = self.board.distro_logo_visible
+        self.distro_logo_host.setVisible(visible)
+        self.distro_logo_remove.setVisible(visible and self.board.editing)
+
     def _refresh_editor_actions(self):
         for key, _icon, _txt, action in self._editor_buttons:
             if key=='undo':action.setEnabled(bool(self.board.history))
@@ -278,6 +300,7 @@ class OverviewPage(Page):
             self.save_editor()
             return
         self.board.begin_edit()
+        self._sync_distro_logo()
         self._refresh_editor_actions()
         self._strip_open = True
         self.layout_toggle.set_collapsed(True)
@@ -287,6 +310,7 @@ class OverviewPage(Page):
     def _finish_editor(self, save):
         if not self.board.editing:return
         self.board.finish_edit(save=save)
+        self._sync_distro_logo()
         self._strip_open=False
         self.layout_toggle.set_collapsed(False)
         self.layout_toggle.setToolTip(tr('Dashboard-Layout'))
@@ -312,6 +336,8 @@ class OverviewPage(Page):
             tile.drag.setText(tr('Zum Verschieben halten'))
             tile.drag.setToolTip(tr('Kachel verschieben'))
             tile.remove.setToolTip(tr('Kachel ausblenden'))
+        self.distro_logo_remove.setToolTip(tr('Distributionslogo ausblenden'))
+
     def apply_layout(self):
         if not self.board.editing:
             self.board.refresh_geometry()
