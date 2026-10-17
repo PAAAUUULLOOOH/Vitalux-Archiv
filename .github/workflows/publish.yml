@@ -108,6 +108,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libopengl0
           STAGED="$PWD/build/staged/Vitalux-${TAG}"
           PY="$STAGED/runtime/bin/python3.12"
           LIB="$STAGED/lib"
