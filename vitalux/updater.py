@@ -11,6 +11,8 @@ import tempfile
 import urllib.error
 import urllib.request
 import zipfile
+import ssl
+import socket
 from pathlib import PurePosixPath
 import stat
 
@@ -30,10 +32,41 @@ def _ver(v):
     return tuple(int(x) for x in re.findall(r"\d+", v or ""))
 
 
+# The bundled Python/OpenSSL runtime may use Debian's CA path on non-Debian
+# systems (e.g. openSUSE). Trust the host's actual CA bundle, never disable TLS.
+CA_BUNDLES = (
+    "/etc/ssl/certs/ca-certificates.crt",       # Debian, Ubuntu, Arch, Fedora
+    "/etc/ssl/ca-bundle.pem",                  # openSUSE
+    "/var/lib/ca-certificates/ca-bundle.pem", # openSUSE
+    "/etc/pki/trust/extracted/pem/tls-ca-bundle.pem", # Fedora/openSUSE
+    "/etc/pki/tls/certs/ca-bundle.crt",       # RHEL
+    "/etc/ssl/cert.pem",                     # Other Linux systems
+)
+
+
+def _tls_context():
+    """Load a valid OS trust store for the embedded Python interpreter."""
+    # Honor the user's explicit override when it names a real certificate file.
+    explicit = os.environ.get("SSL_CERT_FILE")
+    paths = (explicit,) + CA_BUNDLES if explicit else CA_BUNDLES
+    for path in paths:
+        if path and os.path.isfile(path):
+            try:
+                return ssl.create_default_context(cafile=path)
+            except (OSError, ssl.SSLError):
+                continue
+    # Allows OpenSSL to use a CA directory (and respects SSL_CERT_DIR).
+    return ssl.create_default_context()
+
+
+def _github_request(request, timeout):
+    return urllib.request.urlopen(request, timeout=timeout, context=_tls_context())
+
+
 def _get_release():
     req = urllib.request.Request(
         f"https://api.github.com/repos/{DEFAULT_REPO}/releases/latest", headers=HEADERS)
-    with urllib.request.urlopen(req, timeout=10) as response:
+    with _github_request(req, timeout=12) as response:
         return json.load(response)
 
 
@@ -46,8 +79,17 @@ def check():
         if e.code == 404:
             return {"ok": False, "error": "Noch keine Vitalux-Version über GitHub Releases veröffentlicht."}
         return {"ok": False, "error": f"GitHub: HTTP {e.code}"}
-    except (urllib.error.URLError, OSError, TimeoutError):
-        return {"ok": False, "error": tr("Keine Verbindung zu GitHub.")}
+    except (urllib.error.URLError, OSError, TimeoutError) as exc:
+        reason = getattr(exc, "reason", exc)
+        if isinstance(reason, ssl.SSLCertVerificationError):
+            message = ("GitHub-Zertifikat konnte nicht geprüft werden. "
+                       "Bitte Systemzeit und CA-Zertifikate prüfen. "
+                       f"Details: {reason}")
+        elif isinstance(reason, socket.gaierror):
+            message = f"GitHub-DNS-Auflösung fehlgeschlagen: {reason}"
+        else:
+            message = f"GitHub ist nicht erreichbar: {reason}"
+        return {"ok": False, "error": str(message)[:320]}
     except (ValueError, TypeError):
         return {"ok": False, "error": tr("Unerwartete Antwort von GitHub.")}
 
@@ -89,7 +131,7 @@ def _download_verified(url, output_path, sha256, progress, download_limit):
     digest = hashlib.sha256()
     length = 0
     request = urllib.request.Request(url, headers={'User-Agent': HEADERS['User-Agent']})
-    with urllib.request.urlopen(request, timeout=45) as response, open(output_path, 'wb') as f:
+    with _github_request(request, timeout=45) as response, open(output_path, 'wb') as f:
         if response.geturl().split(':', 1)[0] != 'https':
             raise RuntimeError('Update-Download ohne HTTPS abgebrochen.')
         total = int(response.headers.get('Content-Length') or '0')
