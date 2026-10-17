@@ -9,6 +9,7 @@ from . import APP_NAME, distro, i18n, sensors, settings, theme, diagnostics, hov
 from .logo import load_logo
 from .brand import app_icon
 from .wallpaper_accents import resolve_accent
+from . import renderer
 from .update_manager import UpdateManager
 
 
@@ -23,6 +24,7 @@ def main():
     # MainWindow.closeEvent explicitly quits on a genuine Exit command.
     app.setQuitOnLastWindowClosed(False)
     app.setApplicationName(APP_NAME)
+    renderer.prepare_start()
     # Desktop-portal app IDs require an installed .desktop entry; avoid asking
     # the portal to register an unknown ID when using Vitalux portably.
     xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
@@ -46,6 +48,11 @@ def main():
     manager = UpdateManager()
     win = MainWindow(info, logo, manager)
     win.show()
+    # A native driver crash while initializing OpenGL leaves the boot marker;
+    # next launch automatically selects the known-working CPU renderer.
+    QTimer.singleShot(4500, renderer.successful_start)
+    if renderer.warning():
+        QTimer.singleShot(0, lambda: win.statusBar().showMessage(renderer.warning(), 16000))
     QTimer.singleShot(0, manager.check)
     # Let the window appear and the update check start before offering the
     # optional tutorial. Only the first run (or an explicit 'Later') prompts.
