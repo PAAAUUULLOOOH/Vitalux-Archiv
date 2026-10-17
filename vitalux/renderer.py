@@ -10,15 +10,16 @@ from . import settings
 
 SOFTWARE = 'software'
 OPENGL = 'opengl'
+QTQUICK = 'qtquick'
 _failure = ''
 
 
 def desired():
     forced = os.environ.get('VITALUX_RENDERER', '').strip().lower()
-    if forced in (SOFTWARE, OPENGL):
+    if forced in (SOFTWARE, OPENGL, QTQUICK):
         return forced
     saved = settings.get('render_backend', SOFTWARE)
-    return saved if saved in (SOFTWARE, OPENGL) else SOFTWARE
+    return saved if saved in (SOFTWARE, OPENGL, QTQUICK) else SOFTWARE
 
 
 def prepare_start():
@@ -30,15 +31,20 @@ def prepare_start():
     global _failure
     if os.environ.get('VITALUX_RENDERER', '').strip().lower() == SOFTWARE:
         return SOFTWARE
-    if desired() != OPENGL:
+    selected = desired()
+    if selected not in (OPENGL, QTQUICK):
         return SOFTWARE
+    if selected == QTQUICK:
+        # Initialize Qt Quick's scene graph with the GPU RHI rather than the
+        # explicit software backend. Qt/driver may still use Mesa llvmpipe.
+        os.environ.setdefault('QSG_RHI_BACKEND', 'opengl')
     if settings.get('gpu_boot_pending', False):
-        _failure = 'Der vorherige OpenGL-Start wurde nicht abgeschlossen. CPU-Rendering wurde zur Sicherheit wieder aktiviert.'
+        _failure = 'Der vorherige GPU-Start wurde nicht abgeschlossen. CPU-Rendering wurde zur Sicherheit wieder aktiviert.'
         settings.set('render_backend', SOFTWARE)
         settings.set('gpu_boot_pending', False)
         return SOFTWARE
     settings.set('gpu_boot_pending', True)
-    return OPENGL
+    return selected
 
 
 def successful_start():
@@ -66,10 +72,20 @@ def gpu_available():
         return False
 
 
+def quick_available():
+    """Qt Quick needs its own QML and Qt RHI dependencies in the portable ZIP."""
+    try:
+        from PySide6.QtQuickWidgets import QQuickWidget  # noqa: F401
+        from PySide6.QtQuick import QQuickImageProvider  # noqa: F401
+        return gpu_available()
+    except (ImportError, RuntimeError, OSError):
+        return False
+
+
 def fallback():
     global _failure
-    _failure = 'OpenGL ist mit dieser Sitzung oder den Grafiktreibern nicht verfügbar. CPU-Rendering bleibt aktiv.'
-    if os.environ.get('VITALUX_RENDERER', '').strip().lower() != OPENGL:
+    _failure = 'Die gewählte GPU-Grafikausgabe ist hier nicht verfügbar. CPU-Rendering bleibt aktiv.'
+    if os.environ.get('VITALUX_RENDERER', '').strip().lower() not in (OPENGL, QTQUICK):
         settings.set('render_backend', SOFTWARE)
     successful_start()
 
