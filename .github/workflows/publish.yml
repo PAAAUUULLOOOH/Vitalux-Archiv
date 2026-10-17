@@ -22,8 +22,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: vitalux-publication
-  cancel-in-progress: false
+  group: vitalux-publication-stable
+  cancel-in-progress: true
 
 jobs:
   build-and-release:
@@ -145,6 +145,7 @@ jobs:
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_dashboard_brand.py"
       - name: Einstellungen und Changelog in Qt testen
+        timeout-minutes: 8
         shell: bash
         env:
           QT_QPA_PLATFORM: offscreen

@@ -27,6 +27,13 @@ for code, positive, negative in (('de', 'Ja', 'Nein'),
         no.click()
 
     QTimer.singleShot(0, inspect_and_cancel)
+    # Fail closed rather than block a release indefinitely on a headless Qt
+    # platform if native modal focus/translation behavior changes.
+    def watchdog():
+        dialog = app.activeModalWidget()
+        if dialog is not None:
+            dialog.reject()
+    QTimer.singleShot(2000, watchdog)
     result = QMessageBox.question(None, 'Vitalux', prompt,
                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
     assert result == QMessageBox.No, (code, result)
