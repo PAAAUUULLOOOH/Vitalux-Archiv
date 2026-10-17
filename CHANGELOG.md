@@ -5,6 +5,16 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.61] - 2026-10-17
+- Hardware-Warnwerte linksbündig ausgerichtet; Zahlen und Einheiten bleiben sichtbar, Mausrad verändert Werte nur bei fokussierter Eingabe.
+- Dropdowns behalten die dunkle rechte Fläche ohne Pfeil, passen ihre geöffneten Listen an lange Texte an und zeigen vollständige Einträge bei Bedarf als Tooltip.
+- Kleinere Fenster auf hochskalierten KDE-Desktops zugelassen; versteckte Seiten werden nicht mehr unnötig neu gezeichnet.
+- SMART-Daten werden entsprechend der Beschriftung nur noch per Schaltfläche angefordert.
+- Bei mehreren Grafikkarten wird für GPU-Temperaturwarnungen die höchste verfügbare Temperatur berücksichtigt; ungültige Sensordaten lösen keine Warnungen aus.
+- Einstellungen werden zwischengespeichert und atomar geschrieben; Speicherfehler werden gemeldet.
+- GitHub-Workflow und Update-Pakete verbessert: Tests laufen auch bei bereits vorhandenem Release, Differenzupdates basieren auf der unmittelbaren Vorgängerversion.
+- Zusätzliche Regressionstests für Warnwerte, Einstellungen, GPU-Warnungen und Dropdowns.
+
 ## [v0.9.3.60] - 2026-10-17
 - Hardware-Warnwerte vollständig korrigiert: Statt des unter KDE/Wayland abgeschnittenen QSpinBox-Innenfelds werden Zahl und Einheit jetzt getrennt und zuverlässig lesbar dargestellt.
 - Werte bleiben direkt editierbar; Pfeiltasten, Mausrad, Grenzbereiche und Speichern der Einstellungen funktionieren weiterhin.

@@ -4,6 +4,16 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.61] - 2026-10-17
+- Left-aligned hardware warning numbers, preserved readable units, and made wheel changes require input focus.
+- Preserved the dark right-hand drop-down area without an arrow; list width now adapts to full labels and entries have tooltips.
+- Improved sizing for fractionally scaled KDE desktops and stopped repainting hidden pages unnecessarily.
+- SMART health scans now run only on explicit button requests.
+- Multi-GPU temperature warnings use the hottest readable GPU; invalid sensor numbers are ignored.
+- Cached preferences are written atomically and write failures are reported.
+- CI runs its tests even for existing releases and delta archives now target the preceding published version.
+- Extended regression tests for threshold controls, preferences, alerts, and drop-downs.
+
 ## [v0.9.3.60] - 2026-10-17
 - Fixed invisible hardware warning thresholds: the clipped native QSpinBox editor is replaced by a separately laid out number input and visible unit for reliable rendering on KDE/Wayland.
 - Thresholds stay editable with arrow keys, mouse wheel, range validation, and persisted settings.
