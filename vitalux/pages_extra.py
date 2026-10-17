@@ -132,6 +132,9 @@ class InfoPage(Page):
         c = Card(hero=True)
         c.body.addSpacing(10)
         c.body.addWidget(label("Made by PAAAUUULLOOOH", "madeBy", Qt.AlignHCenter, wrap=True))
+        c.body.addWidget(label(
+            'Danke an TimBooH für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering).',
+            'supportCredit', Qt.AlignHCenter, wrap=True))
         c.body.addWidget(label(f"{APP_NAME} {__version__}", "muted", Qt.AlignHCenter))
         c.body.addSpacing(10)
         self.content.addWidget(c)
