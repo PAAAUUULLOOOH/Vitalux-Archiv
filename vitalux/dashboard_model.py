@@ -96,35 +96,67 @@ def normalize_order(saved=None, legacy=None):
 
 
 def grid_pack(order, hidden=(), columns=12):
-    """Reading-order packing on fixed-size tiles. Never overlaps or resizes.
+    """Pack tiles in reading order; fill only conspicuous unused row space.
 
-    Each next card goes to the right, or starts a new row if it will not fit.
-    A row grows to the height of its tallest default-sized card. This is
-    deterministic, so the saved order is stable and small windows can reflow.
+    Ordinary rows retain their native dimensions. When at least a quarter
+    of a row is vacant, tiles may grow up to twice their preferred width.
+    Tall neighbors can fill large vertical gaps too. The renderer continues
+    using the same GAP constant (14 px) between all neighboring tiles.
     """
     cols = int(columns)
     if cols not in (3, 6, 12):
         raise ValueError('Unsupported column count')
     hidden = set(hidden)
-    layout = {}
-    x = y = row_height = 0
+    rows = []
+    row = []
+    used = 0
     for key in order:
         if key not in DEFAULT or key in hidden:
             continue
         native_w, native_h = DEFAULT[key][2:]
-        width = cols if key == 'hero' else min(cols, max(1,round(native_w*cols/12)))
-        if x and x+width > cols:
-            x = 0
-            y += row_height
-            row_height = 0
-        layout[key] = (x,y,width,native_h)
-        x += width
-        row_height = max(row_height,native_h)
-        if x >= cols:
-            x = 0
-            y += row_height
-            row_height = 0
-    return layout
+        width = cols if key == 'hero' else min(
+            cols, max(1, round(native_w * cols / 12)))
+        if row and used + width > cols:
+            rows.append(row)
+            row, used = [], 0
+        row.append((key, width, native_h))
+        used += width
+        if used == cols:
+            rows.append(row)
+            row, used = [], 0
+    if row:
+        rows.append(row)
+
+    result = {}
+    y = 0
+    for row in rows:
+        widths = [width for _, width, _ in row]
+        unused = cols - sum(widths)
+        # A small leftover is less distracting than changing the card sizes.
+        if unused >= max(1, (cols + 3) // 4):
+            while unused:
+                eligible = [
+                    i for i, (key, original, _) in enumerate(row)
+                    if key != 'hero' and widths[i] < min(cols, 2 * original)
+                ]
+                if not eligible:
+                    break
+                # Keep relative growth balanced rather than stretching just
+                # the last card. No gaps are inserted between neighboring tiles.
+                index = min(eligible, key=lambda i: (widths[i] / row[i][1], i))
+                widths[index] += 1
+                unused -= 1
+        row_height = max(height for _, _, height in row)
+        x = 0
+        for i, (key, _, height) in enumerate(row):
+            # The physical vertical spacing is still GAP; fill only voids
+            # spanning at least three logical grid steps.
+            adjusted_height = (row_height if len(row) > 1
+                               and row_height - height >= 3 else height)
+            result[key] = (x, y, widths[i], adjusted_height)
+            x += widths[i]
+        y += row_height
+    return result
 
 
 def move_order(order, key, index):

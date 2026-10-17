@@ -4,6 +4,11 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.77] - 2026-10-18
+- Restored the full About-page acknowledgement, with a bold “Thanks to:” heading and clickable TimBooH GitHub profile; it follows the active language and accent color.
+- Conservative automatic dashboard tiling fills only large holes after tile moves or hiding, retaining the same 14 px spacing, saved order, undo and drag-and-drop.
+- Tidied the affected code, kept the README concise and updated the bilingual in-app guide and regression tests.
+
 ## [v0.9.3.76] - 2026-10-18
 - Smoother mouse-wheel scrolling with time-based interpolation, automatically following the active monitor's configured refresh rate, including screen and refresh-rate changes. Precision touchpad input remains native and immediate.
 - Frame updates run only while actively scrolling; reduced-motion and motion-off settings are respected. This does not change the display mode or guarantee a particular FPS.

@@ -70,13 +70,30 @@ def run():
             credit = info.findChild(QLabel, 'supportCredit')
             author = info.findChild(QLabel, 'madeBy')
             assert credit is not None and author is not None
-            expected = ('Danke an TimBooH für die Unterstützung bei '
-                        'Hintergrundbildern und Grafikdarstellung.')
-            assert credit.text() == expected, credit.text()
+            from PySide6.QtCore import Qt
+            from vitalux.pages_extra import CREDIT_TEXT, CREDIT_URL
+            from vitalux.ui_locale import retranslate_widgets
+            assert credit is info.support_credit
+            assert credit.textFormat() == Qt.RichText
+            assert credit.openExternalLinks()
+            assert credit.textInteractionFlags() & Qt.LinksAccessibleByMouse
+            assert credit.text().startswith('<b>Danke an:</b> ')
+            assert credit.text().count('<a href=') == 1
+            assert f'<a href="{CREDIT_URL}"' in credit.text()
+            assert 'TimBooH</a>' in credit.text()
+            assert 'der Integration eigener Hintergrundbilder' in credit.text()
+            assert 'OpenGL/CPU-Rendering' in credit.text()
+            assert credit.accessibleName() == CREDIT_TEXT
             assert credit.font().pixelSize() < author.font().pixelSize(), (
                 credit.font().pixelSize(), author.font().pixelSize())
             i18n.set_lang('en')
-            assert 'TimBooH' in tr(expected)
+            retranslate_widgets(info)
+            assert credit.text().startswith('<b>Thanks to:</b> ')
+            assert f'<a href="{CREDIT_URL}"' in credit.text()
+            assert credit.accessibleName() == tr(CREDIT_TEXT)
+            i18n.set_lang('de')
+            retranslate_widgets(info)
+            assert credit.text().startswith('<b>Danke an:</b> ')
             info.close()
         finally:
             settings.PATH = original_path

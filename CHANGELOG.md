@@ -5,6 +5,11 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.77] - 2026-10-18
+- Im Info-Reiter steht wieder die vollständige Danksagung mit fettgedrucktem „Danke an:“ und anklickbarem GitHub-Profillink auf TimBooH. Die Danksagung folgt DE/EN und der Akzentfarbe.
+- Automatisches Dashboard-Tiling: Nur größere Leerflächen nach dem Verschieben oder Ausblenden von Kacheln werden vorsichtig ausgefüllt. Der bisherige Abstand von 14 px zwischen Kacheln bleibt gleich. Keine Änderung gespeicherter Reihenfolgen, Undo oder Drag-and-drop-Bedienung.
+- Betroffenen Code gestrafft, kompakte README und integrierte zweisprachige Anleitung aktualisiert; Regressionstests ergänzt.
+
 ## [v0.9.3.76] - 2026-10-18
 - Flüssigeres Mausrad-Scrollen mit zeitbasierter Bewegung und dynamischer Anpassung an die aktuell eingestellte Bildwiederholrate des verwendeten Monitors (auch nach Monitorwechsel oder Hz-Änderung). Touchpads scrollen weiterhin ohne künstliche Verzögerung.
 - Schonende Aktualisierung nur während aktiver Scrollbewegungen; reduzierte Animationen und ausgeschaltete Bewegungseffekte werden respektiert. Keine Änderung der KDE-Monitoreinstellung oder FPS-Garantie.

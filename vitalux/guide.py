@@ -30,7 +30,7 @@ SLIDES = [
         "Auf der Startseite sind die wichtigsten Informationen als Kacheln zusammengefasst.",
         "Du siehst unter anderem Prozessor, Grafik, RAM und Systemlaufwerk.",
         "Diagramme zeigen, wie sich die Auslastung im Zeitverlauf verändert.",
-        "Über „Layout bearbeiten“ lassen sich Kacheln anpassen und anordnen.",
+        "Unter „Layout bearbeiten“ verschiebst du Kacheln; große Lücken schließen sich automatisch, die Abstände bleiben gleich.",
         "overview",
     ),
     (
@@ -86,7 +86,7 @@ SLIDES = [
         "Vitalux prüft automatisch beim Start und etwa alle sechs Stunden auf Updates.",
         "Bei einem Update glüht das Vitalux-Logo in der App und im Tray. Der Updates-Reiter pulsiert; eine Tray-Nachricht nennt die Version.",
         "Vor dem Aktualisieren siehst du die Neuerungen; erst „Jetzt aktualisieren“ startet den Download.",
-        "Der Changelog bleibt auch danach im Updates-Reiter auf Deutsch oder Englisch lesbar.",
+        "Der Changelog bleibt im Updates-Reiter zweisprachig lesbar; im Info-Reiter ist TimBooH mit seinem GitHub-Profil verlinkt.",
         "updates",
     ),
 ]

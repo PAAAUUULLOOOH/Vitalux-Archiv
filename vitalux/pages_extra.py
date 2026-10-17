@@ -1,11 +1,16 @@
+from html import escape
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout
-from .ui_locale import QPushButton, QComboBox
 
-from . import APP_NAME, __version__, changelog
+from . import APP_NAME, __version__, changelog, settings, theme
 from .i18n import tr
 from .pages import Page
+from .ui_locale import QLabel, QPushButton, QComboBox
 from .widgets import Bar, Card, KeyValue, label
+
+CREDIT_URL = "https://github.com/TimBooH"
+CREDIT_TEXT = "Danke an: TimBooH für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering)."
 
 STATUS_TEXT = {
     "idle": "Die Updateprüfung startet automatisch.",
@@ -126,15 +131,41 @@ class UpdatePage(Page):
                            .replace("- ", "• ")[:6000])
 
 
+class SupportCredit(QLabel):
+    """Translated acknowledgement linking only to the fixed GitHub profile."""
+
+    def __init__(self):
+        super().__init__()
+        self.setObjectName("supportCredit")
+        self.setAlignment(Qt.AlignHCenter)
+        self.setWordWrap(True)
+        self.setTextFormat(Qt.RichText)
+        self.setTextInteractionFlags(Qt.TextBrowserInteraction | Qt.TextSelectableByMouse)
+        self.setOpenExternalLinks(True)
+        self.retranslate()
+
+    def retranslate(self):
+        # Translated content is escaped; only this fixed URL becomes HTML.
+        heading, separator, remainder = tr(CREDIT_TEXT).partition(":")
+        before, name, after = remainder.partition("TimBooH")
+        if not separator or not name:
+            raise ValueError("Invalid TimBooH credit translation")
+        self.setText(
+            f"<b>{escape(heading)}:</b>{escape(before)}"
+            f'<a href="{CREDIT_URL}" style="color: {theme.accent()}; '
+            f'text-decoration: underline;">TimBooH</a>{escape(after)}'
+        )
+        self.setAccessibleName(tr(CREDIT_TEXT))
+
+
 class InfoPage(Page):
     def __init__(self, distro):
         super().__init__("Info", "Über diese App")
         c = Card(hero=True)
         c.body.addSpacing(10)
         c.body.addWidget(label("Made by PAAAUUULLOOOH", "madeBy", Qt.AlignHCenter, wrap=True))
-        c.body.addWidget(label(
-            'Danke an TimBooH für die Unterstützung bei Hintergrundbildern und Grafikdarstellung.',
-            'supportCredit', Qt.AlignHCenter, wrap=True))
+        self.support_credit = SupportCredit()
+        c.body.addWidget(self.support_credit)
         c.body.addWidget(label(f"{APP_NAME} {__version__}", "muted", Qt.AlignHCenter))
         c.body.addSpacing(10)
         self.content.addWidget(c)
@@ -149,7 +180,6 @@ class InfoPage(Page):
         help_card.body.addWidget(self.guide_button)
         self.content.addWidget(help_card)
         d = Card("Details")
-        from . import settings
         for k, v in (("Version", __version__), ("Erkannte Distribution", distro["name"]),
                      ("Einstellungsdatei", settings.PATH)):
             kv = KeyValue(k)
@@ -159,7 +189,6 @@ class InfoPage(Page):
 
     def open_guide(self):
         from .guide import GuideDialog
-        from . import settings
         # Visiting the guide counts as opt-in; do not prompt again on next launch.
         settings.set("guide_intro_choice", "completed")
         dlg = GuideDialog(self.window())

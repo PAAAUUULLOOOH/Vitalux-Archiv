@@ -656,6 +656,10 @@ class MainWindow(QMainWindow):
         disk = next((p for name, p in self.pages if name == 'Laufwerke'), None)
         if disk is not None and hasattr(disk, 'refresh_appearance'):
             disk.refresh_appearance()
+        # Keep the linked credit in sync with the active theme accent.
+        info_page = next((page for title, page in self.pages if title == 'Info'), None)
+        if info_page is not None:
+            info_page.support_credit.retranslate()
         # QPainter-based glass/rings/navigation read colors directly from theme.
         self.centralWidget().update()
         for widget in self.centralWidget().findChildren(QWidget):

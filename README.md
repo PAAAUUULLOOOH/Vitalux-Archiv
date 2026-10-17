@@ -44,33 +44,33 @@
 | **Einstellungen** | Farbschemas, eigene Akzentfarben, Hintergründe, Animationen und Warnwerte |
 | **Updates & Info** | Bestätigte Aktualisierungen, lokaler Changelog und integrierte Anleitung |
 
-Scrollen passt seine Animation automatisch an die in KDE/Wayland eingestellte Bildwiederholrate des aktiven Monitors an; präzise Touchpad-Eingaben bleiben direkt. Eine garantierte FPS-Zahl oder Änderung des Monitormodus erfolgt nicht.
+Scrollen folgt der eingestellten Monitor-Bildwiederholrate (ohne FPS-Garantie); Touchpads bleiben direkt. **Automatisches Tiling** füllt nur größere Lücken nach dem Kachelverschieben oder Ausblenden; die Kachelabstände bleiben bei 14 px.
 
 ### Design & Hintergründe
 
 - **Farbschemas:** Glass mit Vitalux Blau (Standard), Dark, Light, Black Glass und Minimalistisch.
 - **Hintergründe:** 14 integrierte Optionen plus selbst importierte PNG-, JPEG-, WebP- und BMP-Bilder mit Füllen, Einpassen, Strecken, Zentrieren und Kacheln. Nur **Funkeln** ist animiert.
-- **Akzentfarben:** Wie gewohnt feste Farben, Distributionsfarbe und eigene Farben direkt unter **Akzentfarbe** auswählen. Zusätzlich gibt es **Hintergrundfarbe automatisch** – ohne separate Reiter oder nummerierte Farbfelder. Der Akzent passt sich bei einem Hintergrundwechsel an.
-- **Oberfläche:** Einheitliche Glasoptik mit optimiertem Scroll-Rendering: keine teuren Drop-Shadow-Effekte auf scrollenden Karten, effizienteres Hintergrundbild-Decoding. Unter **Einstellungen → Grafik-Rendering** lassen sich **CPU**, **OpenGL** und **Qt Quick · GPU-Test** wählen. Der Button **Jetzt neu starten** übernimmt den Wechsel kontrolliert. Der neue Qt-Quick-Modus nutzt einen GPU-Scene-Graph für den Hintergrund; normale Qt-Widgets und Diagramme bleiben vorerst CPU-gerendert. Auch dieser Modus ist experimentell.
+- **Akzentfarben:** Presets, Distributionsfarbe, eigene Farben und **Hintergrundfarbe automatisch** im selben Menü.
+- **Rendering:** CPU (Standard), OpenGL und Qt Quick (GPU-Tests) über **Einstellungen → Grafik-Rendering**; per **Jetzt neu starten** wechseln. GPU-Modi beschleunigen bisher nur den Hintergrund bzw. die Komposition, nicht alle Qt-Widgets und Diagramme.
 
 **630 integrierte Kombinationen:** 5 Farbschemas × 14 Hintergründe × 9 Akzentoptionen (davon 8 feste Farben). Eigene Farben erweitern die Auswahl; manche Kombinationen können optisch identisch sein.
 
-**GPU-Test und Rückkehr:** OpenGL und Qt Quick sind experimentell und möglicherweise nicht schneller. Bei Problemen unter **Grafik-Rendering → CPU · Standard** zurückschalten und **Jetzt neu starten** klicken. Auch `VITALUX_RENDERER=software ./run.sh` erzwingt die CPU-Darstellung, selbst wenn die OpenGL-Option gespeichert ist. Ein Absturz während des GPU-Starts führt beim nächsten Start zur automatischen CPU-Rückkehr. Die vorherige Version bleibt als separates GitHub-Release verfügbar.
+**GPU-Rückkehr:** Die Testmodi sind nicht garantiert schneller. Bei Grafikproblemen **CPU · Standard** wählen und neu starten oder `VITALUX_RENDERER=software ./run.sh` verwenden. Fehlgeschlagene GPU-Starts werden automatisch zurückgesetzt.
 
 **Systemleiste:** Beim Hover werden CPU-, GPU- und RAM-Auslastung sowie verfügbare Temperaturen angezeigt. Im Kontextmenü lässt sich eine kompakte Live-Vorschau öffnen.
 
 ### Monitoring, Warnungen & Benchmarks
 
-In **Einstellungen → Hardware-Warnungen** aktivierst du Grenzwerte für CPU-/GPU-Temperatur, RAM und Systemlaufwerk. Zahlen und Einheiten sind in kompakten, linksbündig ausgerichteten Feldern sichtbar. Warnungen werden erst nach ausreichender Rückkehr unter den Grenzwert erneut ausgelöst; bei mehreren Grafikkarten zählt die höchste verfügbare GPU-Temperatur.
+Unter **Einstellungen → Hardware-Warnungen** gelten konfigurierbare Grenzwerte für CPU/GPU, RAM und Systemlaufwerk; Folgealarme erscheinen erst nach zwischenzeitlicher Entwarnung.
 
-Beim Öffnen von **Laufwerke** werden die SMART-Daten automatisch im Hintergrund geprüft. Die Datenträgerauswahl ist sofort sichtbar; der Button erlaubt jederzeit eine erneute Prüfung. Benchmarks mit `fio` messen MB/s, IOPS und Latenz mit konfigurierbaren Profilen.
+Unter **Laufwerke** startet die SMART-Prüfung im Hintergrund; `fio` misst MB/s, IOPS und Latenz mit wählbaren Profilen.
 
 > [!CAUTION]
 > Laufwerks-Benchmarks schreiben temporäre Daten und belasten den Datenträger. Prüfe Ziel, freien Speicher und Datensicherung vor dem Start.
 
 ### Sprachen & Anleitung
 
-Zwischen **Deutsch und Englisch** wechselst du unten in der Seitenleiste mit **DE / EN**, ohne Neustart. Unter **Info → Anleitung öffnen** erläutert eine integrierte neunteilige Führung Navigation, Hardwaredaten, Benchmarks, Hintergrundgestaltung sowie Update-Hinweise im Tray. Sie ist auch nach dem ersten Start verfügbar.
+**DE / EN** wechselt die Sprache ohne Neustart. Unter **Info → Anleitung öffnen** findest du eine neunteilige Einführung zu Navigation, Hardware, Benchmarks, Design und Updates.
 
 ## Download
 
@@ -169,7 +169,7 @@ Anwendung und Menüeintrag werden entfernt; **persönliche Einstellungen bleiben
 
 GNU/Linux **x86-64**, Wayland oder X11, glibc **2.38+** als derzeitiges Kompatibilitätsziel; AppImage benötigt je nach Distribution FUSE. Hardwareüberwachung funktioniert offline; Internet ist für Release-Prüfungen nötig. Zielsysteme sind unter anderem openSUSE Tumbleweed, Fedora, Arch/CachyOS und weitere aktuelle Linux-Distributionen.
 
-**Mitwirkende:** Danke an TimBooH für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering). Der Dank steht ebenfalls unter „Made by PAAAUUULLOOOH“ im Info-Reiter.
+**Mitwirkende:** **Danke an:** [TimBooH](https://github.com/TimBooH) für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering). Der Name ist auch unter **Info** anklickbar.
 
 ## Feedback & Lizenzen
 

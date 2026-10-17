@@ -4,7 +4,7 @@ EN_MORE = {
     'OpenGL nutzt die GPU für den Hintergrund. Qt Quick rendert den Hintergrund über einen echten GPU-Scene-Graph. Diagramme und normale Qt-Bedienelemente bleiben vorerst CPU-gerendert.': 'OpenGL uses the GPU for the background. Qt Quick renders the background with a real GPU scene graph. Charts and normal Qt widgets still use the CPU.',
     'Zum Wechseln Jetzt neu starten klicken. Bei Grafikfehlern CPU · Standard auswählen; ein fehlgeschlagener GPU-Start wird automatisch zurückgesetzt.': 'Click Restart now to switch. For graphical problems select CPU · Standard; failed GPU starts automatically revert to the CPU.',
     'Aktiv: Qt Quick GPU-Scene-Graph (experimentell)': 'Active: Qt Quick GPU scene graph (experimental)',
-    'Danke an TimBooH für die Unterstützung bei Hintergrundbildern und Grafikdarstellung.': 'Thanks to TimBooH for supporting wallpaper features and graphics rendering.',
+    'Danke an: TimBooH für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering).': 'Thanks to: TimBooH for supporting the integration of custom wallpapers and graphics output (OpenGL/CPU rendering).',
     'Du kannst in Grafik-Rendering direkt zwischen CPU, OpenGL und Qt Quick wählen. Bei der neuen Qt-Quick-Option wird der Hintergrund über den GPU-Scene-Graph angezeigt; Diagramme und Bedienelemente bleiben zunächst Qt-Widgets. Der Button Jetzt neu starten wendet die Auswahl kontrolliert an.': 'Graphics rendering lets you choose CPU, OpenGL or Qt Quick. The Qt Quick option uses a GPU scene graph for the wallpaper; charts and controls remain Qt widgets for now. Restart now applies the selection safely.',
     'Die Akzentfarbe lässt sich wie bisher direkt auswählen; die zusätzliche Option Hintergrundfarbe automatisch folgt deinem gewählten Hintergrund. Unter Grafik-Rendering kannst du zwischen CPU und OpenGL wechseln und über Jetzt neu starten sofort anwenden.': 'As before, select an accent color directly; the additional Automatically match background option follows your selected wallpaper. Under Graphics rendering you can switch CPU/OpenGL and apply it immediately with Restart now.',
     'Grafik-Rendering': 'Graphics rendering',
@@ -439,7 +439,7 @@ EN_MORE.update({
     "Auf der Startseite sind die wichtigsten Informationen als Kacheln zusammengefasst.": "The home screen shows the most important information in tiles.",
     "Du siehst unter anderem Prozessor, Grafik, RAM und Systemlaufwerk.": "You can see the CPU, GPU, RAM and system drive, among other things.",
     "Diagramme zeigen, wie sich die Auslastung im Zeitverlauf verändert.": "Charts show how resource usage changes over time.",
-    "Über „Layout bearbeiten“ lassen sich Kacheln anpassen und anordnen.": "Use “Edit layout” to customize and arrange tiles.",
+    "Unter „Layout bearbeiten“ verschiebst du Kacheln; große Lücken schließen sich automatisch, die Abstände bleiben gleich.": "Use Edit layout to move tiles; large gaps close automatically while spacing stays unchanged.",
     "Die Navigation links": "Navigation on the left",
     "Über die linke Seitenleiste wechselst du zwischen den Bereichen.": "Use the left sidebar to switch between sections.",
     "Jeder Reiter öffnet einen anderen Teil der Systemüberwachung.": "Each tab opens a different part of the system monitor.",
@@ -512,7 +512,7 @@ EN_MORE.update({
     "Eigene Akzentfarben lassen sich mit „Bearbeiten“ ändern oder mit „Löschen“ entfernen.": "Use “Edit” to change a custom accent color or “Delete” to remove it.",
     "Eigene Akzentfarben lassen sich benennen, speichern und über das X wieder entfernen.": "Custom accent colors can be named, saved and removed again using the X.",
     "Vor dem Aktualisieren siehst du die Neuerungen; erst „Jetzt aktualisieren“ startet den Download.": "Review what's new before updating; only “Update now” starts the download.",
-    "Der Changelog bleibt auch danach im Updates-Reiter auf Deutsch oder Englisch lesbar.": "After updating, the changelog remains available in the Updates tab in German or English.",
+    "Der Changelog bleibt im Updates-Reiter zweisprachig lesbar; im Info-Reiter ist TimBooH mit seinem GitHub-Profil verlinkt.": "The changelog remains available in German or English in Updates; TimBooH's GitHub profile is linked in About.",
 })
 
 # Named custom accent controls (v0.9.3.56).

@@ -133,9 +133,11 @@ def check_gui():
     i18n.set_lang("en")
     retranslate_widgets(page)
     assert page.guide_button.text() == "Open guide"
+    assert "Thanks to:" in page.support_credit.text()
     i18n.set_lang("de")
     retranslate_widgets(page)
     assert page.guide_button.text() == "Anleitung öffnen"
+    assert "Danke an:" in page.support_credit.text()
     page.close()
 
     print("Native guide UI: passed (9 slides, arrows, screenshots, DE/EN)")

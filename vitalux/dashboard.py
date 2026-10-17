@@ -1,7 +1,7 @@
-"""Responsive fixed-size dashboard editor with live magnetic reordering.
+"""Responsive dashboard editor with live magnetic reordering.
 
-The original tile sizes are immutable. The distro/hero panel and its internal
-system information always move together as one unit.
+Cards preserve their preferred size except where large gaps would otherwise
+remain. The existing 14 px grid spacing and indivisible hero tile are kept.
 """
 from copy import deepcopy
 from PySide6.QtCore import Qt, QEvent, QRect, QEasingCurve, QPropertyAnimation, Signal
@@ -122,7 +122,7 @@ class Tile(QWidget):
 
 class DashboardBoard(QWidget):
     changed = Signal()
-    """Magnetically reordered fixed-size 12/6/3-column dashboard."""
+    """Magnetic 12/6/3-column dashboard with conservative gap filling."""
     def __init__(self,parent=None):
         super().__init__(parent)
         self.setObjectName('dashboardBoard')
