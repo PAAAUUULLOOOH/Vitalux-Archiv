@@ -131,6 +131,18 @@ jobs:
             "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_tray_wallpaper.py"
           QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
             "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_wallpaper_accents.py"
+          QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
+            "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_renderer_backends.py"
+      - name: Experimentellen OpenGL-Renderer unter Mesa testen
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0
+          STAGED="$PWD/build/staged/Vitalux-${TAG}"
+          cd "$STAGED"
+          QT_QPA_PLATFORM=xcb VITALUX_GL_SMOKE=1 LIBGL_ALWAYS_SOFTWARE=1 \
+            LD_LIBRARY_PATH="$PWD/lib" \
+            xvfb-run -a "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_renderer_backends.py"
       - name: Native Anleitung und Übersetzungen testen
         shell: bash
         run: |
