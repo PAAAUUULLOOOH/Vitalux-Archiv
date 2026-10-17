@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QLabel as _QLabel, QPushButton as _QPushButton,
     QFileDialog as _QFileDialog)
 from .i18n import tr
 from PySide6.QtCore import Qt, QRectF, QSize
-from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPalette
 
 
 def localized(x):
@@ -141,6 +141,18 @@ class QComboBox(_QComboBox):
         accent = theme.accent()
         view = self.view()
         container = view.window()
+        # Qt Wayland/Fusion can render popup padding using the palette rather
+        # than QSS. Explicit matching colors remove unmatched dark gutters.
+        popup_palette = container.palette()
+        popup_palette.setColor(QPalette.Window, QColor(surface))
+        popup_palette.setColor(QPalette.Base, QColor(surface))
+        popup_palette.setColor(QPalette.Text, QColor(theme.TEXT))
+        popup_palette.setColor(QPalette.Highlight, QColor(theme.blend(accent, surface, .24)))
+        popup_palette.setColor(QPalette.HighlightedText, QColor(theme.TEXT))
+        container.setPalette(popup_palette)
+        view.setPalette(popup_palette)
+        view.viewport().setPalette(popup_palette)
+        container.setAutoFillBackground(True)
         container.setObjectName("vitaluxComboPopup")
         container.setStyleSheet(
             f"QFrame#vitaluxComboPopup {{ background: {surface}; "
@@ -164,6 +176,9 @@ class QComboBox(_QComboBox):
         return result
     def addItems(self, items):
         for item in items:self.addItem(item)
+    def clear(self):
+        self._source_items.clear()
+        return super().clear()
     def removeItem(self, index):
         if 0 <= index < len(self._source_items):
             self._source_items.pop(index)
