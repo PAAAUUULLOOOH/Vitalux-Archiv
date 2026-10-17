@@ -32,3 +32,53 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QSG_RHI_BACKEND: software
         run: python tests/test_gpu_ui_preview.py
+
+      - name: Assemble self-contained opt-in preview ZIP from latest tested release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/input build/stage artifacts
+          BASE_TAG="v0.9.3.76"
+          BASE_ZIP="Vitalux-${BASE_TAG}-linux-x86_64.zip"
+          gh release download "$BASE_TAG" --pattern "$BASE_ZIP" --dir build/input
+          unzip -tq "build/input/$BASE_ZIP"
+          unzip -q "build/input/$BASE_ZIP" -d build/input
+          BASE="build/input/Vitalux-${BASE_TAG}"
+          test -x "$BASE/runtime/bin/python3.12"
+          test -f "$BASE/vitalux/__main__.py"
+          test -f "$BASE/runtime/lib/python3.12/site-packages/PySide6/QtQuick.abi3.so"
+          TARGET="build/stage/Vitalux-QtQuick-GPU-Vorschau-${BASE_TAG}"
+          cp -a "$BASE" "$TARGET"
+          cp vitalux/gpu_ui.py "$TARGET/vitalux/gpu_ui.py"
+          mkdir -p "$TARGET/assets/quick-ui"
+          cp assets/quick-ui/Main.qml "$TARGET/assets/quick-ui/Main.qml"
+          cp run.sh "$TARGET/run.sh"
+          cp gpu-preview-starten.sh "$TARGET/GPU-Vorschau-starten.sh"
+          chmod +x "$TARGET/GPU-Vorschau-starten.sh" "$TARGET/run.sh"
+          (
+            cd "$TARGET"
+            QT_QPA_PLATFORM=offscreen QSG_RHI_BACKEND=software \
+              LD_LIBRARY_PATH="$PWD/lib" \
+              "$PWD/runtime/bin/python3.12" \
+              "$GITHUB_WORKSPACE/tests/test_gpu_ui_preview.py"
+          )
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          root = Path("build/stage/Vitalux-QtQuick-GPU-Vorschau-v0.9.3.76")
+          output = Path("artifacts/Vitalux-QtQuick-GPU-Vorschau-v0.9.3.76-linux-x86_64.zip")
+          with ZipFile(output, "w", ZIP_DEFLATED, compresslevel=6) as archive:
+              for file in sorted(root.rglob("*")):
+                  if file.is_file() and "__pycache__" not in file.parts:
+                      archive.write(file, root.name + "/" + file.relative_to(root).as_posix())
+          print("Portable GPU preview created:", output, output.stat().st_size)
+          PY
+          unzip -tq artifacts/*.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vitalux-QtQuick-GPU-Vorschau
+          path: artifacts/*.zip
+          retention-days: 7
+          if-no-files-found: error
