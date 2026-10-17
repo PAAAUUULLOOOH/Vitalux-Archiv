@@ -1,0 +1,318 @@
+"""Hardware-sensor page, appearance settings and customizable dashboard controls."""
+import json
+from datetime import datetime
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout, QListWidget, QVBoxLayout, QWidget, QSpinBox)
+from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
+
+from . import __version__, settings, theme, motion
+from .pages import Page
+from .sensors import fmt_bytes, fmt_rate, system_static
+from .widgets import Card, KeyValue, Meter, label
+from .i18n import tr
+
+
+class SensorsPage(Page):
+    def __init__(self):
+        super().__init__('Sensoren', 'Temperaturen, Lüfter und Spannungen · direkt aus Linux hwmon')
+        self.cards = {}
+        self.rows = {}
+        for ident, title in [('temps', 'Temperaturen'), ('fans', 'Lüfter'), ('voltages', 'Spannungen'), ('powers', 'Leistungsaufnahme'), ('frequencies', 'Frequenzen')]:
+            card = Card(title)
+            self.cards[ident] = card
+            self.rows[ident] = {}
+            self.content.addWidget(card)
+        self.message = label('', 'muted', wrap=True)
+        self.content.addWidget(self.message)
+
+    def refresh(self, d, h):
+        sensors = d.get('sensors', {})
+        count = 0
+        for ident in ('temps', 'fans', 'voltages', 'powers', 'frequencies'):
+            seen = set()
+            entries = sensors.get(ident, [])
+            for sensor in entries[:80]:
+                key = sensor['name']
+                seen.add(key)
+                row = self.rows[ident].get(key)
+                if row is None:
+                    row = self.rows[ident][key] = KeyValue(key)
+                    self.cards[ident].body.addWidget(row)
+                val = sensor['value']
+                unit = {'temps': '°C', 'fans': tr('U/min'), 'voltages': 'V', 'powers': 'W', 'frequencies': 'MHz'}[ident]
+                if val is None:
+                    row.set('–')
+                else:
+                    row.set(f'{val:.1f} {unit}' if ident != 'fans' else f'{val:.0f} {unit}')
+                count += 1
+            for key, widget in self.rows[ident].items():
+                widget.setVisible(key in seen)
+            self.cards[ident].setVisible(bool(entries))
+        self.message.setText(tr('Keine zusätzlichen Sensoren verfügbar.') if not count else
+            tr('Nicht jeder Sensor ist von jedem Mainboard/Grafiktreiber verfügbar; fehlende Werte werden nicht erfunden.'))
+
+
+class PreferencesPage(Page):
+    DEFAULTS = {
+        'theme': 'glass', 'accent': 'auto', 'motion': 'smooth',
+        'interval': 1, 'close_to_tray': True, 'alerts_enabled': False,
+        'cpu_temp': 90, 'gpu_temp': 90, 'ram_usage': 90, 'disk_usage': 95,
+    }
+
+    def __init__(self, window):
+        super().__init__('Einstellungen', 'Design, Messintervall, Dashboard und Datenexport')
+        self.window = window
+        look = Card('Erscheinungsbild')
+        self.mode = QComboBox()
+        for title, value in [('Dark', 'dark'), ('Light', 'light'), ('Glass', 'glass'), ('Black Glass', 'black_glass'), ('Minimalistisch', 'minimal')]:
+            self.mode.addItem(title, value)
+        self.mode.setCurrentIndex(max(0, self.mode.findData(theme.mode())))
+        self.mode.currentIndexChanged.connect(self.change_mode)
+        r = QHBoxLayout()
+        r.addWidget(label('Farbschema', 'strong'))
+        r.addWidget(self.mode)
+        r.addStretch(1)
+        look.body.addLayout(r)
+        self.theme_note = label('', 'muted', wrap=True)
+        self.theme_note.setObjectName('themeDescription')
+        look.body.addWidget(self.theme_note)
+        self.mode_notes = {
+            'dark': 'Dark · Kontrastreiche, ruhige Flächen ohne Glasunschärfe.',
+            'light': 'Light · Helle, gut lesbare Karten ohne Glaseffekt.',
+            'glass': 'Glass · Halbtransparente Panels mit Lichtreflexen und weichgezeichnetem Hintergrund.',
+            'black_glass': 'Black Glass · Tiefschwarze Glasflächen mit dezenten Reflexionen und silbernen Kanten.',
+            'minimal': 'Minimalistisch · Einfache Flächen ohne Glas, Schatten und dekorative Animationen. Spart Zeichenaufwand.',
+        }
+        self.theme_note.setText(tr(self.mode_notes.get(theme.mode(), self.mode_notes['dark'])))
+        r2 = QHBoxLayout()
+        r2.addWidget(label('Akzentfarbe', 'strong'))
+        accent = QComboBox()
+        self.accent_combo = accent
+        for title, value in [('Distribution', 'auto'), ('Vitalux Blau', '#4f8cff'),
+            ('Cyan', '#52d3ff'), ('Violett', '#a78bfa'), ('Grün', '#73ba25'),
+            ('Orange', '#f59e0b'), ('Rosa', '#f472b6')]:
+            accent.addItem(title, value)
+        stored = settings.get('accent', 'auto')
+        idx = accent.findData(stored)
+        if idx < 0:
+            accent.addItem('Eigene Farbe', stored)
+            idx = accent.count()-1
+        accent.setCurrentIndex(idx)
+        accent.currentIndexChanged.connect(lambda _: self.change_accent(accent.currentData()))
+        r2.addWidget(accent)
+        custom = QPushButton('Eigene Farbe …')
+        custom.setObjectName('ghostBtn')
+        custom.clicked.connect(lambda: self.custom_accent(accent))
+        r2.addWidget(custom)
+        r2.addStretch(1)
+        look.body.addLayout(r2)
+        look.body.addWidget(label('Akzentfarben gelten für Reiter, Kartenkanten, Kurven und Bedienelemente.', 'muted', wrap=True))
+        self.accent_preview = QWidget()
+        self.accent_preview.setMinimumHeight(14)
+        self.accent_preview.setObjectName('accentPreview')
+        self.accent_preview.setStyleSheet(f'background: {theme.accent()}; border-radius: 7px;')
+        look.body.addWidget(self.accent_preview)
+        # A presentation preference, not a global reduction of monitoring speed.
+        # Runtime widgets read the profile on their next interaction.
+        r_motion = QHBoxLayout()
+        r_motion.addWidget(label('Animationen', 'strong'))
+        self.motion_combo = QComboBox()
+        for name, value in [('Flüssig', 'smooth'), ('Reduziert', 'reduced'), ('Aus', 'off')]:
+            self.motion_combo.addItem(name, value)
+        self.motion_combo.setCurrentIndex(max(0, self.motion_combo.findData(motion.level())))
+        self.motion_combo.currentIndexChanged.connect(self.change_motion)
+        r_motion.addWidget(self.motion_combo)
+        r_motion.addStretch(1)
+        look.body.addLayout(r_motion)
+        look.body.addWidget(label('Übergänge anpassen: weich, verkürzt oder ohne Animation.', 'muted', wrap=True))
+        self.content.addWidget(look)
+
+        monitor = Card('Live-Monitoring')
+        row = QHBoxLayout()
+        row.addWidget(label('Aktualisierungsintervall', 'strong'))
+        self.interval = QComboBox()
+        for val in (1, 2, 5):
+            self.interval.addItem(f'{val} Sekunde' if val == 1 else f'{val} Sekunden', val)
+        self.interval.setCurrentIndex(max(0, self.interval.findData(settings.get('interval', 1))))
+        self.interval.currentIndexChanged.connect(self.change_interval)
+        row.addWidget(self.interval)
+        row.addStretch()
+        monitor.body.addLayout(row)
+        monitor.body.addWidget(label('Die Diagramme bieten 60 Sekunden, 5 Minuten und 15 Minuten Verlauf sowie einzeln schaltbare Datenreihen.', 'muted', wrap=True))
+        self.content.addWidget(monitor)
+        tray = Card('Systemleiste')
+        self.close_to_tray = QCheckBox('Fenster schließen → in Systemleiste weiterlaufen')
+        self.close_to_tray.setChecked(bool(settings.get('close_to_tray', True)))
+        self.close_to_tray.setEnabled(self.window._tray is not None)
+        self.close_to_tray.toggled.connect(lambda enabled: self._set_preference('close_to_tray', enabled))
+        tray.body.addWidget(self.close_to_tray)
+        tray.body.addWidget(label('Ein Linksklick auf das Tray-Symbol öffnet Vitalux. Über das Kontextmenü kann Vitalux vollständig beendet werden.', 'muted', wrap=True))
+        self.content.addWidget(tray)
+
+        notifications = Card('Hardware-Warnungen')
+        self.alert_toggle = QCheckBox('Grenzwert-Warnungen aktivieren')
+        self.alert_toggle.setChecked(bool(settings.get('alerts_enabled', False)))
+        self.alert_toggle.toggled.connect(lambda checked: self._set_preference('alerts_enabled', checked))
+        notifications.body.addWidget(self.alert_toggle)
+        notifications.body.addWidget(label('Warnungen erscheinen beim Überschreiten eines Grenzwerts. Erst nach Abkühlung oder sinkender Auslastung kann eine erneute Warnung erfolgen.', 'muted', wrap=True))
+        threshold_grid = QGridLayout()
+        self.alert_boxes = {}
+        for idx, (key, title, default, lo, hi, unit) in enumerate((
+            ('cpu_temp', 'CPU-Temperatur', 90, 40, 110, '°C'),
+            ('gpu_temp', 'GPU-Temperatur', 90, 40, 115, '°C'),
+            ('ram_usage', 'RAM-Auslastung', 90, 50, 100, '%'),
+            ('disk_usage', 'Systemlaufwerk-Belegung', 95, 50, 100, '%'),
+        )):
+            value = QSpinBox()
+            value.setRange(lo, hi)
+            value.setSuffix(' ' + unit)
+            value.setValue(int(settings.get(key, default)))
+            value.valueChanged.connect(lambda v, k=key: self._set_preference(k, v))
+            threshold_grid.addWidget(label(title, 'strong'), idx, 0)
+            threshold_grid.addWidget(value, idx, 1)
+            self.alert_boxes[key] = value
+        notifications.body.addLayout(threshold_grid)
+        self.content.addWidget(notifications)
+
+        export = Card('Diagnose & Berichte')
+        export.body.addWidget(label('Exportiert alle aktuell erfassten Messwerte in eine lokale JSON-Datei. Enthält auch Host- und Netzwerkangaben.', 'muted', wrap=True))
+        btn = QPushButton('Systembericht exportieren …')
+        btn.setObjectName('ghostBtn')
+        btn.clicked.connect(self.export)
+        export.body.addWidget(btn)
+        diag_btn = QPushButton('Fehlerdiagnose exportieren …')
+        diag_btn.setObjectName('ghostBtn')
+        diag_btn.clicked.connect(self.export_diagnostics)
+        export.body.addWidget(diag_btn)
+        export.body.addWidget(label('Diagnoseberichte enthalten möglicherweise private Systemangaben. Sie werden nur lokal gespeichert, nicht automatisch versendet.', 'muted', wrap=True))
+        self.content.addWidget(export)
+
+        # Only visible when the *preferences* deviate from the original values.
+        # Dashboard tile positions, update source and language are intentionally
+        # not touched by this button.
+        restore_row = QHBoxLayout()
+        restore_row.addStretch(1)
+        self.restore_button = QPushButton('Standardwerte wiederherstellen')
+        self.restore_button.setObjectName('ghostBtn')
+        self.restore_button.clicked.connect(self.restore_defaults)
+        restore_row.addWidget(self.restore_button)
+        self.content.addLayout(restore_row)
+        self._refresh_restore_button()
+
+    def _set_preference(self, key, value):
+        settings.set(key, value)
+        self._refresh_restore_button()
+
+    def _refresh_restore_button(self):
+        self.restore_button.setVisible(any(
+            settings.get(key, default) != default
+            for key, default in self.DEFAULTS.items()
+        ))
+
+    def restore_defaults(self):
+        answer = QMessageBox.question(
+            self, 'Vitalux',
+            tr('Alle Anzeige-, Überwachungs- und Warnungseinstellungen auf die Standardwerte zurücksetzen? Dashboard-Anordnung und Sprache bleiben erhalten.'),
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if answer != QMessageBox.Yes:
+            return
+        # Update visible widgets without emitting change handlers or tearing
+        # down pages: the user keeps the current scroll position.
+        for key, default in self.DEFAULTS.items():
+            settings.set(key, default)
+        self.mode.blockSignals(True)
+        self.mode.setCurrentIndex(self.mode.findData('glass'))
+        self.mode.blockSignals(False)
+        self.accent_combo.blockSignals(True)
+        self.accent_combo.setCurrentIndex(self.accent_combo.findData('auto'))
+        self.accent_combo.blockSignals(False)
+        self.motion_combo.blockSignals(True)
+        self.motion_combo.setCurrentIndex(self.motion_combo.findData('smooth'))
+        self.motion_combo.blockSignals(False)
+        self.interval.blockSignals(True)
+        self.interval.setCurrentIndex(self.interval.findData(1))
+        self.interval.blockSignals(False)
+        self.close_to_tray.blockSignals(True)
+        self.close_to_tray.setChecked(True)
+        self.close_to_tray.blockSignals(False)
+        self.alert_toggle.blockSignals(True)
+        self.alert_toggle.setChecked(False)
+        self.alert_toggle.blockSignals(False)
+        for key, box in self.alert_boxes.items():
+            box.blockSignals(True)
+            box.setValue(self.DEFAULTS[key])
+            box.blockSignals(False)
+        self.window.set_interval(1)
+        self.window.apply_appearance()
+        self._refresh_restore_button()
+
+    def refresh_appearance(self):
+        self.theme_note.setText(tr(self.mode_notes.get(theme.mode(), self.mode_notes['dark'])))
+        self.accent_preview.setStyleSheet(f'background: {theme.accent()}; border-radius: 7px;')
+
+    def change_mode(self, *_):
+        val = self.mode.currentData()
+        settings.set('theme', val)
+        self.window.apply_appearance()
+        self._refresh_restore_button()
+
+    def change_accent(self, val):
+        if not val:
+            return
+        settings.set('accent', val)
+        self.window.apply_appearance()
+        self._refresh_restore_button()
+
+    def custom_accent(self, combo):
+        from PySide6.QtGui import QColor
+        color = QColorDialog.getColor(QColor(theme.accent()), self, tr('Akzentfarbe wählen'))
+        if color.isValid():
+            value = color.name()
+            idx = combo.findData(value)
+            if idx < 0:
+                combo.addItem('Eigene Farbe', value)
+                idx = combo.count()-1
+            combo.setCurrentIndex(idx)
+
+    def change_motion(self, *_):
+        profile = self.motion_combo.currentData()
+        if profile in motion.MODES:
+            self._set_preference('motion', profile)
+
+    def change_interval(self, *_):
+        val = self.interval.currentData()
+        if val:
+            self._set_preference('interval', int(val))
+            self.window.set_interval(int(val))
+
+    def export_diagnostics(self):
+        from .diagnostics import export_report
+        filename, _ = QFileDialog.getSaveFileName(self, 'Fehlerbericht speichern',
+             f'Vitalux-Diagnose-{datetime.now():%Y%m%d-%H%M%S}.json', 'JSON (*.json)')
+        if not filename:
+            return
+        try:
+            export_report(filename, include_errors=True, sample=self.window.last_sample)
+        except OSError as exc:
+            QMessageBox.warning(self, 'Vitalux', f'Export fehlgeschlagen: {exc}')
+        else:
+            QMessageBox.information(self, 'Vitalux', 'Fehlerbericht gespeichert.')
+
+    def export(self):
+        if not self.window.last_sample:
+            QMessageBox.information(self, 'Vitalux', 'Warte auf die erste Messung.')
+            return
+        suggested = f'Vitalux-Bericht-{datetime.now():%Y%m%d-%H%M%S}.json'
+        filename, _ = QFileDialog.getSaveFileName(self, 'Systembericht speichern', suggested, 'JSON (*.json)')
+        if not filename:
+            return
+        data = {'app': 'Vitalux', 'version': __version__, 'captured': datetime.now().astimezone().isoformat(),
+                'system': system_static(), 'sample': self.window.last_sample}
+        try:
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False, default=str)
+        except OSError as exc:
+            QMessageBox.warning(self, 'Vitalux', f'Export fehlgeschlagen: {exc}')
+        else:
+            QMessageBox.information(self, 'Vitalux', 'Systembericht gespeichert.')
