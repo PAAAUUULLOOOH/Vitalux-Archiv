@@ -4,6 +4,13 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.75] - 2026-10-18
+- Added **Qt Quick · GPU test (experimental)** as a third option next to CPU and OpenGL under Settings → Graphics rendering. Restart now applies changes.
+- Qt Quick uses the Qt RHI/OpenGL scene graph for the wallpaper texture while CPU-painted widgets, charts and glass cards remain unchanged. This is not a full QML migration or a performance guarantee.
+- Bundled required Qt Quick/QML libraries into the portable ZIP and AppImage with automatic CPU fallback. The prior CPU and OpenGL options remain available.
+- Added a smaller Info-page credit beneath “Made by PAAAUUULLOOOH”: “Thanks to TimBooH for supporting the integration of custom wallpapers and graphics output (OpenGL/CPU rendering).”
+- Updated German/English documentation and renderer regression tests.
+
 ## [v0.9.3.74] - 2026-10-18
 - Disabled expensive offscreen Qt drop shadows inside scrolling cards while retaining frosted glass surfaces and borders, reducing repaint overhead in both CPU and OpenGL modes.
 - Decode imported wallpapers at a bounded target size and reuse cached images; all five placement modes remain available.
