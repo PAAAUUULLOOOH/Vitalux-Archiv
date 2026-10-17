@@ -55,9 +55,9 @@
 | **Einstellungen** | Akzentfarben, Animationen, Messintervalle und Dashboard-Anordnung |
 | **Updates & Info** | Automatische Versionsprüfung, Aktualisierung auf Wunsch und integrierte Anleitung |
 
-**Farbschemata:** Dark, Light, Glass, Black Glass und Minimalistisch. Glass und Black Glass bieten Glasoptik mit weichgezeichnetem Hintergrund. Die Dropdown-Menüs passen sich farblich an das gewählte Design an. Eigene Akzentfarben kannst du benennen, speichern und über das **X neben der Farbauswahl** wieder löschen.
+**Farbschemata:** Dark, Light, Glass, Black Glass und Minimalistisch. Glass und Black Glass bieten Glasoptik mit weichgezeichnetem Hintergrund. Die Dropdown-Menüs passen sich farblich an das gewählte Design an. Eigene Akzentfarben kannst du benennen und speichern. Wähle eine gespeicherte eigene Farbe aus, um sie über **„Bearbeiten“** umzubenennen oder neu einzufärben und über **„Löschen“** zu entfernen. Beide Schaltflächen erscheinen nur bei eigenen Farben.
 
-**Hardware-Warnungen:** In **Einstellungen → Hardware-Warnungen** aktivierst du Grenzwerte. Die kompakten Eingabefelder für CPU-/GPU-Temperatur, RAM-Auslastung und Systemlaufwerk stehen links neben ihren Beschriftungen.
+**Hardware-Warnungen:** In **Einstellungen → Hardware-Warnungen** aktivierst du Grenzwerte. Die kompakten Eingabefelder für CPU-/GPU-Temperatur, RAM-Auslastung und Systemlaufwerk stehen rechts hinter ihren Beschriftungen.
 
 **Laufwerks-Benchmark:** Sequenzielle und zufällige Lese-/Schreibtests mit anpassbaren Testprofilen. Angezeigt werden unter anderem **MB/s** (Datenrate), **IOPS** (Ein-/Ausgabevorgänge pro Sekunde) und **Latenz** (Verzögerung).
 
