@@ -7,7 +7,7 @@ from pathlib import Path
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.getcwd())
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame, QMessageBox
 
@@ -49,11 +49,14 @@ def check_preferences(app):
             app.processEvents()
 
             for name, spin in page.alert_boxes.items():
-                assert spin.width() == 112, (name, spin.width())
+                assert spin.width() == 100, (name, spin.width())
                 assert spin.alignment() & Qt.AlignHCenter, name
                 assert spin.alignment() & Qt.AlignVCenter, name
                 assert spin.value() > 0
-                assert spin.x() > page.alert_labels[name].x(), name
+                label_widget = page.alert_labels[name]
+                gap = spin.mapTo(page, QPoint(0, 0)).x() - (
+                    label_widget.mapTo(page, QPoint(0, 0)).x() + label_widget.width())
+                assert 0 <= gap <= 14, (name, gap)
 
             # Every dropdown, including the SMART selector, uses the same Qt
             # popup background and palette in all five Vitalux themes.
@@ -73,7 +76,7 @@ def check_preferences(app):
                     app.processEvents()
                     popup = dropdown.view().window()
                     assert "background:" in popup.styleSheet(), scheme
-                    expected = theme.blend(theme.accent(), theme.CARD, .05)
+                    expected = theme.combo_surface()
                     assert popup.palette().color(QPalette.Base).name() == expected, scheme
                     # Some Qt styles map Text to WindowText for popup
                     # containers. The explicit QSS controls visible glyphs.
@@ -110,6 +113,7 @@ def check_preferences(app):
             assert page.edit_custom_accent_button.isVisible()
             assert page.edit_custom_accent_button.text() == "Bearbeiten"
             assert page.remove_custom_accent_button.text() == "Löschen"
+            assert page.edit_custom_accent_button.mapTo(page, QPoint(0, 0)).x() < page.remove_custom_accent_button.mapTo(page, QPoint(0, 0)).x()
             assert settings.get("custom_accents") == [{"name": "Mein Petrol", "color": "#123456"}]
             assert settings.get("accent") == "#123456"
 
