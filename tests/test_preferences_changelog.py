@@ -239,8 +239,8 @@ def check_changelog(app):
     versions = changelog.entries()
     assert versions and versions[0][0] == __version__, (versions, __version__)
     assert len(changelog.version_notes(__version__)) >= 3
-    assert "Dropdown" in " ".join(changelog.version_notes(__version__, lang="de"))
-    assert "drop-down" in " ".join(changelog.version_notes(__version__, lang="en"))
+    assert "Warnwerte" in " ".join(changelog.version_notes(__version__, lang="de"))
+    assert "threshold" in " ".join(changelog.version_notes(__version__, lang="en"))
 
     manager = UpdateManager()
     page = UpdatePage(manager)
@@ -263,12 +263,12 @@ def check_changelog(app):
     app.processEvents()
     assert "A new feature" in page.notes.text()
     assert "Etwas Neues" not in page.notes.text()
-    assert "drop-down" in page.changelog_details.text()
+    assert "threshold" in page.changelog_details.text()
     assert page.changelog_select.currentData() == __version__
     i18n.set_lang("de")
     page.retranslate()
     assert "Etwas Neues" in page.notes.text()
-    assert "Dropdown" in page.changelog_details.text()
+    assert "Warnwerte" in page.changelog_details.text()
     manager.status = "uptodate"
     manager.notes = ""
     page.sync()
