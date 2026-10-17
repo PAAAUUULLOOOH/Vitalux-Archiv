@@ -476,3 +476,12 @@ EN_MORE.update({
     "Vor dem Aktualisieren siehst du die Neuerungen; erst „Jetzt aktualisieren“ startet den Download.": "Review what's new before updating; only “Update now” starts the download.",
     "Der Changelog bleibt auch danach im Updates-Reiter auf Deutsch oder Englisch lesbar.": "After updating, the changelog remains available in the Updates tab in German or English.",
 })
+
+# Named custom accent controls (v0.9.3.56).
+EN_MORE.update({
+    "Bearbeiten": "Edit",
+    "Löschen": "Delete",
+    "Ausgewählte eigene Farbe bearbeiten": "Edit selected custom color",
+    "Eigene Farbe bearbeiten": "Edit custom color",
+    "Diese Akzentfarbe ist bereits vorhanden.": "This accent color already exists.",
+})
