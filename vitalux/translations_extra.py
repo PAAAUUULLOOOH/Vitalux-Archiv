@@ -1,5 +1,6 @@
 """Extra English translations for dashboard, settings, sensors and disk tests."""
 EN_MORE = {
+    'Wähle einen von 14 integrierten Hintergründen oder importiere eigene Bilder mit Füllen, Einpassen, Strecken, Zentrieren oder Kacheln. Nur Funkeln ist animiert.': 'Choose from 14 built-in backgrounds or import your own images with fill, fit, stretch, center or tile layout. Only Sparkle is animated.',
     'Live-Übersicht': 'Live overview',
     'Live-Vorschau anzeigen': 'Show live preview',
     'Eigenes Bild': 'Custom image',
