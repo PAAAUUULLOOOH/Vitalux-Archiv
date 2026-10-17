@@ -5,6 +5,13 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.75] - 2026-10-18
+- Neuer **Qt Quick · GPU-Test (experimentell)** als dritte Option direkt unter **Einstellungen → Grafik-Rendering**, neben CPU und OpenGL. Wechsel erfolgt wie gehabt über **Jetzt neu starten**.
+- Qt Quick nutzt den GPU-Scene-Graph mit Qt RHI/OpenGL für die Hintergrundtextur, während vorhandene CPU-gerenderte Qt-Widgets, Charts und Glas-Karten erhalten bleiben. Eine Beschleunigung der gesamten Oberfläche wird nicht versprochen.
+- Benötigte Qt-Quick-/QML-Bindings und Module werden für die portable ZIP und AppImage gebündelt. Bei fehlenden Grafikkomponenten fällt Vitalux auf CPU zurück. Die bisherigen CPU-/OpenGL-Modi und der GPU-Startschutz bleiben unverändert.
+- Unter **Info**, direkt unter „Made by PAAAUUULLOOOH“ und in kleinerer Schrift ergänzt: „Danke an TimBooH für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering).“
+- README, deutsche/englische Anleitung und Rendering-Tests aktualisiert.
+
 ## [v0.9.3.74] - 2026-10-18
 - Scrollende Karten verwenden keine aufwendigen Qt-Offsetschatten mehr, um wiederholtes Rendern großer Zwischenflächen zu vermeiden. Glasmaterial und Umrandungen bleiben erhalten; unabhängig von der Wahl CPU/OpenGL.
 - Eigene Hintergrundbilder werden beim Dekodieren passend zur Zielgröße verkleinert und wiederverwendet. Das verringert CPU- und Speicheraufwand besonders bei großen Fotos und häufiger Größenänderung; Ausrichtungen Füllen, Einpassen, Strecken, Zentrieren und Kacheln bleiben verfügbar.
