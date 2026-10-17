@@ -114,16 +114,16 @@ class PreferencesPage(Page):
         self.edit_custom_accent_button.setToolTip(tr('Ausgewählte eigene Farbe bearbeiten'))
         self.edit_custom_accent_button.clicked.connect(self.edit_custom_accent)
         r2.addWidget(self.edit_custom_accent_button)
-        custom = QPushButton('Eigene Farbe …')
-        custom.setObjectName('ghostBtn')
-        custom.clicked.connect(lambda: self.custom_accent(accent))
-        r2.addWidget(custom)
         self.remove_custom_accent_button = QPushButton('Löschen')
         self.remove_custom_accent_button.setObjectName('ghostBtn')
         self.remove_custom_accent_button.setCursor(Qt.PointingHandCursor)
         self.remove_custom_accent_button.setToolTip(tr('Ausgewählte eigene Farbe löschen'))
         self.remove_custom_accent_button.clicked.connect(self.remove_custom_accent)
         r2.addWidget(self.remove_custom_accent_button)
+        custom = QPushButton('Eigene Farbe …')
+        custom.setObjectName('ghostBtn')
+        custom.clicked.connect(lambda: self.custom_accent(accent))
+        r2.addWidget(custom)
         r2.addStretch(1)
         look.body.addLayout(r2)
         self._sync_custom_accent_actions()
@@ -176,31 +176,32 @@ class PreferencesPage(Page):
         self.alert_toggle.toggled.connect(lambda checked: self._set_preference('alerts_enabled', checked))
         notifications.body.addWidget(self.alert_toggle)
         notifications.body.addWidget(label('Warnungen erscheinen beim Überschreiten eines Grenzwerts. Erst nach Abkühlung oder sinkender Auslastung kann eine erneute Warnung erfolgen.', 'muted', wrap=True))
-        threshold_grid = QGridLayout()
-        # Keep the warning card size. Labels on the left; narrow, centered
-        # numeric fields follow on the right, as requested.
-        threshold_grid.setColumnStretch(0, 1)
-        threshold_grid.setColumnStretch(1, 0)
-        threshold_grid.setHorizontalSpacing(14)
+        threshold_grid = QVBoxLayout()
+        threshold_grid.setSpacing(9)
         self.alert_boxes = {}
         self.alert_labels = {}
-        for idx, (key, title, default, lo, hi, unit) in enumerate((
+        for key, title, default, lo, hi, unit in (
             ('cpu_temp', 'CPU-Temperatur', 90, 40, 110, '°C'),
             ('gpu_temp', 'GPU-Temperatur', 90, 40, 115, '°C'),
             ('ram_usage', 'RAM-Auslastung', 90, 50, 100, '%'),
             ('disk_usage', 'Systemlaufwerk-Belegung', 95, 50, 100, '%'),
-        )):
+        ):
             value = QSpinBox()
             value.setObjectName('alertThresholdSpin')
-            value.setFixedWidth(112)
+            value.setFixedWidth(100)
             value.setAlignment(Qt.AlignCenter)
             value.setRange(lo, hi)
             value.setSuffix(' ' + unit)
             value.setValue(int(settings.get(key, default)))
             value.valueChanged.connect(lambda v, k=key: self._set_preference(k, v))
             text = label(title, 'strong')
-            threshold_grid.addWidget(text, idx, 0, Qt.AlignLeft | Qt.AlignVCenter)
-            threshold_grid.addWidget(value, idx, 1, Qt.AlignRight)
+            threshold_row = QHBoxLayout()
+            threshold_row.setContentsMargins(0, 0, 0, 0)
+            threshold_row.setSpacing(10)
+            threshold_row.addWidget(text, 0, Qt.AlignVCenter)
+            threshold_row.addWidget(value, 0, Qt.AlignVCenter)
+            threshold_row.addStretch(1)
+            threshold_grid.addLayout(threshold_row)
             self.alert_boxes[key] = value
             self.alert_labels[key] = text
         notifications.body.addLayout(threshold_grid)
