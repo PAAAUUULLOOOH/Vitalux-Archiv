@@ -2,12 +2,12 @@
 import json
 from datetime import datetime
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QSize
 from PySide6.QtGui import QColor, QIntValidator
 from PySide6.QtWidgets import (QColorDialog, QFrame, QGridLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QSizePolicy, QVBoxLayout, QWidget)
 from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
 
-from . import __version__, settings, theme, motion, backdrops
+from . import __version__, settings, theme, motion, backdrops, user_background
 from .pages import Page
 from .sensors import fmt_bytes, fmt_rate, system_static
 from .widgets import Card, KeyValue, Meter, label
@@ -147,7 +147,7 @@ class AlertThresholdField(QFrame):
 class PreferencesPage(Page):
     DEFAULTS = {
         'theme': 'glass', 'accent': '#4f8cff', 'motion': 'smooth',
-        'background_style': 'theme_default',
+        'background_style': 'theme_default', 'custom_background_fit': 'cover',
         'interval': 1, 'close_to_tray': True, 'alerts_enabled': False,
         'cpu_temp': 90, 'gpu_temp': 90, 'ram_usage': 90, 'disk_usage': 95,
     }
@@ -230,6 +230,7 @@ class PreferencesPage(Page):
         self.background_combo = QComboBox()
         for key, title in backdrops.PRESETS:
             self.background_combo.addItem(title, key)
+        self.background_combo.addItem('Eigenes Bild', 'custom_image')
         saved_bg = settings.get('background_style', 'theme_default')
         if saved_bg == 'legacy':
             saved_bg = 'theme_default'
@@ -238,6 +239,41 @@ class PreferencesPage(Page):
         bg_row.addWidget(self.background_combo)
         bg_row.addStretch(1)
         look.body.addLayout(bg_row)
+        custom_area = QWidget()
+        self.custom_background_area = custom_area
+        picture_layout = QVBoxLayout(custom_area)
+        picture_layout.setContentsMargins(0, 0, 0, 0)
+        pictures = QHBoxLayout()
+        pictures.addWidget(label('Hintergrundbild', 'strong'))
+        self.background_image_combo = QComboBox()
+        self.background_image_combo.currentIndexChanged.connect(self.select_background_image)
+        pictures.addWidget(self.background_image_combo)
+        add_picture = QPushButton('Bild hinzufügen …')
+        add_picture.setObjectName('ghostBtn')
+        add_picture.clicked.connect(self.add_background_image)
+        pictures.addWidget(add_picture)
+        remove_picture = QPushButton('Löschen')
+        remove_picture.setObjectName('ghostBtn')
+        remove_picture.clicked.connect(self.remove_background_image)
+        self.remove_background_button = remove_picture
+        pictures.addWidget(remove_picture)
+        pictures.addStretch(1)
+        picture_layout.addLayout(pictures)
+        fit_row = QHBoxLayout()
+        fit_row.addWidget(label('Bildausrichtung', 'strong'))
+        self.background_fit_combo = QComboBox()
+        for caption, fit in user_background.FITS:
+            self.background_fit_combo.addItem(caption, fit)
+        self.background_fit_combo.setCurrentIndex(max(0, self.background_fit_combo.findData(settings.get('custom_background_fit', 'cover'))))
+        self.background_fit_combo.currentIndexChanged.connect(self.change_background_fit)
+        fit_row.addWidget(self.background_fit_combo)
+        fit_row.addStretch(1)
+        picture_layout.addLayout(fit_row)
+        self.background_preview = QLabel()
+        self.background_preview.setFixedSize(320, 120)
+        picture_layout.addWidget(self.background_preview)
+        look.body.addWidget(custom_area)
+        self.refresh_background_images()
         look.body.addWidget(label(
             'Nur Funkeln ist animiert. Die anderen Hintergründe sind statisch; '
             'Adaptiv folgt der ausgewählten Akzentfarbe.',
@@ -276,7 +312,7 @@ class PreferencesPage(Page):
         self.close_to_tray.setEnabled(self.window._tray is not None)
         self.close_to_tray.toggled.connect(lambda enabled: self._set_preference('close_to_tray', enabled))
         tray.body.addWidget(self.close_to_tray)
-        tray.body.addWidget(label('Ein Linksklick auf das Tray-Symbol öffnet Vitalux. Über das Kontextmenü kann Vitalux vollständig beendet werden.', 'muted', wrap=True))
+        tray.body.addWidget(label('Tray-Hover: CPU-, GPU- und RAM-Auslastung sowie Temperaturen. Im Kontextmenü öffnet sich zusätzlich eine kompakte Live-Vorschau.', 'muted', wrap=True))
         self.content.addWidget(tray)
 
         notifications = Card('Hardware-Warnungen')
@@ -368,6 +404,10 @@ class PreferencesPage(Page):
         self.background_combo.blockSignals(True)
         self.background_combo.setCurrentIndex(self.background_combo.findData('theme_default'))
         self.background_combo.blockSignals(False)
+        self.background_fit_combo.blockSignals(True)
+        self.background_fit_combo.setCurrentIndex(self.background_fit_combo.findData('cover'))
+        self.background_fit_combo.blockSignals(False)
+        self.sync_background_controls()
         self.interval.blockSignals(True)
         self.interval.setCurrentIndex(self.interval.findData(1))
         self.interval.blockSignals(False)
@@ -389,6 +429,7 @@ class PreferencesPage(Page):
         self._sync_custom_accent_actions()
         self.theme_note.setText(tr(self.mode_notes.get(theme.mode(), self.mode_notes['dark'])))
         self.accent_preview.setStyleSheet(f'background: {theme.accent()}; border-radius: 7px;')
+        self.sync_background_controls()
 
     def change_mode(self, *_):
         val = self.mode.currentData()
@@ -511,8 +552,111 @@ class PreferencesPage(Page):
         combo.setCurrentIndex(combo.count()-1)
         self._sync_custom_accent_actions()
 
+    def refresh_background_images(self):
+        selected = settings.get('custom_background_selected', '')
+        self.background_image_combo.blockSignals(True)
+        self.background_image_combo.clear()
+        for item in user_background.images():
+            self.background_image_combo.addItem(item['name'], item['file'])
+        index = self.background_image_combo.findData(selected)
+        self.background_image_combo.setCurrentIndex(index if index >= 0 else (0 if self.background_image_combo.count() else -1))
+        self.background_image_combo.blockSignals(False)
+        self.sync_background_controls()
+
+    def sync_background_controls(self):
+        custom = self.background_combo.currentData() == 'custom_image'
+        self.custom_background_area.setVisible(custom)
+        count = self.background_image_combo.count()
+        self.remove_background_button.setEnabled(count > 0)
+        self.background_fit_combo.setEnabled(count > 0)
+        self.background_preview.setVisible(custom and count > 0)
+        if custom and count:
+            self.background_preview.setPixmap(user_background.draw(
+                QSize(320, 120), self.background_image_combo.currentData(),
+                self.background_fit_combo.currentData() or 'cover'))
+
+    def add_background_image(self):
+        names, _ = QFileDialog.getOpenFileNames(self, tr('Bilder auswählen'), '', 'Bilder (*.png *.jpg *.jpeg *.webp *.bmp)')
+        if not names:
+            return
+        entries = user_background.images()
+        failures = []
+        new = None
+        for name in names:
+            try:
+                new = user_background.import_image(name)
+                entries.append(new)
+            except (ValueError, OSError) as exc:
+                failures.append(f'{name}: {exc}')
+        if new:
+            settings.set('custom_backgrounds', entries)
+            settings.set('custom_background_selected', new['file'])
+            settings.set('background_style', 'custom_image')
+            self.background_combo.blockSignals(True)
+            self.background_combo.setCurrentIndex(self.background_combo.findData('custom_image'))
+            self.background_combo.blockSignals(False)
+            self.refresh_background_images()
+            self.window.apply_appearance()
+            self._refresh_restore_button()
+        if failures:
+            QMessageBox.warning(self, 'Vitalux', '\n'.join(failures[:4]))
+
+    def select_background_image(self, *_):
+        filename = self.background_image_combo.currentData()
+        if filename:
+            settings.set('custom_background_selected', filename)
+            self.sync_background_controls()
+            if self.background_combo.currentData() == 'custom_image':
+                self.window.apply_appearance()
+
+    def remove_background_image(self):
+        filename = self.background_image_combo.currentData()
+        if not filename:
+            return
+        if QMessageBox.question(self, 'Vitalux', tr('Importiertes Bild entfernen? Das Original bleibt erhalten.'),
+                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+            return
+        remaining = [item for item in user_background.images() if item['file'] != filename]
+        path = user_background.image_path(filename)
+        try:
+            if path is not None:
+                path.unlink()
+        except OSError as exc:
+            QMessageBox.warning(self, 'Vitalux', str(exc))
+            return
+        settings.set('custom_backgrounds', remaining)
+        settings.set('custom_background_selected', remaining[0]['file'] if remaining else '')
+        if not remaining:
+            settings.set('background_style', 'theme_default')
+            self.background_combo.blockSignals(True)
+            self.background_combo.setCurrentIndex(self.background_combo.findData('theme_default'))
+            self.background_combo.blockSignals(False)
+        self.refresh_background_images()
+        self.window.apply_appearance()
+        self._refresh_restore_button()
+
+    def change_background_fit(self, *_):
+        fit = self.background_fit_combo.currentData()
+        if fit is None:
+            return
+        settings.set('custom_background_fit', fit)
+        self.sync_background_controls()
+        if self.background_combo.currentData() == 'custom_image':
+            self.window.apply_appearance()
+        self._refresh_restore_button()
+
     def change_background(self, *_):
-        settings.set('background_style', self.background_combo.currentData())
+        style = self.background_combo.currentData()
+        if style == 'custom_image' and not self.background_image_combo.count():
+            self.add_background_image()
+            if not self.background_image_combo.count():
+                self.background_combo.blockSignals(True)
+                self.background_combo.setCurrentIndex(max(0, self.background_combo.findData(settings.get('background_style', 'theme_default'))))
+                self.background_combo.blockSignals(False)
+                self.sync_background_controls()
+                return
+        settings.set('background_style', style)
+        self.sync_background_controls()
         self.window.apply_appearance()
         self._refresh_restore_button()
 
