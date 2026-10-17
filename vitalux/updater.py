@@ -226,43 +226,23 @@ printf '\\n=== Vitalux update restart: %s ===\\n' "$(date -Is)" >> "$state_dir/r
 
 
 
-def cleanup_previous_versions(root=None, appimage=None):
-    """Remove only Vitalux-managed rollback copies after a healthy new launch.
+def cleanup_superseded_backups(root=None):
+    """Delete only stale update-temp backups, never the latest rollback copy.
 
-    Called several seconds *after* the window opens. A failed launch leaves
-    the previous AppImage / ZIP snapshot available for manual recovery.
-    Never touch other downloaded AppImages, ZIP archives or personal files.
+    For AppImages, the update helper atomically replaces the single
+    Vitalux.AppImage.previous with the immediately preceding version; this
+    backup must be kept until a later update or an automatic rollback.
+    ZIP updates likewise keep .backup; any abandoned .backup.old from a
+    previous interrupted update can be cleaned separately.
     """
-    if appimage is None:
-        appimage = appimage_path()
-    if appimage:
-        target = os.path.realpath(appimage)
-        if not target.endswith('.AppImage') or not os.path.isfile(target):
-            return False
-        previous = target + '.previous'
-        if os.path.isfile(previous) and not os.path.islink(previous):
-            os.unlink(previous)
-            return True
-        return False
-
     root = os.path.realpath(root or app_root())
-    previous = os.path.join(root, '.backup')
-    meta = os.path.join(previous, 'metadata.json')
-    if os.path.islink(previous) or not backup_available(root):
+    old = os.path.join(root, '.backup.old')
+    if os.path.islink(old):
         return False
-    try:
-        with open(meta, encoding='utf-8') as src:
-            old_version = str(json.load(src).get('version', ''))
-    except (OSError, ValueError, TypeError):
-        return False
-    # A metadata file from a newer version must never be deleted by
-    # running an older installed executable.
-    if not re.fullmatch(r'\d+\.\d+\.\d+(?:\.\d+)?', old_version):
-        return False
-    if _ver(old_version) >= _ver(__version__):
-        return False
-    shutil.rmtree(previous)
-    return True
+    if os.path.isdir(old) and os.path.isfile(os.path.join(old, 'metadata.json')):
+        shutil.rmtree(old)
+        return True
+    return False
 
 
 def _find_root(extracted):
