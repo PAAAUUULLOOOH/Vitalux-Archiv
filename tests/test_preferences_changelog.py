@@ -9,7 +9,7 @@ sys.path.insert(0, os.getcwd())
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget
+from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame
 
 from vitalux import __version__, changelog, i18n, settings, theme
 from vitalux.control import PreferencesPage
@@ -51,6 +51,17 @@ def check_preferences(app):
                 assert spin.alignment() & Qt.AlignHCenter, name
                 assert spin.alignment() & Qt.AlignVCenter, name
                 assert spin.value() > 0
+                assert spin.x() < page.alert_labels[name].x(), name
+
+            # Custom popup has no unthemed native top/bottom bands.
+            for dropdown in (page.mode, page.accent_combo, page.interval):
+                assert dropdown.view().frameShape() == QFrame.NoFrame
+                assert dropdown.view().autoFillBackground()
+                assert dropdown.maxVisibleItems() == 10
+                dropdown.showPopup()
+                app.processEvents()
+                assert "background:" in dropdown.view().window().styleSheet()
+                dropdown.hidePopup()
 
             # Normal Qt checkbox semantics remain intact with our painted tick.
             standard = page.alert_toggle
@@ -124,7 +135,8 @@ def check_changelog(app):
     versions = changelog.entries()
     assert versions and versions[0][0] == __version__, (versions, __version__)
     assert len(changelog.version_notes(__version__)) >= 3
-    assert "Häkchen" in " ".join(changelog.version_notes(__version__))
+    assert "Dropdown" in " ".join(changelog.version_notes(__version__, lang="de"))
+    assert "drop-down" in " ".join(changelog.version_notes(__version__, lang="en"))
 
     manager = UpdateManager()
     page = UpdatePage(manager)
@@ -136,11 +148,23 @@ def check_changelog(app):
     assert not page.update_card.isVisible()
     manager.status = "available"
     manager.latest = "0.9.3.55"
-    manager.notes = "## Neu in der nächsten Version\n- Etwas Neues"
+    manager.notes = ("## Deutsch\n\n### Neu in nächster Version\n\n- Etwas Neues"
+                     "\n\n## English\n\n### New in next version\n\n- A new feature")
     page.sync()
     app.processEvents()
     assert page.update_card.isVisible(), "New-release notes must be visible before updating"
     assert "Etwas Neues" in page.notes.text()
+    i18n.set_lang("en")
+    page.retranslate()
+    app.processEvents()
+    assert "A new feature" in page.notes.text()
+    assert "Etwas Neues" not in page.notes.text()
+    assert "drop-down" in page.changelog_details.text()
+    assert page.changelog_select.currentData() == __version__
+    i18n.set_lang("de")
+    page.retranslate()
+    assert "Etwas Neues" in page.notes.text()
+    assert "Dropdown" in page.changelog_details.text()
     manager.status = "uptodate"
     manager.notes = ""
     page.sync()
@@ -149,6 +173,12 @@ def check_changelog(app):
     assert page.changelog_select.count() > 1
     page.changelog_select.setCurrentIndex(1)
     assert page.changelog_details.text(), "Past release notes must remain accessible"
+    selected = page.changelog_select.currentData()
+    i18n.set_lang("en")
+    page.retranslate()
+    assert page.changelog_select.currentData() == selected
+    assert "checkbox" in page.changelog_details.text().lower()
+    i18n.set_lang("de")
     page.close()
     manager.shutdown()
     print("Offline changelog history and pre-/post-update visibility: PASS")
