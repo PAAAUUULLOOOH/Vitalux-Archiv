@@ -4,7 +4,15 @@ BASE="${APPDIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
 INTEGRATOR="$BASE/packaging/appimage-integration.sh"
 case "${1:-}" in
   --install|--uninstall) exec bash "$INTEGRATOR" "$1" ;;
-  --portable|--launch) shift; exec "$BASE/run.sh" "$@" ;;
+  --portable|--launch)
+    shift
+    # Guard all launches while the single rollback copy exists. Crashes restore
+    # that copy; normal exits leave it ready for future recovery.
+    if [[ -n "${APPIMAGE:-}" && -f "${APPIMAGE}.previous" && -f "$BASE/packaging/appimage-rollback-watch.sh" ]]; then
+      exec bash "$BASE/packaging/appimage-rollback-watch.sh" "$BASE" "$APPIMAGE" "$@"
+    fi
+    exec "$BASE/run.sh" "$@"
+    ;;
 esac
 TARGET="$HOME/.local/opt/vitalux/Vitalux.AppImage"
 LAUNCHER="$HOME/.local/bin/vitalux"
