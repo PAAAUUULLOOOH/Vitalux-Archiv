@@ -12,7 +12,7 @@ from .pages_extra import InfoPage, UpdatePage
 from .control import SensorsPage, PreferencesPage
 from .brand import PulseCore, TrayPulse, app_icon, sync_installed_icon, wordmark_pixmap
 from .widgets import NavButton, SidebarToggle, ChartPanel, Gauge, label
-from .glass import AmbientScene, GlassSidebar, GlassSurface
+from .glass import AmbientScene, GlassSidebar, GlassSurface, create_ambient_scene
 from .sidebar_transition import SidebarTransition, SidebarFreeze
 from .alerts import AlertMonitor, readings_from_sample
 from .tray_preview import TrayPreview, tray_tooltip
@@ -115,7 +115,8 @@ class MainWindow(QMainWindow):
                 if not old_page.benchmark.stop_and_wait():
                     return  # Never destroy a running QThread.
         distro, logo = self.distro, self.logo
-        root = AmbientScene()
+        root = create_ambient_scene()
+        self.render_backend_active = root.render_backend
         outer = QHBoxLayout(root)
         self._outer_layout = outer
         outer.setContentsMargins(0, 0, 0, 0)
