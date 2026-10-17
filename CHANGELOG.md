@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.73] - 2026-10-17
+- Experimentelle, **optionale OpenGL/GPU-Darstellung** für den nativen Hintergrund und die finale Qt-Fensterkomposition eingeführt. Klassische Qt-Widgets, Sensoren und Diagramme bleiben zunächst CPU-gerendert; eine Leistungssteigerung ist nicht garantiert.
+- Unter **Einstellungen → Grafik-Rendering** kann zwischen „CPU · Standard (stabil)“ und „OpenGL · GPU-Test (experimentell)“ gewechselt werden. Die Änderung greift aus technischen Gründen erst nach einem Neustart und erhält alle übrigen Einstellungen.
+- Vor dem OpenGL-Start prüft Vitalux, ob ein GL-Kontext erzeugt werden kann. Bei fehlendem OpenGL bleibt die CPU-Darstellung aktiv. Ein Absturz während der GPU-Startphase führt beim nächsten Programmstart automatisch zum CPU-Modus; mit `VITALUX_RENDERER=software` lässt sich dieser jederzeit erzwingen.
+- Der GPU-Test kann separat mit identischem Hintergrund und gleichen Messintervallen verglichen werden; frühere Releases werden nicht überschrieben. Zweisprachige Anleitung, README und Regressionstests aktualisiert.
+
 ## [v0.9.3.72] - 2026-10-17
 - Einstellungen → Farbakzente erhält zwei Reiter: „Manuelle Farbakzente“ (alle bisherigen Farben und Bearbeiten/Löschen unverändert) und „Passend zum Hintergrund“ mit fünf aus dem angezeigten Hintergrund ermittelten Farben.
 - Neuer Modus „Automatisch anpassen“: Beim Wechsel eines integrierten Hintergrunds oder eines eigenen Bildes wird die Akzentfarbe neu ermittelt und auf Bedienelemente, Diagramme, Fenster- und Tray-Darstellung angewendet. Manuell ausgewählte Bildfarben folgen ebenfalls dem jeweils aktiven Hintergrund.
