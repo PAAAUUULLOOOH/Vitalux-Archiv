@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="base" cx="43%" cy="36%" r="70%">
+      <stop offset="0%" stop-color="#1b2943"/>
+      <stop offset="52%" stop-color="#101a2a"/>
+      <stop offset="100%" stop-color="#080e19"/>
+    </radialGradient>
+    <linearGradient id="ice" x1="12%" y1="18%" x2="87%" y2="87%">
+      <stop offset="0%" stop-color="#fcdded"/>
+      <stop offset="20%" stop-color="#fac1df"/>
+      <stop offset="50%" stop-color="#f792c7"/>
+      <stop offset="100%" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fac1df"/>
+      <stop offset="47%" stop-color="#f472b6"/>
+      <stop offset="75%" stop-color="#f792c7"/>
+      <stop offset="100%" stop-color="#9f5182"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f472b6" stop-opacity="0.31"/>
+      <stop offset="65%" stop-color="#9f5182" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#9f5182" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- asymmetric instrument silhouette: broken enclosure rather than a boxed V -->
+  <circle cx="128" cy="128" r="110" fill="url(#aura)"/>
+  <circle cx="128" cy="128" r="99" fill="url(#base)" stroke="#9f5182" stroke-width="1.7"/>
+  <circle cx="128" cy="128" r="84" fill="none" stroke="#9f5182" stroke-width="1.4"/>
+  <!-- three non-matching arcs create a recognizable silhouette -->
+  <path d="M 53,52 A 107,107 0 0 1 191,42" fill="none" stroke="url(#ice)" stroke-width="11" stroke-linecap="square"/>
+  <path d="M 213,76 A 107,107 0 0 1 173,224" fill="none" stroke="#f792c7" stroke-width="11" stroke-linecap="square"/>
+  <path d="M 139,234 A 107,107 0 0 1 31,154" fill="none" stroke="#f472b6" stroke-width="10" stroke-linecap="square"/>
+  <path d="M 31,118 A 107,107 0 0 1 41,88" fill="none" stroke="#9f5182" stroke-width="3.5" stroke-linecap="square"/>
+  <!-- asymmetrical sensor notches -->
+  <path d="M 100,30 L 99,42 M 209,137 L 219,140 M 65,204 L 75,195" stroke="#fcdded" stroke-width="2.5" stroke-linecap="square" opacity=".67"/>
+  <path d="M 115,55 L 140,55 M 128,43 L 128,68 M 55,129 L 70,129 M 184,129 L 199,129" fill="none" stroke="#9f5182" stroke-width="1.8" opacity=".55"/>
+  <path d="M 83,83 L 95,95 M 172,83 L 161,95 M 83,173 L 95,161 M 172,173 L 161,161" stroke="#9f5182" stroke-width="1.6" opacity=".5"/>
+  <!-- central lens and precision ring -->
+  <circle cx="128" cy="128" r="62" fill="url(#aura)"/>
+  <circle cx="128" cy="128" r="61" fill="none" stroke="#9f5182" stroke-width="2.5"/>
+  <path d="M 95,77 A 58,58 0 0 1 169,88" fill="none" stroke="#fac1df" stroke-width="2.5" opacity=".68"/>
+  <path d="M 166,168 A 58,58 0 0 1 97,178" fill="none" stroke="#f792c7" stroke-width="2.5" opacity=".52"/>
+  <!-- distinctive pulse: monitoring + deep V dip, not a font glyph -->
+  <path d="M 65,126 H 91 L 109,101 L 132,163 L 158,94 L 173,126 H 191" fill="none" stroke="#f472b6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity=".11"/>
+  <path d="M 65,126 H 91 L 109,101 L 132,163 L 158,94 L 173,126 H 191" fill="none" stroke="url(#wave)" stroke-width="10.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="132" cy="163" r="7.6" fill="#fcdded"/>
+  <circle cx="132" cy="163" r="3.4" fill="#ffffff"/>
+  <!-- sensor terminals, deliberately unbalanced -->
+  <circle cx="65" cy="126" r="4.6" fill="#fcdded"/>
+  <circle cx="191" cy="126" r="4.6" fill="#f792c7"/>
+  <circle cx="213" cy="76" r="4" fill="#fcdded"/>
+  <circle cx="53" cy="52" r="3.7" fill="#fcdded"/>
+  <!-- Original Vitalux shapes with an independently designed icon palette: #f472b6. -->
+</svg>
