@@ -356,10 +356,11 @@ class DashboardBoard(QWidget):
         return None
 
     def eventFilter(self, watched, event):
-        """Edit-mode pointer capture: any tile surface moves the whole tile.
+        """App-level drag handling without unsupported Wayland mouse grabs.
 
-        Close/X remains clickable. During a drag the tile has a mouse grab,
-        so the gesture continues even outside its original geometry.
+        QWidget.grabMouse() on a non-popup triggers Qt Wayland warnings and may
+        destabilize focus/input. The existing application event filter receives
+        drag motion/release while the pointer remains in the Vitalux window.
         """
         if not self.editing:
             return super().eventFilter(watched,event)
@@ -388,7 +389,6 @@ class DashboardBoard(QWidget):
                 or (isinstance(watched, QToolButton) and watched.property('distroLogoRemove'))):
             return super().eventFilter(watched,event)
         self.begin_drag(owner.key,event.globalPosition().toPoint())
-        owner.grabMouse()
         owner.setCursor(Qt.ClosedHandCursor)
         event.accept()
         return True
@@ -442,9 +442,8 @@ class DashboardBoard(QWidget):
         state=self._dragging
         if state is None:return
         self._dragging=None
-        # Restore pointer capture even when editing is ended mid-gesture.
+        # No explicit grab/release: Qt Wayland only supports popup mouse grabs.
         owner=self.tiles[state['key']]
-        owner.releaseMouse()
         owner.unsetCursor()
         if state['moved'] and state['preview']!=state['original']:
             self._push_undo()
