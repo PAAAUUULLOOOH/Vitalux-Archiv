@@ -19,7 +19,7 @@ fi
 echo "[$(date -Is)] Starting updated Vitalux with previous version retained." >> "$LOG"
 # Our normal launcher captures Python and Qt diagnostics in vitalux.log.
 # Wait for the real application, not the AppImage mount/launcher alone.
-bash "$BASE/run.sh" "$@"
+VITALUX_GUARDED=1 bash "$BASE/run.sh" "$@"
 status=$?
 case "$status" in
   0|129|130|143)
