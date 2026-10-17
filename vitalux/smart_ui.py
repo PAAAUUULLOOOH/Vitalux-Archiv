@@ -3,11 +3,11 @@ Own Vitalux-themed Qt widgets; no third-party design assets.
 """
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QWidget,QFrame,QComboBox,QGridLayout,QHBoxLayout,QVBoxLayout,
+from PySide6.QtWidgets import (QWidget,QFrame,QGridLayout,QHBoxLayout,QVBoxLayout,
     QLabel,QProgressBar,QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QSizePolicy)
 from . import theme
 from .widgets import Card,label
-from .ui_locale import QPushButton
+from .ui_locale import QPushButton, QComboBox
 from .i18n import tr
 from .sensors import fmt_bytes
 
