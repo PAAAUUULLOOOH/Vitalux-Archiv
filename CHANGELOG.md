@@ -5,6 +5,14 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.74] - 2026-10-18
+- Scrollende Karten verwenden keine aufwendigen Qt-Offsetschatten mehr, um wiederholtes Rendern großer Zwischenflächen zu vermeiden. Glasmaterial und Umrandungen bleiben erhalten; unabhängig von der Wahl CPU/OpenGL.
+- Eigene Hintergrundbilder werden beim Dekodieren passend zur Zielgröße verkleinert und wiederverwendet. Das verringert CPU- und Speicheraufwand besonders bei großen Fotos und häufiger Größenänderung; Ausrichtungen Füllen, Einpassen, Strecken, Zentrieren und Kacheln bleiben verfügbar.
+- Unter **Akzentfarbe** stehen weiterhin alle festen und selbst angelegten Farben. Ein einziger zusätzlicher Dropdown-Eintrag **Hintergrundfarbe automatisch** ersetzt beide Akzent-Reiter sowie die nummerierten Farboptionen. Alte nummerierte Auswahlwerte werden automatisch auf diesen Modus umgestellt.
+- Layout der Akzent- und Hintergrundbildaktionen für schmalere Fenster und KDE-Skalierung angepasst.
+- Beim Wechsel von CPU zu OpenGL oder umgekehrt erscheint **Jetzt neu starten**. Vitalux stoppt seine Threads kontrolliert und startet über den bestehenden Launcher neu, ohne im Tray als alte Instanz weiterzulaufen. Bei laufendem Benchmark wird der Neustart abgelehnt.
+- Automatische Tests sowie deutsche/englische Anleitung aktualisiert. Die vorigen Releases bleiben für einen Rückschritt verfügbar.
+
 ## [v0.9.3.73] - 2026-10-17
 - Experimentelle, **optionale OpenGL/GPU-Darstellung** für den nativen Hintergrund und die finale Qt-Fensterkomposition eingeführt. Klassische Qt-Widgets, Sensoren und Diagramme bleiben zunächst CPU-gerendert; eine Leistungssteigerung ist nicht garantiert.
 - Unter **Einstellungen → Grafik-Rendering** kann zwischen „CPU · Standard (stabil)“ und „OpenGL · GPU-Test (experimentell)“ gewechselt werden. Die Änderung greift aus technischen Gründen erst nach einem Neustart und erhält alle übrigen Einstellungen.
