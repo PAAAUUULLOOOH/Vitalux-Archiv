@@ -37,6 +37,10 @@ def main():
     win = MainWindow(info, logo, manager)
     win.show()
     QTimer.singleShot(0, manager.check)
+    # Let the window appear and the update check start before offering the
+    # optional tutorial. Only the first run (or an explicit 'Later') prompts.
+    from .guide import offer_first_start_guide
+    QTimer.singleShot(1800, lambda: offer_first_start_guide(win))
     sys.exit(app.exec())
 
 
