@@ -11,7 +11,7 @@ from collections import deque
 from pathlib import Path
 
 from PySide6.QtCore import QObject, Property, QThread, QUrl, Signal, Slot
-from PySide6.QtGui import QGuiApplication, QIcon
+from PySide6.QtGui import QColor, QGuiApplication, QIcon
 from PySide6.QtQuick import QQuickView
 
 from . import APP_NAME, distro, sensors, settings, theme
@@ -128,7 +128,7 @@ def create_view(telemetry):
     if not _QML.is_file():
         raise RuntimeError(f"Qt Quick preview fehlt: {_QML}")
     view = QQuickView()
-    view.setColor(theme.BG)
+    view.setColor(QColor(theme.BG))
     view.setResizeMode(QQuickView.SizeRootObjectToView)
     view.rootContext().setContextProperty("telemetry", telemetry)
     view.setSource(QUrl.fromLocalFile(str(_QML)))
@@ -136,7 +136,6 @@ def create_view(telemetry):
         messages = "; ".join(error.toString() for error in view.errors())
         raise RuntimeError("QML konnte nicht geladen werden: " + messages)
     view.setTitle(APP_NAME + " – Qt Quick GPU-Vorschau (experimentell)")
-    view.setMinimumSize(QQuickView().minimumSize()) if False else None
     view.resize(1250, 850)
     view.setIcon(QIcon(str(_ROOT / "assets" / "vitalux.svg")))
     return view
