@@ -35,6 +35,8 @@ def include(path):
         return False
     if len(parts) == 2 and parts[1] in BINDINGS:
         return True
+    if len(parts) == 2 and parts[1].startswith('libpyside6'):
+        return any(part in parts[1].lower() for part in ('qml', 'quick'))
     if len(parts) == 4 and parts[1:3] == ('Qt', 'lib'):
         return parts[-1] in LIBRARIES
     if len(parts) >= 4 and parts[1:3] == ('Qt', 'qml'):
