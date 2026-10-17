@@ -1,0 +1,63 @@
+name: Vitalux AppImage Release
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag, e.g. v0.9.3.46
+        required: true
+        type: string
+permissions:
+  contents: write
+jobs:
+  appimage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download portable Vitalux asset
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || exit 2
+          mkdir -p build/source
+          ZIP="Vitalux-${TAG}-linux-x86_64-Portabel.zip"
+          gh release download "$TAG" --pattern "$ZIP" --dir build
+          unzip -tq "build/$ZIP"
+          unzip -q "build/$ZIP" -d build/source
+          ROOT="$(find build/source -maxdepth 3 -type f -name run.sh -printf '%h\n' | head -n 1)"
+          test -n "$ROOT"
+          test -f "$ROOT/bin/fio"
+          echo "ROOT=$ROOT" >> "$GITHUB_ENV"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+      - name: Acquire AppImage build tool
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y curl squashfs-tools unzip file
+          mkdir -p tooling
+          curl -fL --retry 3 --silent --show-error https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -o tooling/appimagetool.AppImage
+          chmod +x tooling/appimagetool.AppImage
+          (cd tooling && ./appimagetool.AppImage --appimage-extract >/dev/null)
+          test -x tooling/squashfs-root/AppRun
+      - name: Build AppImage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          bash packaging/build-appimage.sh "$ROOT" "$PWD/dist/Vitalux-${TAG}-x86_64.AppImage" "$PWD/tooling/squashfs-root/AppRun"
+          (cd dist && sha256sum *.AppImage > "Vitalux-${TAG}-x86_64.AppImage.sha256")
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vitalux-AppImage
+          path: dist/*
+      - name: Publish AppImage release files
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" dist/*.AppImage dist/*.sha256 --clobber
