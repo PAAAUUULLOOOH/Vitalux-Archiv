@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.55] - 2026-10-17
+- Dropdown-Menüs mit durchgängig gestalteten Hintergründen überarbeitet; störende schwarze Leisten oben und unten beseitigt.
+- Schmale, mittig ausgerichtete Temperatur- und Auslastungswarnwerte links vor ihre Beschriftungen verschoben, ohne die Kachelgröße zu verändern.
+- Vollständige englische Changelogs für installierte und kommende Updates ergänzt; der Sprachwechsel aktualisiert beide Anzeigen.
+- Integrierte Anleitung und README zu Warnwerten, Farbauswahl, Dropdowns und Changelog gezielt aktualisiert.
+
 ## [v0.9.3.54] - 2026-10-17
 - Einheitliche Checkboxen mit sichtbar gezeichnetem Häkchen in Diagrammen, Einstellungen und Benchmarks.
 - Schmalere Warnwert-Felder mit mittig ausgerichteten Zahlen; die Größe der umgebenden Kacheln bleibt unverändert.
