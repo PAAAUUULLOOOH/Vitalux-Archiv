@@ -5,6 +5,15 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.66] - 2026-10-17
+- Die Seitenleiste lässt sich über einen eigenen Punkte-Griff links oder rechts andocken. Anklicken wechselt die Seite, Ziehen und Loslassen positioniert sie nach Fensterhälfte. Die Position wird gespeichert; Ein-/Ausklapppfeil, Trennkante und Dashboard-Layoutpfeil passen sich automatisch an.
+- Bei „Layout bearbeiten“ wird die Hervorhebung des Pfeils beim Schließen vollständig zurückgesetzt. Die seitliche Bearbeitungsleiste öffnet in der passenden Richtung.
+- Die Glas-Seitenleiste und die Kacheln erhielten harmonisierte Helligkeit und Transparenz, während die gewohnte Originaloptik erhalten bleibt.
+- Hintergrundanimationen mit stärker wahrnehmbaren, auf das jeweilige Farbschema abgestimmten Lichtverläufen versehen. Auch Minimalistisch unterstützt bei ausdrücklicher Aktivierung einen ressourcenschonenden monochromen Lichtschein; standardmäßig bleibt die Animation ausgeschaltet.
+- Neue Standardwerte: Glass, Vitalux Blau und dazugehöriger Glass-Hintergrund. Vorhandene Einstellungen bleiben erhalten.
+- Die sechs vordefinierten Akzentfarben wechseln nun das Vitalux-App-, Fenster- und Tray-Symbol. Eine vorhandene Benutzerinstallation aktualisiert auch ihre Menü-Icondatei; das glühende Updatesymbol übernimmt dieselbe Farbe.
+- README, integrierte Anleitung und deutsch/englische Änderungsübersichten aktualisiert. Ergänzende grafische Regressionstests hinzugefügt.
+
 ## [v0.9.3.65] - 2026-10-17
 - Das Vitalux-Symbol im KDE-Systemtray glüht und pulsiert nun bei einem verfügbaren Update. Nach dem Aktualisieren erscheint automatisch wieder das normale Symbol. Das Vitalux-Logo in der App erhält einen besser sichtbaren, farblich abgestimmten Leuchtring; Updates-Reiter und einmalige Tray-Meldung bleiben erhalten.
 - Die ursprüngliche frosted Seitenleiste mit Glasmaterial und beleuchteter Trennkante wurde wiederhergestellt. Für abweichende Hintergrundpaletten passt sich ihre Transparenz behutsam an; das originale Erscheinungsbild der Farbschemas bleibt erhalten.

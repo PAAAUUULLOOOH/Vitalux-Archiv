@@ -884,6 +884,7 @@ class SidebarToggle(_SoftHover, QPushButton):
     def __init__(self, parent=None, orientation="horizontal"):
         super().__init__('', parent)
         self._collapsed = False
+        self._right_side = False
         self._orientation = orientation
         self._init_soft_hover()
         self.setObjectName('sidebarToggle')
@@ -893,6 +894,17 @@ class SidebarToggle(_SoftHover, QPushButton):
         self.setFocusPolicy(Qt.StrongFocus)
         self.setAccessibleName(tr('Seitenleiste ein-/ausklappen'))
         self.setToolTip(tr('Seitenleiste einklappen'))
+
+    def set_right_side(self, right):
+        self._right_side = bool(right)
+        self.update()
+
+    def reset_highlight(self):
+        """Clear clicked/focused highlight, especially after closing edit mode."""
+        self.clearFocus()
+        self._hover_motion.stop()
+        self._hover_frame(0.0)
+        self.update()
 
     def set_collapsed(self, collapsed):
         self._collapsed = bool(collapsed)
@@ -981,7 +993,7 @@ class SidebarToggle(_SoftHover, QPushButton):
             shift = -1 if self._collapsed else 1
             p.drawLine(QPointF(cx-4.5,cy-2*shift),QPointF(cx,cy+2.5*shift))
             p.drawLine(QPointF(cx,cy+2.5*shift),QPointF(cx+4.5,cy-2*shift))
-        elif self._collapsed:
+        elif self._collapsed != self._right_side:
             p.drawLine(QPointF(cx-2, cy-4.5), QPointF(cx+2.5, cy))
             p.drawLine(QPointF(cx+2.5, cy), QPointF(cx-2, cy+4.5))
         else:

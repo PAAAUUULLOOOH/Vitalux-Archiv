@@ -4,6 +4,15 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.66] - 2026-10-17
+- The sidebar can now be docked left or right using a draggable dotted grip; clicking the grip toggles sides. Dock position persists, and the collapse arrow, seam and dashboard layout arrow mirror their positions.
+- Fixed the dashboard layout editor arrow remaining highlighted after closing; the action strip now opens toward the available screen area.
+- Balanced the frosted sidebar contrast and brightness with surrounding cards while preserving the familiar glass design.
+- Improved all optional background animations with more noticeable, palette-matched lighting; Minimal also supports an inexpensive monochrome shimmer when explicitly enabled. Animation remains off by default.
+- New installation defaults: Glass theme, Vitalux Blue accent and matching Glass wallpaper. Existing preferences are preserved.
+- All six predefined accent colors now recolor Vitalux's window, app and tray icons. User-installed desktop menu icons update too, subject to KDE icon caching. Update glow matches the selected color.
+- Updated the README, bilingual in-app guide and visual regressions.
+
 ## [v0.9.3.65] - 2026-10-17
 - The Vitalux system tray icon now glows and breathes when an update is available, returning to the normal icon afterwards. The in-app logo has a brighter accent-coordinated halo; Updates navigation and the one-time tray notification remain intact.
 - Restored the original frosted sidebar with its illuminated seam. For non-default background palettes, frost intensity adjusts modestly while original color schemes retain their familiar look.

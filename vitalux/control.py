@@ -147,7 +147,7 @@ class AlertThresholdField(QFrame):
 
 class PreferencesPage(Page):
     DEFAULTS = {
-        'theme': 'glass', 'accent': 'auto', 'motion': 'smooth',
+        'theme': 'glass', 'accent': '#4f8cff', 'motion': 'smooth',
         'background_style': 'theme_default', 'background_intensity': 60,
         'background_softness': 65, 'background_animate': False,
         'interval': 1, 'close_to_tray': True, 'alerts_enabled': False,
@@ -188,7 +188,7 @@ class PreferencesPage(Page):
             ('Orange', '#f59e0b'), ('Rosa', '#f472b6')]:
             accent.addItem(title, value)
         self.custom_accents = self._read_custom_accents()
-        stored = settings.get('accent', 'auto')
+        stored = settings.get('accent', '#4f8cff')
         if accent.findData(stored) < 0 and QColor(str(stored)).isValid():
             # Migrate the unnamed color from earlier Vitalux installations.
             if not any(item['color'] == QColor(stored).name() for item in self.custom_accents):
@@ -393,7 +393,7 @@ class PreferencesPage(Page):
         self.mode.setCurrentIndex(self.mode.findData('glass'))
         self.mode.blockSignals(False)
         self.accent_combo.blockSignals(True)
-        self.accent_combo.setCurrentIndex(self.accent_combo.findData('auto'))
+        self.accent_combo.setCurrentIndex(self.accent_combo.findData('#4f8cff'))
         self.accent_combo.blockSignals(False)
         self.motion_combo.blockSignals(True)
         self.motion_combo.setCurrentIndex(self.motion_combo.findData('smooth'))

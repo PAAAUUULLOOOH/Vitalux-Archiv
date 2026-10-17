@@ -97,8 +97,9 @@ def material_tint(style, base, accent, amount=.16):
 
 
 def motion_colors(style, accent, light=False):
+    """Three drifting tones preserve each preset's color family."""
     colors = _colors(style, accent, light)
-    return colors[1], colors[2]
+    return colors[1], colors[2], colors[3]
 
 
 def minimal_color(intensity):

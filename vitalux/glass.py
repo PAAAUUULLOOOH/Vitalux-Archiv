@@ -47,7 +47,7 @@ class AmbientScene(QWidget):
         self._composed_soft = QPixmap()
         self._phase = 0.0
         self._motion_timer = QTimer(self)
-        self._motion_timer.setInterval(220)
+        self._motion_timer.setInterval(250)
         self._motion_timer.timeout.connect(self._advance_backdrop)
         self.sync_background()
 
@@ -59,7 +59,6 @@ class AmbientScene(QWidget):
         style = backdrops.resolve(settings.get('background_style', 'theme_default'),
                                   theme.mode())
         active = (settings.get('background_animate', False)
-                  and style != 'minimal' and theme.mode() != 'minimal'
                   and motion.enabled())
         if active:
             self._motion_timer.start()
@@ -70,7 +69,7 @@ class AmbientScene(QWidget):
     def _advance_backdrop(self):
         if not self.isVisible():
             return
-        self._phase = (self._phase + .065) % 6.28318530718
+        self._phase = (self._phase + .11) % 6.28318530718
         self._composed_key = None
         self._render_key = None
         self.update()
@@ -181,8 +180,10 @@ class AmbientScene(QWidget):
         # Apply readability correction once, *before* sidebar or cards sample.
         if theme.mode() == 'light' and style not in ('light', 'arctic'):
             painter.fillRect(full, rgba(247, 250, 255, 200))
-        elif theme.mode() != 'light' and style == 'light':
-            painter.fillRect(full, rgba(5, 12, 26, 194))
+        elif theme.mode() != 'light' and style in backdrops.LIGHT_PRESETS:
+            # Glass/Dark text is light: soften luminous wallpapers underneath
+            # without altering the shared card/sidebar sampling or text color.
+            painter.fillRect(full, rgba(5, 12, 26, 188))
         elif theme.mode() in ('glass', 'black_glass'):
             if style == theme.mode():
                 tint = QLinearGradient(0, 0, canvas.width(), canvas.height())
@@ -209,17 +210,17 @@ class AmbientScene(QWidget):
         # It works even with the original bundled Glass wallpapers.
         if moving:
             glow_colors = backdrops.motion_colors(style, theme.accent(), theme.mode() == 'light')
-            strength = (max(.25, intensity / 100) * .24)
+            strength = (.16 + intensity / 100 * .36)
             width, height = canvas.width(), canvas.height()
+            positions = ((.14, .25), (.86, .72), (.52, .55), (.70, .18))
             for i, color in enumerate(glow_colors):
-                x = width * ((.23 if i == 0 else .78) +
-                             .16 * sin(self._phase + i * 2.1))
-                y = height * ((.30 if i == 0 else .68) +
-                              .18 * cos(self._phase * .8 + i * 2.3))
-                radius = max(width * .34, height * .72) * (1 + softness / 300)
+                bx, by = positions[i % len(positions)]
+                x = width * (bx + .22 * sin(self._phase + i * 2.1))
+                y = height * (by + .21 * cos(self._phase * .84 + i * 2.3))
+                radius = max(width * .38, height * .77) * (1 + softness / 300)
                 gradient = QRadialGradient(QPointF(x, y), radius)
                 center = QColor(color)
-                center.setAlphaF(min(.42, strength * (.95 if i == 0 else .60)))
+                center.setAlphaF(min(.54, strength * (.98 if i == 0 else .83)))
                 end = QColor(center); end.setAlpha(0)
                 gradient.setColorAt(0, center)
                 gradient.setColorAt(.55, QColor(center).lighter(104))
@@ -252,6 +253,16 @@ class AmbientScene(QWidget):
         if theme.mode() == "minimal":
             p.fillRect(self.rect(),
                        backdrops.minimal_color(settings.get('background_intensity', 60)))
+            if self._motion_timer.isActive():
+                # Explicit opt-in: a moving monochrome light beam; no blur or
+                # atmospheric pixmap allocation on the low-power Minimal theme.
+                x = self.width() * (.5 + .48 * sin(self._phase))
+                band = QLinearGradient(x - self.width()*.45, 0,
+                                       x + self.width()*.45, self.height())
+                band.setColorAt(0, rgba(255,255,255,0))
+                band.setColorAt(.5, rgba(255,255,255,25))
+                band.setColorAt(1, rgba(255,255,255,0))
+                p.fillRect(self.rect(), QBrush(band))
         else:
             self._ensure_composed()
             p.fillRect(self.rect(), QColor(theme.BG))
@@ -450,6 +461,20 @@ class GlassSidebar(QFrame):
         self.setObjectName('sidebar')
         self.setAutoFillBackground(False)
         self._toggle_button = None
+        self._drag_handle = None
+        self._right = False
+
+    def set_side(self, right):
+        self._right = bool(right)
+        self._position_toggle()
+        self.update()
+
+    def set_drag_handle(self, handle):
+        self._drag_handle = handle
+        handle.setParent(self)
+        self._position_toggle()
+        handle.show()
+        handle.raise_()
 
     def set_toggle_button(self, button):
         self._toggle_button = button
@@ -460,9 +485,14 @@ class GlassSidebar(QFrame):
 
     def _position_toggle(self):
         if self._toggle_button is not None:
-            # Stable top-right control, aligned to the vertical glass seam.
-            self._toggle_button.move(self.width() - self._toggle_button.width() - 5, 13)
+            x = 5 if self._right else self.width() - self._toggle_button.width() - 5
+            self._toggle_button.move(x, 13)
             self._toggle_button.raise_()
+        if self._drag_handle is not None:
+            x = (35 if self._right
+                 else self.width() - self._drag_handle.width() - 35)
+            self._drag_handle.move(x, 13)
+            self._drag_handle.raise_()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -492,19 +522,19 @@ class GlassSidebar(QFrame):
                 shade = QLinearGradient(0, 0, self.width(), 0)
                 if theme.mode() == 'black_glass':
                     # Original two-sided black-glass frost.
-                    left, right = (215, 179) if matching else (145, 118)
+                    left, right = (190, 160) if matching else (143, 119)
                     shade.setColorAt(0, rgba(2, 2, 3, left))
                     shade.setColorAt(1, rgba(13, 13, 16, right))
                 else:
                     # Original blue-grey transparent glass material.
-                    left, right = (175, 133) if matching else (
-                        (139, 117) if style in backdrops.LIGHT_PRESETS
+                    left, right = (159, 130) if matching else (
+                        (135, 116) if style in backdrops.LIGHT_PRESETS
                         else (112, 96))
                     shade.setColorAt(0, rgba(7, 15, 30, left))
                     shade.setColorAt(1, rgba(15, 28, 47, right))
                 p.fillRect(rect, QBrush(shade))
             else:
-                material = QColor(theme.SIDEBAR)
+                material = QColor(theme.blend(theme.SIDEBAR, theme.CARD, .63))
                 if not matching:
                     material.setAlpha(226 if theme.mode() == 'light' else 188)
                 p.fillRect(rect, material)
@@ -514,7 +544,8 @@ class GlassSidebar(QFrame):
         side.setColorAt(.5, accent)
         side.setColorAt(1, QColor(theme.BORDER))
         p.setPen(QPen(QBrush(side), 1.1))
-        p.drawLine(self.width()-1, 0, self.width()-1, self.height())
+        x = 0 if self._right else self.width()-1
+        p.drawLine(x, 0, x, self.height())
         p.end()
 
 

@@ -543,3 +543,12 @@ EN_MORE.update({
     "Die ursprüngliche Glas-Seitenleiste ist wieder da; Farben, Kacheln und neue Hintergründe sind aufeinander abgestimmt. Mit den Reglern änderst du Intensität und Weichheit.": "The original frosted sidebar has returned. Colors, cards and new backgrounds are coordinated. Adjust intensity and softness using the sliders.",
     "Bei einem Update glüht das Vitalux-Logo in der App und im Tray. Der Updates-Reiter pulsiert; eine Tray-Nachricht nennt die Version.": "When an update is available, the Vitalux logo glows in the app and system tray. The Updates tab pulses and a tray notification names the version.",
 })
+
+# v0.9.3.66 – Sidebar docking, coherent motion and accent icon syncing.
+EN_MORE.update({
+    "Seitenleiste nach links oder rechts verschieben": "Move sidebar to the left or right",
+    "Über die Seitenleiste wechselst du zwischen den Bereichen; sie kann links oder rechts angeordnet werden.": "Use the sidebar to navigate between pages; it can be docked on the left or right.",
+    "Ziehe den Punkte-Griff oben auf die gewünschte Seite (oder klicke ihn zum Wechseln an). Pfeile und Anordnung passen sich an.": "Drag the dotted grip at the top to the desired side (or click it to switch). The arrows and layout adapt automatically.",
+    "Standardmäßig startet Vitalux mit Glass und Vitalux Blau. Gespeicherte persönliche Einstellungen bleiben erhalten.": "Vitalux defaults to Glass and Vitalux Blue. Existing personal settings are preserved.",
+    "Alle Hintergründe unterstützen auf Wunsch sichtbarere Farbbewegungen. Die sechs Akzentfarben färben auch die App- und Tray-Symbole um.": "All backgrounds support more noticeable optional color motion. The six accent presets also recolor the app and tray icons.",
+})

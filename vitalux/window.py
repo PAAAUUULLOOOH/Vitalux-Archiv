@@ -10,7 +10,8 @@ from .i18n import tr
 from .pages import CpuPage, DiskPage, GpuPage, MemoryPage, NetworkPage, OverviewPage, SystemPage
 from .pages_extra import InfoPage, UpdatePage
 from .control import SensorsPage, PreferencesPage
-from .brand import PulseCore, TrayPulse, wordmark_pixmap
+from .brand import PulseCore, TrayPulse, app_icon, sync_installed_icon, wordmark_pixmap
+from .sidebar_grip import SidebarGrip
 from .widgets import NavButton, SidebarToggle, ChartPanel, Gauge, label
 from .glass import AmbientScene, GlassSidebar, GlassSurface
 from .sidebar_transition import SidebarTransition, SidebarFreeze
@@ -57,6 +58,7 @@ class MainWindow(QMainWindow):
         self.pages = []
         self.update_btn = None
         self._sidebar_collapsed = bool(settings.get('sidebar_collapsed', False))
+        self._sidebar_right = settings.get('sidebar_position', 'left') == 'right'
         self._sidebar_progress = 1.0 if self._sidebar_collapsed else 0.0
         self._sidebar_motion = None
         self._sidebar_overlay = None
@@ -70,7 +72,6 @@ class MainWindow(QMainWindow):
         # Create the tray icon even when Plasma's StatusNotifier host comes up
         # after Vitalux. Qt automatically registers a visible icon when a host
         # becomes available. Checking isSystemTrayAvailable() here loses that.
-        from .brand import app_icon
         self._tray = QSystemTrayIcon(app_icon(), self)
         self._tray.setToolTip('')
         self._tray_glow = TrayPulse(self._tray, self)
@@ -112,6 +113,7 @@ class MainWindow(QMainWindow):
         distro, logo = self.distro, self.logo
         root = AmbientScene()
         outer = QHBoxLayout(root)
+        self._outer_layout = outer
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
 
@@ -212,6 +214,9 @@ class MainWindow(QMainWindow):
         self.collapse_button = SidebarToggle(side)
         self.collapse_button.clicked.connect(self.toggle_sidebar)
         side.set_toggle_button(self.collapse_button)
+        self.sidebar_grip = SidebarGrip(side)
+        self.sidebar_grip.dockRequested.connect(self.set_sidebar_position)
+        side.set_drag_handle(self.sidebar_grip)
         sl.addSpacing(8)
         lang_host = QWidget(side)
         self.lang_host = lang_host
@@ -234,9 +239,16 @@ class MainWindow(QMainWindow):
         self.sidebar_version = label(f"{APP_NAME}  ·  {__version__}", 'sidebarVersion', Qt.AlignHCenter)
         sl.addWidget(self.sidebar_version)
 
-        outer.addWidget(side)
-        outer.addWidget(self.stack, 1)
+        if self._sidebar_right:
+            outer.addWidget(self.stack, 1)
+            outer.addWidget(side)
+        else:
+            outer.addWidget(side)
+            outer.addWidget(self.stack, 1)
         self.setCentralWidget(root)
+        self.sidebar.set_side(self._sidebar_right)
+        self.sidebar_grip.set_right(self._sidebar_right)
+        self.pages[0][1].set_sidebar_side(self._sidebar_right)
         self._apply_sidebar_state()
         self._setup_sidebar_motion()
         self._sync_glow()
@@ -416,8 +428,44 @@ class MainWindow(QMainWindow):
         painter = QPainter(background)
         side.render(painter, QPoint(0, 0), QRegion(), QWidget.RenderFlag.DrawWindowBackground)
         painter.end()
+        grip = sprite(self.sidebar_grip)
         return dict(background=background, nav=nav, brand=brand,
-                    language=language, version=version, viewport=viewport)
+                    language=language, version=version, grip=grip, viewport=viewport)
+
+    def set_sidebar_position(self, right):
+        """Dock the existing sidebar to either edge without rebuilding pages.
+
+        The small grip supports click-to-toggle and dragging across the window.
+        This preserves live sensor workers, SMART requests, scroll positions
+        and user-edited dashboard arrangements.
+        """
+        right = bool(right)
+        if self._sidebar_right == right:
+            return
+        if self._sidebar_motion is not None:
+            self._sidebar_finish()
+        root = self.centralWidget()
+        self._sidebar_right = right
+        settings.set('sidebar_position', 'right' if right else 'left')
+        outer = self._outer_layout
+        outer.removeWidget(self.sidebar)
+        outer.removeWidget(self.stack)
+        if right:
+            outer.addWidget(self.stack, 1)
+            outer.addWidget(self.sidebar)
+        else:
+            outer.addWidget(self.sidebar)
+            outer.addWidget(self.stack, 1)
+        self.sidebar.set_side(right)
+        self.sidebar_grip.set_right(right)
+        self.collapse_button.set_right_side(right)
+        self.pages[0][1].set_sidebar_side(right)
+        self._apply_sidebar_state()
+        outer.activate()
+        self.centralWidget().update()
+        overview = self.pages[0][1]
+        if hasattr(overview, 'board'):
+            overview.board.refresh_geometry(animate=False)
 
     def toggle_sidebar(self):
         """Move the sidebar seam smoothly, without animating the live widget tree.
@@ -434,7 +482,10 @@ class MainWindow(QMainWindow):
         if self._sidebar_motion is not None:
             return
 
-        if not motion.enabled():
+        if self._sidebar_right or not motion.enabled():
+            # The optimized sprite compositor assumes the sidebar sits left.
+            # On the right, apply the finished layout directly, avoiding
+            # mirrored/distorted screenshots during its transition.
             self._sidebar_collapsed = not self._sidebar_collapsed
             settings.set('sidebar_collapsed', self._sidebar_collapsed)
             self._apply_sidebar_state()
@@ -575,6 +626,9 @@ class MainWindow(QMainWindow):
         self.nav_host.layout().setContentsMargins(1,2,1 if compact else 3,2)
         for btn in self.nav_buttons:btn.set_compact(compact)
         self.sidebar.setFixedWidth(74 if compact else 250)
+        self.sidebar.set_side(self._sidebar_right)
+        self.sidebar_grip.set_right(self._sidebar_right)
+        self.collapse_button.set_right_side(self._sidebar_right)
         self.collapse_button.set_collapsed(compact)
         self.sidebar._position_toggle()
 
@@ -590,12 +644,18 @@ class MainWindow(QMainWindow):
     def apply_appearance(self):
         """Restyle in-place; keep selected page, benchmark worker and scroll intact."""
         theme.set_mode(settings.get('theme', 'glass'))
-        user_accent = settings.get('accent', 'auto')
+        user_accent = settings.get('accent', '#4f8cff')
         theme.set_accent(self.distro['color'] if user_accent == 'auto' else user_accent)
         QApplication.instance().setStyleSheet(theme.stylesheet())
         self.brand_mark.setPixmap(wordmark_pixmap(200, 42))
         self.pulse_core.sync_theme()
+        current_icon = app_icon()
+        QApplication.instance().setWindowIcon(current_icon)
+        self.setWindowIcon(current_icon)
+        if not self._tray_glow.active:
+            self._tray.setIcon(current_icon)
         self._tray_glow.refresh()
+        sync_installed_icon()
         minimal = theme.mode() == 'minimal'
         self.centralWidget().set_low_power(minimal)
         # Disabling graphics effects (rather than removing them) retains the

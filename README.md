@@ -46,13 +46,13 @@
 
 ### Design & Hintergründe
 
-- **Farbschemas:** Dark, Light, Glass, Black Glass und Minimalistisch. Die **ursprüngliche Seitenleiste** mit Frosted-Glass-Material, Akzentkante und gewohntem Kontrast ist wiederhergestellt.
+- **Farbschemas:** Standardmäßig **Glass mit Vitalux Blau**. Auch Dark, Light, Black Glass und Minimalistisch stehen zur Verfügung. Bereits gespeicherte Einstellungen bleiben unverändert.
 - **Hintergründe:** **Automatisch (Farbschema)** sowie die Originale Dark, Light, Glass, Black Glass und Minimalistisch. Dazu neun neue Stile: **Hell** (Perlmutt, Morgenlicht, Eisblau), **Regenbogen** (Pastell, Prisma) und **Dunkel** (Tiefsee, Mitternacht, Samt, Graphit). Vorherige Zusatzhintergründe wurden entfernt; gespeicherte frühere Auswahlen fallen automatisch auf das aktuelle Farbschema zurück.
-- **Anpassung:** Feinere, farblich abgestimmte Slider für **Farbintensität** und **Hintergrundweichheit** (0–100 %); optionale sanfte Hintergrundanimation (standardmäßig **aus**). Die zusätzlichen Hintergründe bieten weichere Lichtverläufe und dezente Satinstrukturen.
-- **Akzentfarben:** Vorgaben oder benannte eigene Farben; **Bearbeiten → Löschen → Eigene Farbe …** sind die passenden Aktionen.
-- **Bedienung:** Keine aufschwebenden Hover-Texthinweise mehr innerhalb von Vitalux; sichtbare Hervorhebungen beim Überfahren bleiben. Dropdowns sind an das Farbschema angepasst und zeigen lange Bezeichnungen in geöffneten Listen.
+- **Anpassung:** Farbintensität und Hintergrundweichheit (0–100 %) mit eigenen Qt-Reglern; auf Wunsch deutlichere, farblich abgestimmte Animationen für **alle Hintergründe** – auch für Minimalistisch als monochromer Lichtschein. Animationen sind standardmäßig **aus**.
+- **Akzentfarben & Symbole:** Vitalux Blau, Cyan, Violett, Grün, Orange und Rosa ändern auch das App-, Fenster- und Tray-Symbol. Bei einer Benutzerinstallation wird das Symbol im KDE-Anwendungsmenü ebenfalls aktualisiert (der Icon-Cache kann kurz verzögert sein). Eigene Farben bleiben bearbeitbar.
+- **Bedienung:** Die Seitenleiste lässt sich am **Punkte-Griff oben** per Ziehen links oder rechts andocken, alternativ durch Anklicken des Griffs. Position und zugehörige Pfeile werden gespeichert beziehungsweise gespiegelt. Der Pfeil für die Dashboard-Layoutbearbeitung verliert nach dem Schließen seine Markierung. Hover-Texthinweise bleiben deaktiviert.
 
-**Abgestimmtes Design:** Die klassische Seitenleiste ist zurück. Neue Paletten verwenden dezente Anteile der gewählten Akzentfarbe; Glaskacheln bleiben kontrastreich und die Schrift lesbar. Farbstärke und Weichheit lassen sich über nativ gezeichnete Regler ändern. Animationen sind optional und standardmäßig deaktiviert.
+**Abgestimmtes Design:** Die Seitenleiste ist farblich an die Kacheln angepasst und kann links oder rechts sitzen. Der Zusammenklapppfeil und der Dashboard-Layoutpfeil orientieren sich an der Position. Das Glühen bei Updates bleibt auf das ausgewählte Symbol und dessen Akzentfarbe abgestimmt.
 
 Die Hintergrundeffekte sind **lokal gerenderte Qt-Farbverläufe**. Es werden weder ein Browser noch externe Hintergrunddateien benötigt.
 

@@ -7,6 +7,8 @@ No external font or image download is required.
 from __future__ import annotations
 
 import math
+import os
+from tempfile import NamedTemporaryFile
 from functools import lru_cache
 from pathlib import Path
 
@@ -59,7 +61,7 @@ ACCENT_VARIANTS = {
 
 def _selected_variant():
     from . import settings
-    chosen = settings.get("accent", "auto")
+    chosen = settings.get("accent", "#4f8cff")
     return ACCENT_VARIANTS.get(str(chosen).lower())
 
 
@@ -85,8 +87,50 @@ def wordmark_pixmap(width=205, height=44):
 def app_icon():
     icon = QIcon()
     for size in (32, 48, 64, 128, 256, 512):
-        icon.addPixmap(icon_pixmap(size))
+        icon.addPixmap(themed_icon_pixmap(size))
     return icon
+
+
+def sync_installed_icon():
+    """Update only Vitalux's own user-local launcher icon, if installed.
+
+    No system icon, launcher from another app, or package-managed resource is
+    changed. The desktop icon keeps its stable name for AppImage integration.
+    KDE may briefly cache the previous color in the application menu.
+    """
+    import shutil
+    base = Path(os.environ.get('XDG_DATA_HOME') or
+                (Path.home() / '.local' / 'share'))
+    desktop = base / 'applications' / 'vitalux.desktop'
+    target = base / 'icons' / 'hicolor' / 'scalable' / 'apps' / 'vitalux.svg'
+    if (not desktop.is_file() or desktop.is_symlink()
+            or not target.is_file() or target.is_symlink()):
+        return False
+    try:
+        data = desktop.read_text(encoding='utf-8')
+        if 'Name=Vitalux' not in data or 'Icon=vitalux' not in data:
+            return False
+        source = _ASSETS / _brand_asset(icon=True)
+        if not source.is_file():
+            return False
+        new_bytes = source.read_bytes()
+        if target.read_bytes() == new_bytes:
+            return True
+        with NamedTemporaryFile(dir=target.parent, prefix='.vitalux-icon-',
+                                suffix='.svg', delete=False) as fd:
+            tmp = Path(fd.name)
+            fd.write(new_bytes)
+            fd.flush()
+            os.fsync(fd.fileno())
+        try:
+            os.replace(tmp, target)
+        finally:
+            if tmp.exists():
+                tmp.unlink()
+        return True
+    except OSError:
+        # Dynamic taskbar/tray icons remain active even on a readonly desktop.
+        return False
 
 
 class TrayPulse(QObject):

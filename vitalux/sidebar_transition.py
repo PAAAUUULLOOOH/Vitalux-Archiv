@@ -99,7 +99,7 @@ class SidebarTransition(QWidget):
                              for key, data in layers['nav'].items()
                              for rect, sprite in ([data] if data else [(None, None)])},
                         **{key: (value[0], _transition_cache(value[1])) if value else None
-                           for key in ('brand', 'language', 'version')
+                           for key in ('brand', 'language', 'version', 'grip')
                            for value in (layers[key],)})
 
         self._sidebar_start = normalise_sidebar(before_side)
@@ -242,6 +242,15 @@ class SidebarTransition(QWidget):
                     rect, sprite = part
                     painter.drawPixmap(rect.topLeft(), sprite)
             painter.restore()
+
+        # Drag handle is always visible, even in collapsed navigation.
+        start_grip, end_grip = start.get('grip'), end.get('grip')
+        if start_grip and end_grip:
+            old_rect, _ = start_grip
+            new_rect, _ = end_grip
+            x = round(_lerp(old_rect.x(), new_rect.x(), fraction))
+            y = round(_lerp(old_rect.y(), new_rect.y(), fraction))
+            painter.drawPixmap(x, y, end_grip[1])
 
         a, b = start['viewport'], end['viewport']
         clip = QRect(round(_lerp(a.x(), b.x(), fraction)),
