@@ -6,6 +6,7 @@ on:
     paths:
       - "vitalux/**"
       - "CHANGELOG.md"
+      - "CHANGELOG.en.md"
       - "scripts/release_notes.py"
       - "assets/**"
       - "run.sh"
@@ -73,7 +74,7 @@ jobs:
           cp -a "$SOURCE" "$DEST"
           rm -rf "$DEST/vitalux" "$DEST/assets" "$DEST/.github"
           cp -a vitalux assets "$DEST/"
-          cp run.sh Portable-pruefen.sh CHANGELOG.md "$DEST/"
+          cp run.sh Portable-pruefen.sh CHANGELOG.md CHANGELOG.en.md "$DEST/"
           mkdir -p "$DEST/bin" "$DEST/packaging"
           cp bin/fio "$DEST/bin/fio"
           cp packaging/build-appimage.sh "$DEST/packaging/build-appimage.sh"
@@ -87,6 +88,7 @@ jobs:
           assert (root/'runtime/bin/python3.12').is_file()
           assert (root/'bin/fio.real').is_file()
           assert (root/'packaging/build-appimage.sh').is_file()
+          assert (root/'CHANGELOG.en.md').is_file()
           print('Vitalux source and runtime package assembled')
           PY
       - name: Changelog-Version prüfen und Release-Notizen erzeugen
