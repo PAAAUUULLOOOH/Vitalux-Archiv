@@ -72,6 +72,10 @@ rm -f -- "$QT_CHECK"
 done
 STATUS=${PIPESTATUS[0]}
 log_line "=== Vitalux ended (exit code $STATUS) ==="
+if [ "$STATUS" -eq 42 ]; then
+  log_line '=== Grafik-Rendering geändert – Vitalux wird kontrolliert neu gestartet ==='
+  exec bash "$HERE/run.sh" "$@"
+fi
 if [ "$STATUS" -ne 0 ]; then
   # Python's fatal handler writes raw native frames to errors.log before
   # exiting. A post-crash footer gives that frame block the crash *time*
