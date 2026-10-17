@@ -113,14 +113,12 @@ class _ListPopupStyle(_QProxyStyle):
 
 
 class QComboBox(_QComboBox):
-    """Compact, arrowless, fully theme-painted combo (including its popup)."""
-    def __init__(self, *args, **kwargs):
+    def __init__(self,*args,**kwargs):
         self._source_items = []
-        super().__init__(*args, **kwargs)
-        # Force an ordinary list popup instead of the KDE-native menu popup
-        # (which can show dark scroll/menu strips on Wayland).
-        fusion = _QStyleFactory.create("Fusion")
-        self._popup_style = _ListPopupStyle(fusion) if fusion is not None else None
+        super().__init__(*args,**kwargs)
+        # KDE/Wayland native popup styles sometimes show black top and bottom
+        # scroll strips. A regular Fusion list popup avoids native menu bands.
+        self._popup_style = _QStyleFactory.create("Fusion")
         if self._popup_style is not None:
             self.setStyle(self._popup_style)
         view = _QListView(self)
@@ -134,93 +132,46 @@ class QComboBox(_QComboBox):
         view.viewport().setAutoFillBackground(True)
         self.setView(view)
         self.setMaxVisibleItems(10)
-        self.setSizePolicy(_QSizePolicy.Maximum, _QSizePolicy.Fixed)
 
     def sizeHint(self):
-        # No arrow region is reserved. Long user-defined entries are elided;
-        # the SMART device selector can still set its own larger minimum width.
-        hint = super().sizeHint()
-        metrics = self.fontMetrics()
-        longest = max((metrics.horizontalAdvance(self.itemText(i))
-                       for i in range(self.count())), default=0)
-        return QSize(max(78, min(196, longest + 24)), max(34, hint.height()))
-
-    def minimumSizeHint(self):
-        hint = self.sizeHint()
-        return QSize(min(84, hint.width()), hint.height())
-
-    def paintEvent(self, event):
-        # Draw the actual field ourselves. Merely setting QSS was ineffective
-        # with some host Qt/KDE styles, which kept their native dark field.
-        # This deliberately draws NO chevron or native down-arrow.
-        from . import theme
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        if not self.isEnabled():
-            painter.setOpacity(.55)
-        surface = QColor(theme.combo_surface())
-        border = QColor(theme.accent() if self.hasFocus() else
-                        theme.blend(theme.accent(), theme.BORDER, .4)
-                        if self.underMouse() else theme.BORDER)
-        painter.setBrush(surface)
-        painter.setPen(QPen(border, 1.1))
-        painter.drawRoundedRect(QRectF(self.rect()).adjusted(.7, .7, -.7, -.7), 8.5, 8.5)
-        painter.setFont(self.font())
-        painter.setPen(QColor(theme.TEXT))
-        width = max(0, self.width() - 24)
-        content = self.fontMetrics().elidedText(self.currentText(), Qt.ElideRight, width)
-        painter.drawText(QRectF(11, 0, width, self.height()), Qt.AlignVCenter | Qt.AlignLeft, content)
-        painter.end()
+        # Trim just a few pixels without forcing a width that would truncate
+        # longer localized dropdown values or user-named accent colors.
+        preferred = super().sizeHint()
+        return QSize(max(88, preferred.width()), preferred.height())
 
     def showPopup(self):
-        # Paint ALL popup surfaces (frame, item view, viewport, selection).
-        # A native popup may ignore the app-level stylesheet on Wayland.
+        # The popup is a native Qt window; style its whole frame and viewport
+        # to avoid unthemed black strips above/below the option rows.
         from . import theme
-        surface, border = theme.combo_surface(), theme.BORDER
-        chosen = theme.blend(theme.accent(), surface, .25)
-        hovered = theme.blend(theme.accent(), surface, .14)
+        surface = theme.blend(theme.accent(), theme.CARD, .05)
+        border = theme.BORDER
+        accent = theme.accent()
         view = self.view()
-        viewport = view.viewport()
-        popup = view.window()
-        palette = popup.palette()
-        for role, color in (
-            (QPalette.Window, surface), (QPalette.Base, surface),
-            (QPalette.AlternateBase, surface), (QPalette.Button, surface),
-            (QPalette.Text, theme.TEXT), (QPalette.WindowText, theme.TEXT),
-            (QPalette.ButtonText, theme.TEXT), (QPalette.Highlight, chosen),
-            (QPalette.HighlightedText, theme.TEXT),
-        ):
-            palette.setColor(role, QColor(color))
-        for widget in (popup, view, viewport):
-            widget.setPalette(palette)
-            widget.setAutoFillBackground(True)
-            widget.setAttribute(Qt.WA_StyledBackground, True)
-        popup.setObjectName("vitaluxComboPopup")
-        popup.setStyleSheet(
-            f"QWidget#vitaluxComboPopup {{ background-color: {surface}; "
-            f"border: 1px solid {border}; border-radius: 8px; padding: 1px; }}"
-            f"QListView {{ background-color: {surface}; color: {theme.TEXT}; "
-            f"border: none; outline: 0; padding: 0; }}"
-            f"QWidget#qt_scrollarea_viewport {{ background-color: {surface}; }}"
+        container = view.window()
+        # Qt Wayland/Fusion can render popup padding using the palette rather
+        # than QSS. Explicit matching colors remove unmatched dark gutters.
+        popup_palette = container.palette()
+        popup_palette.setColor(QPalette.Window, QColor(surface))
+        popup_palette.setColor(QPalette.Base, QColor(surface))
+        popup_palette.setColor(QPalette.Text, QColor(theme.TEXT))
+        popup_palette.setColor(QPalette.Highlight, QColor(theme.blend(accent, surface, .24)))
+        popup_palette.setColor(QPalette.HighlightedText, QColor(theme.TEXT))
+        container.setPalette(popup_palette)
+        view.setPalette(popup_palette)
+        view.viewport().setPalette(popup_palette)
+        container.setAutoFillBackground(True)
+        container.setObjectName("vitaluxComboPopup")
+        container.setStyleSheet(
+            f"QFrame#vitaluxComboPopup {{ background: {surface}; "
+            f"border: 1px solid {border}; border-radius: 9px; padding: 2px; }}"
+            f"QListView {{ background: {surface}; color: {theme.TEXT}; "
+            f"border: none; outline: none; padding: 0px; }}"
             f"QListView::item {{ color: {theme.TEXT}; border: none; "
-            f"padding: 6px 9px; min-height: 20px; }}"
-            f"QListView::item:selected {{ background-color: {chosen}; color: {theme.TEXT}; }}"
-            f"QListView::item:hover {{ background-color: {hovered}; }}"
-            f"QScrollBar:vertical {{ background-color: {surface}; }}"
+            f"padding: 7px 10px; min-height: 22px; }}"
+            f"QListView::item:selected {{ background: {theme.blend(accent, surface, .24)}; "
+            f"color: {theme.TEXT}; }}"
+            f"QListView::item:hover {{ background: {theme.blend(accent, surface, .14)}; }}"
         )
-        # Give the view/viewport their own explicit themed surfaces as well,
-        # instead of relying on inherited styling from a native popup window.
-        view.setStyleSheet(
-            f"QListView {{ background-color: {surface}; color: {theme.TEXT}; "
-            f"border: none; outline: 0; padding: 0; }}"
-            f"QListView::item {{ padding: 6px 9px; min-height: 20px; }}"
-            f"QListView::item:selected {{ background-color: {chosen}; color: {theme.TEXT}; }}"
-            f"QListView::item:hover {{ background-color: {hovered}; }}"
-        )
-        viewport.setStyleSheet(f"background-color: {surface};")
-        # Reassert the palette after applying QSS (QSS can repolish widgets).
-        for widget in (popup, view, viewport):
-            widget.setPalette(palette)
         super().showPopup()
 
     def addItem(self, *args, **kwargs):
@@ -232,6 +183,9 @@ class QComboBox(_QComboBox):
         return result
     def addItems(self, items):
         for item in items:self.addItem(item)
+    def clear(self):
+        self._source_items.clear()
+        return super().clear()
     def clear(self):
         self._source_items.clear()
         return super().clear()
