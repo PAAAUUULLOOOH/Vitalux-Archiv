@@ -55,9 +55,9 @@ def _recolor_brand(pixmap, scheme, accent, *, wordmark=False):
     p = QPainter(pixmap)
     p.setCompositionMode(QPainter.CompositionMode_SourceAtop)
     if scheme == "minimal":
-        # Clean, single-color identity in the no-animation theme.
+        # One solid tone (no decorative glow) that still tracks the accent.
         p.setCompositionMode(QPainter.CompositionMode_SourceIn)
-        p.fillRect(pixmap.rect(), QColor(theme.TEXT))
+        p.fillRect(pixmap.rect(), QColor(theme.blend(accent, theme.TEXT, .28)))
     else:
         if scheme == "black_glass":
             silver = QColor("#d5dde7")
