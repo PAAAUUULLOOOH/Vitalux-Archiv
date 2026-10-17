@@ -4,6 +4,12 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.73] - 2026-10-17
+- Added an experimental, opt-in OpenGL/GPU background renderer and GPU-based composition for the main Qt window. Standard Qt widgets and charts still render on the CPU; improvements are not guaranteed.
+- Settings → Graphics rendering lets you choose CPU (stable default) or OpenGL (experimental), taking effect after restart without touching other preferences.
+- Context availability is checked before startup and automatically falls back to CPU when unavailable. A crash during GPU startup is detected on the next launch and switches back to CPU; `VITALUX_RENDERER=software` also provides an immediate override.
+- The previous release remains untouched for rollback. README, bilingual help and regression coverage updated.
+
 ## [v0.9.3.72] - 2026-10-17
 - Added two accent-color tabs in Settings: Manual Accent Colors (existing colors, edit and delete preserved) and Match Background (five suggested accent colors sampled from the active wallpaper).
 - The Match Automatically mode updates accent colors when the user changes a built-in background or personal image. Explicitly selected wallpaper swatches also track the active wallpaper.
