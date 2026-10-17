@@ -58,7 +58,11 @@ def main():
     # optional tutorial. Only the first run (or an explicit 'Later') prompts.
     from .guide import offer_first_start_guide
     QTimer.singleShot(1800, lambda: offer_first_start_guide(win))
-    sys.exit(app.exec())
+    result = app.exec()
+    if result == 0 and win.restart_requested:
+        renderer.successful_start()
+        sys.exit(42)  # The portable launcher restarts with the new renderer.
+    sys.exit(result)
 
 
 if __name__ == "__main__":
