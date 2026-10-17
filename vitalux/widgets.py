@@ -3,7 +3,7 @@ import math
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt, QTimer, QVariantAnimation, QEasingCurve
 from PySide6.QtGui import QBrush, QColor, QConicalGradient, QFont, QLinearGradient, QPainter, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import QFrame, QGridLayout, QHBoxLayout, QSizePolicy, QVBoxLayout, QWidget, QGraphicsDropShadowEffect
-from .ui_locale import QLabel, QPushButton, QComboBox, QCheckBox
+from .ui_locale import QLabel, QPushButton, QComboBox, QCheckBox, paint_check_indicator
 
 from . import theme, motion
 from .glass import GlassSurface, paint_glass_body, rgba
@@ -508,33 +508,15 @@ class ChartSeriesCheckBox(QCheckBox):
         side = 15.0
         x, y = 2.0, (self.height()-side)/2
         r = QRectF(x, y, side, side)
-        checked = self.isChecked()
-        edge = QColor(theme.accent() if checked else theme.BORDER)
-        if not checked and self.underMouse():
-            edge = QColor(theme.MUTED)
-        backdrop = QColor(theme.CARD)
-        backdrop.setAlpha(38 if theme.mode() in ('glass', 'black_glass') else 24 if theme.mode() == 'dark' else 110)
-        p.setPen(QPen(edge, 1.45 if checked else 1.2))
-        p.setBrush(backdrop)
-        p.drawRoundedRect(r, 3.3, 3.3)
-        if checked:
-            tick = QPainterPath()
-            tick.moveTo(x+3.2, y+7.7)
-            tick.lineTo(x+6.25, y+10.7)
-            tick.lineTo(x+12.0, y+4.25)
-            p.setBrush(Qt.NoBrush)
-            p.setPen(QPen(QColor(theme.accent()), 2.0, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
-            p.drawPath(tick)
+        if not self.isEnabled():
+            p.setOpacity(.45)
+        paint_check_indicator(p, r, self.isChecked(), self.underMouse(), self.hasFocus())
         font = QFont(self.font())
         font.setBold(True)
         p.setFont(font)
         p.setPen(QColor(self.series_color))
         p.drawText(QRectF(x + side + 8, 0, max(0, self.width() - side - x - 10), self.height()),
                    Qt.AlignLeft | Qt.AlignVCenter, self.text())
-        if self.hasFocus():
-            p.setPen(QPen(QColor(theme.accent()), 1, Qt.DotLine))
-            p.setBrush(Qt.NoBrush)
-            p.drawRoundedRect(r.adjusted(-1.5,-1.5,1.5,1.5), 4, 4)
         p.end()
 
 
