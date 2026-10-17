@@ -90,6 +90,16 @@ class InfoPage(Page):
         c.body.addWidget(label(f"{APP_NAME} {__version__}", "muted", Qt.AlignHCenter))
         c.body.addSpacing(10)
         self.content.addWidget(c)
+        help_card = Card("Anleitung und Hilfe")
+        help_card.body.addWidget(label(
+            "Entdecke Vitalux in einer bebilderten Schritt-für-Schritt-Anleitung mit Pfeilen und Beispielen.",
+            "muted", wrap=True))
+        self.guide_button = QPushButton("Anleitung öffnen")
+        self.guide_button.setObjectName("primaryBtn")
+        self.guide_button.setCursor(Qt.PointingHandCursor)
+        self.guide_button.clicked.connect(self.open_guide)
+        help_card.body.addWidget(self.guide_button)
+        self.content.addWidget(help_card)
         d = Card("Details")
         from . import settings
         for k, v in (("Version", __version__), ("Erkannte Distribution", distro["name"]),
@@ -98,3 +108,11 @@ class InfoPage(Page):
             kv.set(v)
             d.body.addWidget(kv)
         self.content.addWidget(d)
+
+    def open_guide(self):
+        from .guide import GuideDialog
+        from . import settings
+        # Visiting the guide counts as opt-in; do not prompt again on next launch.
+        settings.set("guide_intro_choice", "completed")
+        dlg = GuideDialog(self.window())
+        dlg.exec()
