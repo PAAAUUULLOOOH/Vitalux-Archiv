@@ -9,7 +9,8 @@ sys.path.insert(0, os.getcwd())
 
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QColor, QPalette
-from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame, QMessageBox
+from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame
+from vitalux.ui_locale import QMessageBox
 
 from vitalux import __version__, changelog, i18n, settings, theme
 from vitalux.control import PreferencesPage, AlertThresholdField
