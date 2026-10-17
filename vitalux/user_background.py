@@ -1,5 +1,6 @@
 """Locally stored, safe user background images with configurable placement."""
 from pathlib import Path
+from functools import lru_cache
 from uuid import uuid4
 import shutil
 from PySide6.QtCore import Qt, QSize
@@ -54,20 +55,48 @@ def import_image(filename):
     return {'name': source.stem[:80], 'file': dest}
 
 
+@lru_cache(maxsize=6)
+def _scaled_image(path, modified, source_bytes, width, height, mode):
+    """Cache bounded decoded wallpapers; JPEG readers can subsample at decode.
+
+    Images which are already smaller than the target retain their natural size.
+    'center' and 'tile' intentionally keep the original pixel dimensions.
+    """
+    reader = QImageReader(path)
+    reader.setAutoTransform(True)
+    native = reader.size()
+    if native.isValid() and mode in ('cover', 'contain', 'stretch'):
+        if mode == 'stretch':
+            target = QSize(width, height)
+        else:
+            factor = (max if mode == 'cover' else min)(
+                width / native.width(), height / native.height())
+            target = QSize(max(1, round(native.width() * factor)),
+                           max(1, round(native.height() * factor)))
+        # Never enlarge at decode time and avoid accidentally decoding to zero.
+        if (target.width() > 0 and target.height() > 0
+                and (target.width() < native.width() or
+                     target.height() < native.height())):
+            reader.setScaledSize(target)
+    image = reader.read()
+    return QPixmap.fromImage(image) if not image.isNull() else QPixmap()
+
+
 def draw(size, filename, mode='cover'):
-    canvas = QPixmap(QSize(size))
+    """Render a wallpaper at its display size, with local image decode caching."""
+    size = QSize(size)
+    canvas = QPixmap(size)
     if canvas.isNull():
         return canvas
     canvas.fill(QColor(theme.BG))
     path = image_path(filename)
     if path is None:
         return canvas
-    reader = QImageReader(str(path))
-    reader.setAutoTransform(True)
-    picture = reader.read()
-    if picture.isNull():
+    metadata = path.stat()
+    source = _scaled_image(str(path), metadata.st_mtime_ns, metadata.st_size,
+                           size.width(), size.height(), mode)
+    if source.isNull():
         return canvas
-    source = QPixmap.fromImage(picture)
     painter = QPainter(canvas)
     painter.setRenderHint(QPainter.SmoothPixmapTransform)
     if mode == 'tile':
@@ -75,7 +104,7 @@ def draw(size, filename, mode='cover'):
     else:
         ratio = (Qt.IgnoreAspectRatio if mode == 'stretch' else
                  Qt.KeepAspectRatio if mode == 'contain' else Qt.KeepAspectRatioByExpanding)
-        scaled = source if mode == 'center' else source.scaled(canvas.size(), ratio, Qt.SmoothTransformation)
+        scaled = source if mode == 'center' else source.scaled(size, ratio, Qt.SmoothTransformation)
         painter.drawPixmap((canvas.width()-scaled.width())//2,
                            (canvas.height()-scaled.height())//2, scaled)
     painter.end()
