@@ -459,3 +459,12 @@ EN_MORE.update({
     "Distributionslogo": "Distribution logo",
     "Distributionslogo ausblenden": "Hide distribution logo",
 })
+
+# Persistent release history and user-named accent presets.
+EN_MORE.update({
+    "Eigene Farbe benennen": "Name custom color",
+    "Wie soll diese Akzentfarbe heißen?": "What would you like to name this accent color?",
+    "Ausgewählte eigene Farbe löschen": "Delete selected custom color",
+    "Für diese installierte Version ist kein Changelog verfügbar.": "No changelog is available for this installed version.",
+    "Changelog": "Changelog",
+})
