@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (QColorDialog, QFrame, QGridLayout, QHBoxLayout, Q
 from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
 
 from . import __version__, settings, theme, motion, backdrops
-from .appearance_slider import AppearanceSlider
 from .pages import Page
 from .sensors import fmt_bytes, fmt_rate, system_static
 from .widgets import Card, KeyValue, Meter, label
@@ -148,8 +147,7 @@ class AlertThresholdField(QFrame):
 class PreferencesPage(Page):
     DEFAULTS = {
         'theme': 'glass', 'accent': '#4f8cff', 'motion': 'smooth',
-        'background_style': 'theme_default', 'background_intensity': 60,
-        'background_softness': 65, 'background_animate': False,
+        'background_style': 'theme_default',
         'interval': 1, 'close_to_tray': True, 'alerts_enabled': False,
         'cpu_temp': 90, 'gpu_temp': 90, 'ram_usage': 90, 'disk_usage': 95,
     }
@@ -185,7 +183,7 @@ class PreferencesPage(Page):
         self.accent_combo = accent
         for title, value in [('Distribution', 'auto'), ('Vitalux Blau', '#4f8cff'),
             ('Cyan', '#52d3ff'), ('Violett', '#a78bfa'), ('Grün', '#73ba25'),
-            ('Orange', '#f59e0b'), ('Rosa', '#f472b6')]:
+            ('Orange', '#f59e0b'), ('Gelb', '#facc15'), ('Rot', '#ef4444'), ('Rosa', '#f472b6')]:
             accent.addItem(title, value)
         self.custom_accents = self._read_custom_accents()
         stored = settings.get('accent', '#4f8cff')
@@ -240,41 +238,10 @@ class PreferencesPage(Page):
         bg_row.addWidget(self.background_combo)
         bg_row.addStretch(1)
         look.body.addLayout(bg_row)
-        self.background_sliders = {}
-        self.background_values = {}
-        for key, title, default in (
-            ('background_intensity', 'Farbintensität', 60),
-            ('background_softness', 'Hintergrundweichheit', 65),
-        ):
-            bg_row = QHBoxLayout()
-            bg_row.addWidget(label(title, 'strong'))
-            slider = AppearanceSlider()
-            slider.setRange(0, 100)
-            slider.setTracking(False)
-            slider.setObjectName('backgroundSlider')
-            slider.setFixedWidth(220)
-            slider.setPageStep(10)
-            slider.setSingleStep(1)
-            slider.setValue(backdrops.bounded(settings.get(key, default), default))
-            value_label = label(f'{slider.value()} %', 'muted')
-            value_label.setObjectName('backgroundSliderValue')
-            value_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            value_label.setFixedWidth(62)
-            value_label.setMinimumHeight(28)
-            slider.valueChanged.connect(lambda v, k=key, out=value_label:
-                                        self.change_background_level(k, v, out))
-            bg_row.addWidget(slider)
-            bg_row.addWidget(value_label)
-            bg_row.addStretch(1)
-            look.body.addLayout(bg_row)
-            self.background_sliders[key] = slider
-            self.background_values[key] = value_label
-        self.background_animate = QCheckBox('Hintergrund sanft animieren')
-        self.background_animate.setChecked(bool(settings.get('background_animate', False)))
-        self.background_animate.toggled.connect(
-            lambda v: self.change_background_option('background_animate', bool(v)))
-        look.body.addWidget(self.background_animate)
-        look.body.addWidget(label('Die Original-Farbschemas bleiben erhalten. Neue Hintergründe sind nach Hell, Regenbogen und Dunkel gruppiert; Minimalistisch bleibt einfarbig.', 'muted', wrap=True))
+        look.body.addWidget(label(
+            'Statische Hintergründe bleiben unverändert. Animiert: Regenbogen, '
+            'Fade Bunt, Funkeln und Hell. Adaptiv folgt der Akzentfarbe.',
+            'muted', wrap=True))
         # A presentation preference, not a global reduction of monitoring speed.
         # Runtime widgets read the profile on their next interaction.
         r_motion = QHBoxLayout()
@@ -401,14 +368,6 @@ class PreferencesPage(Page):
         self.background_combo.blockSignals(True)
         self.background_combo.setCurrentIndex(self.background_combo.findData('theme_default'))
         self.background_combo.blockSignals(False)
-        for key, slider in self.background_sliders.items():
-            slider.blockSignals(True)
-            slider.setValue(self.DEFAULTS[key])
-            slider.blockSignals(False)
-            self.background_values[key].setText(f'{self.DEFAULTS[key]} %')
-        self.background_animate.blockSignals(True)
-        self.background_animate.setChecked(False)
-        self.background_animate.blockSignals(False)
         self.interval.blockSignals(True)
         self.interval.setCurrentIndex(self.interval.findData(1))
         self.interval.blockSignals(False)
@@ -553,15 +512,9 @@ class PreferencesPage(Page):
         self._sync_custom_accent_actions()
 
     def change_background(self, *_):
-        self.change_background_option('background_style', self.background_combo.currentData())
-
-    def change_background_level(self, key, value, output):
-        output.setText(f'{value} %')
-        self.change_background_option(key, int(value))
-
-    def change_background_option(self, key, value):
-        self._set_preference(key, value)
+        settings.set('background_style', self.background_combo.currentData())
         self.window.apply_appearance()
+        self._refresh_restore_button()
 
     def change_motion(self, *_):
         profile = self.motion_combo.currentData()

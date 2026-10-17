@@ -55,6 +55,8 @@ ACCENT_VARIANTS = {
     "#a78bfa": "violet",
     "#73ba25": "green",
     "#f59e0b": "orange",
+    "#facc15": "yellow",
+    "#ef4444": "red",
     "#f472b6": "pink",
 }
 
@@ -92,44 +94,72 @@ def app_icon():
 
 
 def sync_installed_icon():
-    """Update only Vitalux's own user-local launcher icon, if installed.
+    """Keep the user-installed KDE launcher icon in sync with the accent.
 
-    No system icon, launcher from another app, or package-managed resource is
-    changed. The desktop icon keeps its stable name for AppImage integration.
-    KDE may briefly cache the previous color in the application menu.
+    A distinct icon *path* per preset avoids KDE's stale hicolor/desktop-entry
+    icon cache. No shared/system desktop file is touched.
     """
-    import shutil
+    import re
     base = Path(os.environ.get('XDG_DATA_HOME') or
                 (Path.home() / '.local' / 'share'))
     desktop = base / 'applications' / 'vitalux.desktop'
-    target = base / 'icons' / 'hicolor' / 'scalable' / 'apps' / 'vitalux.svg'
+    directory = base / 'icons' / 'hicolor' / 'scalable' / 'apps'
+    original = directory / 'vitalux.svg'
     if (not desktop.is_file() or desktop.is_symlink()
-            or not target.is_file() or target.is_symlink()):
+            or not original.is_file() or original.is_symlink()
+            or directory.is_symlink()):
         return False
     try:
         data = desktop.read_text(encoding='utf-8')
-        if 'Name=Vitalux' not in data or 'Icon=vitalux' not in data:
+        if 'Name=Vitalux' not in data:
             return False
+        found = re.search(r'^Icon=(.*)$', data, flags=re.MULTILINE)
+        if not found:
+            return False
+        old_icon = found.group(1).strip()
+        if old_icon != 'vitalux' and not (
+                old_icon.startswith(str(directory / 'vitalux-'))
+                and old_icon.endswith('.svg')):
+            return False
+        variant = _selected_variant()
         source = _ASSETS / _brand_asset(icon=True)
         if not source.is_file():
             return False
+        # The selected color changes the icon *filename*, not just its bytes:
+        # Plasma consequently refreshes pinned launchers more reliably.
+        target = directory / ('vitalux-' + (variant or 'original') + '.svg')
         new_bytes = source.read_bytes()
-        if target.read_bytes() == new_bytes:
-            return True
-        with NamedTemporaryFile(dir=target.parent, prefix='.vitalux-icon-',
-                                suffix='.svg', delete=False) as fd:
-            tmp = Path(fd.name)
-            fd.write(new_bytes)
-            fd.flush()
-            os.fsync(fd.fileno())
-        try:
-            os.replace(tmp, target)
-        finally:
-            if tmp.exists():
-                tmp.unlink()
+        if not target.is_file() or target.read_bytes() != new_bytes:
+            with NamedTemporaryFile(dir=directory, prefix='.vitalux-color-',
+                                    suffix='.svg', delete=False) as fd:
+                tmp = Path(fd.name)
+                fd.write(new_bytes)
+                fd.flush()
+                os.fsync(fd.fileno())
+            try:
+                os.replace(tmp, target)
+            finally:
+                if tmp.exists():
+                    tmp.unlink()
+        updated = re.sub(r'^Icon=.*$', 'Icon=' + str(target), data,
+                         count=1, flags=re.MULTILINE)
+        if updated != data:
+            with NamedTemporaryFile(dir=desktop.parent,
+                                    prefix='.vitalux-entry-',
+                                    suffix='.desktop', delete=False) as fd:
+                tmp = Path(fd.name)
+                fd.write(updated.encode('utf-8'))
+                fd.flush()
+                os.fsync(fd.fileno())
+            try:
+                os.chmod(tmp, desktop.stat().st_mode & 0o777)
+                os.replace(tmp, desktop)
+            finally:
+                if tmp.exists():
+                    tmp.unlink()
         return True
     except OSError:
-        # Dynamic taskbar/tray icons remain active even on a readonly desktop.
+        # Window and tray color changes still work without desktop integration.
         return False
 
 
@@ -159,20 +189,25 @@ class TrayPulse(QObject):
         beat = .5 + .5 * math.sin(phase)
         color = QColor(theme.accent())
         glow = QRadialGradient(QPointF(32, 32), 31)
-        center = QColor(color); center.setAlpha(int(54 + 115 * beat))
-        mid = QColor(color); mid.setAlpha(int(25 + 55 * beat))
+        center = QColor(color); center.setAlpha(int(88 + 145 * beat))
+        mid = QColor(color); mid.setAlpha(int(40 + 100 * beat))
         edge = QColor(color); edge.setAlpha(0)
         glow.setColorAt(0, center)
-        glow.setColorAt(.58, mid)
+        glow.setColorAt(.62, mid)
         glow.setColorAt(1, edge)
         p.setPen(Qt.NoPen)
         p.setBrush(QBrush(glow))
-        p.drawEllipse(QRectF(1, 1, 62, 62))
-        ring = QColor(color); ring.setAlpha(int(65 + 155 * beat))
-        p.setPen(QPen(ring, 1.4 + beat * 1.5))
+        p.drawEllipse(QRectF(0, 0, 64, 64))
+        ring = QColor(color).lighter(130)
+        ring.setAlpha(int(115 + 140 * beat))
+        p.setPen(QPen(ring, 2 + beat * 2.4))
         p.setBrush(Qt.NoBrush)
-        p.drawEllipse(QRectF(7, 7, 50, 50))
-        p.drawPixmap(10, 10, 44, 44, themed_icon_pixmap(44))
+        p.drawEllipse(QRectF(3, 3, 58, 58))
+        p.drawPixmap(8, 8, 48, 48, themed_icon_pixmap(48))
+        # A visible light pip survives Plasma's 22px tray scaling.
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor(255, 255, 255, int(75 + 180*beat)))
+        p.drawEllipse(QPointF(54, 10), 2 + beat * 1.8, 2 + beat * 1.8)
         p.end()
         return px
 
@@ -180,7 +215,14 @@ class TrayPulse(QObject):
         if not self.active:
             return
         self._phase = (self._phase + .38) % (2 * math.pi)
-        self.tray.setIcon(QIcon(self._render(self._phase)))
+        pix = self._render(self._phase)
+        icon = QIcon()
+        icon.addPixmap(pix)
+        # Explicit small render sizes avoid smooth-downscaling away the glow.
+        for target in (22, 32, 48):
+            icon.addPixmap(pix.scaled(target, target, Qt.KeepAspectRatio,
+                                      Qt.SmoothTransformation))
+        self.tray.setIcon(icon)
 
     def set_active(self, active):
         active = bool(active)
@@ -197,7 +239,7 @@ class TrayPulse(QObject):
 
     def refresh(self):
         if self.active:
-            self.tray.setIcon(QIcon(self._render(self._phase)))
+            self._advance()
 
     def stop(self):
         self.set_active(False)

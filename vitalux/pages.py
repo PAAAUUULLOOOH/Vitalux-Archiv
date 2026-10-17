@@ -139,7 +139,6 @@ class OverviewPage(Page):
         # The overlay arrow ends at y=43; place the first glass card just
         # below it, without wasting space on an extra header/toolbar row.
         self.root.setContentsMargins(30,45,30,30)
-        self._sidebar_on_right = False
         self.layout_toggle = SidebarToggle(self, orientation='horizontal')
         self.layout_toggle.setToolTip(tr('Dashboard-Layout'))
         self.layout_toggle.setAccessibleName(tr('Dashboard-Layout'))
@@ -194,27 +193,20 @@ class OverviewPage(Page):
         self._position_editor_controls()
         QTimer.singleShot(0,self.board.refresh_geometry)
 
-    def set_sidebar_side(self, right):
-        self._sidebar_on_right = bool(right)
-        self.layout_toggle.set_right_side(self._sidebar_on_right)
-        self._position_editor_controls()
-
     def resizeEvent(self, event):
         super().resizeEvent(event)
         if hasattr(self,'layout_actions'):
             self._position_editor_controls()
 
     def _position_editor_controls(self):
-        # Put the editor arrow and toolbar on the *outer* edge of content.
-        x = 5 if self._sidebar_on_right else self.width()-self.layout_toggle.width()-5
+        # Dashboard toolbar remains on the outer right edge of content.
+        x = self.width()-self.layout_toggle.width()-5
         self.layout_toggle.move(x,13)
         # Shift just the small action strip, not its children or an animated
         # clipping mask. Widgets retain their full width throughout movement.
-        target_x = (x+self.layout_toggle.width()+7 if self._sidebar_on_right
-                    else x-self._strip_width-7)
+        target_x = x-self._strip_width-7
         if self._strip_anim is None:
-            direction = -1 if self._sidebar_on_right else 1
-            self.layout_actions.move(target_x+round(direction*22*(1-self._strip_fraction)),13)
+            self.layout_actions.move(target_x+round(22*(1-self._strip_fraction)),13)
         self.layout_toggle.raise_()
         if self._strip_open:
             self.layout_actions.raise_()
@@ -253,11 +245,9 @@ class OverviewPage(Page):
         fade.setEndValue(finish)
         travel = QPropertyAnimation(self.layout_actions, b'pos', self)
         travel.setStartValue(self.layout_actions.pos())
-        x=5 if self._sidebar_on_right else self.width()-self.layout_toggle.width()-5
-        target=(x+self.layout_toggle.width()+7 if self._sidebar_on_right
-                else x-self._strip_width-7)
-        direction = -1 if self._sidebar_on_right else 1
-        travel.setEndValue(QPoint(target+round(direction*22*(1-finish)),13))
+        x=self.width()-self.layout_toggle.width()-5
+        target=x-self._strip_width-7
+        travel.setEndValue(QPoint(target+round(22*(1-finish)),13))
         group=QParallelAnimationGroup(self)
         for animation in (fade,travel):
             animation.setDuration(motion.duration(round(235*abs(finish-start))))

@@ -174,14 +174,6 @@ QToolButton#customAccentRemove:hover { color: $ACCENT; border-color: $ACCENT; ba
 QCheckBox { spacing: 8px; }
 QCheckBox::indicator { width: 16px; height: 16px; }
 QCheckBox::indicator:checked { background: $ACCENT; border: 1px solid $ACCENT; border-radius: 4px; }
-/* AppearanceSlider paints its own finished rail and thumb, bypassing
-   platform-dependent Qt/Plasma QSlider subcontrols entirely. */
-QSlider#backgroundSlider { background: transparent; border: none; }
-QLabel#backgroundSliderValue {
-    font-size: 12px; font-weight: 750; color: $TEXT;
-    background: $ACTIVE_BG; border: 1px solid $ACCENT_HOVER_BORDER;
-    border-radius: 9px; padding: 2px 7px;
-}
 QToolTip { background: $CARD; border: 1px solid $BORDER; color: $TEXT; }
 QToolButton#tileMoveHint, QToolButton#tileRemoveHint {
     background: transparent; border: none; border-radius: 0px;
@@ -224,7 +216,7 @@ def stylesheet():
     return _QSS.substitute(
         BG=BG, TEXT=TEXT, MUTED=MUTED, CARD=CARD, BORDER=BORDER, TRACK=TRACK,
         ACCENT=base, ACCENT_HOVER=QColor(base).lighter(115).name() if light else QColor(base).lighter(128).name(),
-        SECONDARY=secondary_accent(), HANDLE_TOP=QColor(base).lighter(144).name(), BUTTON_TEXT="#07111b" if not light else "#ffffff",
+        SECONDARY=secondary_accent(), BUTTON_TEXT="#07111b" if not light else "#ffffff",
         INPUT_BG=blend(base, pal['card'], .035 if light else .045),
         COMBO_BG=combo_surface(),
         BUTTON_BG=blend(base, pal['card'], .07 if light else .10),

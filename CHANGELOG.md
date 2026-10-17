@@ -5,6 +5,15 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.67] - 2026-10-17
+- Die globale Option „Hintergrund sanft animieren“ samt gespeicherter Einstellung und Zeichenlogik entfernt. Statische Designs bleiben nun stets statisch.
+- Vier eigens animierte Hintergründe ergänzt: Regenbogen, Fade Bunt, Funkeln und Hell. Sie animieren direkt bei Auswahl; hellere Farbtöne bleiben unabhängig vom Farbschema erhalten. Adaptiv · Akzentfarbe ist wieder verfügbar.
+- Regler für Farbintensität und Hintergrundweichheit mitsamt ihrer GUI, Berechnung, Speicherung und dem separaten Slider-Modul entfernt. Jedes Wallpaper verwendet fest abgestimmte Farben und Weichheit.
+- Seitenleiste wieder dauerhaft links angeordnet. Freies Andocken rechts, Ziehgriff und spiegelnde Bedienelemente sowie nicht mehr benötigte Dateien entfernt.
+- Zu den Standard-Akzentfarben Gelb und Rot passende Vitalux-Symbole und Wortmarken hinzugefügt. Farbwechsel von Fenster- und Tray-Symbol sowie benutzerinstalliertem KDE-Menü-Symbol verbessert.
+- Update-Symbol erhält ein kräftiger sichtbares pulsierendes Leuchten im Tray. Pop-up-Schaltflächen (Ja/Nein usw.) richten sich unabhängig von Qt-Systemübersetzungen nach der gewählten Vitalux-Sprache.
+- README, integrierte Anleitung und deutsch/englische Änderungshistorie aktualisiert; automatisierte Tests angepasst.
+
 ## [v0.9.3.66] - 2026-10-17
 - Die Seitenleiste lässt sich über einen eigenen Punkte-Griff links oder rechts andocken. Anklicken wechselt die Seite, Ziehen und Loslassen positioniert sie nach Fensterhälfte. Die Position wird gespeichert; Ein-/Ausklapppfeil, Trennkante und Dashboard-Layoutpfeil passen sich automatisch an.
 - Bei „Layout bearbeiten“ wird die Hervorhebung des Pfeils beim Schließen vollständig zurückgesetzt. Die seitliche Bearbeitungsleiste öffnet in der passenden Richtung.

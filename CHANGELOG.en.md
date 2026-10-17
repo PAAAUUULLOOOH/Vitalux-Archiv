@@ -4,6 +4,15 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.67] - 2026-10-17
+- Removed the global “Gently animate background” option and its rendering/settings implementation; static backgrounds stay static.
+- Added four intrinsically animated wallpapers: Rainbow, Color Fade, Sparkle and Light. Light palettes retain their intended brightness regardless of UI scheme, and Adaptive Accent Color returns.
+- Completely removed color-intensity and background-softness sliders, related stored preferences, rendering controls and the dedicated slider module; wallpaper colors and softness are now tuned per preset.
+- Restored the permanently left-aligned sidebar; right-side docking, drag handle and mirrored controls have been removed with their unused source modules.
+- Added yellow and red accent presets with matching Vitalux SVG icons and wordmarks; improved icon updates in the app, tray and user-installed KDE launcher.
+- Increased update icon glow visibility in the tray. Pop-up buttons now respect Vitalux’s selected language rather than depending on Qt system catalog availability.
+- Updated compact README, bilingual built-in guide, changelogs and regression tests.
+
 ## [v0.9.3.66] - 2026-10-17
 - The sidebar can now be docked left or right using a draggable dotted grip; clicking the grip toggles sides. Dock position persists, and the collapse arrow, seam and dashboard layout arrow mirror their positions.
 - Fixed the dashboard layout editor arrow remaining highlighted after closing; the action strip now opens toward the available screen area.

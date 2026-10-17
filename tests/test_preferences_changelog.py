@@ -86,26 +86,30 @@ def check_preferences(app):
 
             # Backdrop controls persist independently of the color scheme and
             # preserve the readable dropdown styles.
-            assert page.background_combo.count() == 15
+            assert page.background_combo.count() == 20
             assert page.background_combo.findData('aurora') == -1
             assert page.background_combo.findData('obsidian') == -1
             assert page.background_combo.findData('nebula') == -1
             assert page.background_combo.findData('arctic') == -1
-            assert page.background_combo.findData('adaptive') == -1
+            assert page.background_combo.findData('adaptive') >= 0
+            for name in ('animated_rainbow', 'animated_fade',
+                         'animated_sparkle', 'animated_light'):
+                assert page.background_combo.findData(name) >= 0
+            assert page.accent_combo.findData('#facc15') >= 0
+            assert page.accent_combo.findData('#ef4444') >= 0
+            assert not hasattr(page, 'background_animate')
             assert page.background_combo.findData('theme_default') >= 0
             assert [page.background_combo.itemText(page.background_combo.findData(key))
                     for key in ('dark', 'light', 'glass', 'black_glass', 'minimal')] == [
                     'Dark', 'Light', 'Glass', 'Black Glass', 'Minimalistisch']
-            assert page.background_sliders['background_intensity'].objectName() == 'backgroundSlider'
-            page.background_combo.setCurrentIndex(page.background_combo.findData('pastel_rainbow'))
-            assert settings.get('background_style') == 'pastel_rainbow'
-            page.background_sliders['background_intensity'].setValue(73)
-            assert settings.get('background_intensity') == 73
-            page.background_sliders['background_softness'].setValue(42)
-            assert settings.get('background_softness') == 42
-            page.background_animate.setChecked(True)
-            assert settings.get('background_animate') is True
-            page.background_animate.setChecked(False)
+            assert not hasattr(page, 'background_sliders')
+            assert not hasattr(page, 'background_values')
+            for name in ('animated_rainbow', 'animated_fade',
+                         'animated_sparkle', 'animated_light', 'adaptive'):
+                assert page.background_combo.findData(name) >= 0
+            page.background_combo.setCurrentIndex(
+                page.background_combo.findData('animated_rainbow'))
+            assert settings.get('background_style') == 'animated_rainbow'
 
             # Previous themed drop-down styling is restored: a separate darker
             # control area on the right, with a readable closed label.

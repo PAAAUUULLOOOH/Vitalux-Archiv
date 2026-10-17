@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="114" viewBox="0 0 560 114">
+  <defs>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="15%">
+      <stop offset="0%" stop-color="#fffce0"/>
+      <stop offset="28%" stop-color="#ffffff"/>
+      <stop offset="63%" stop-color="#ffefa1"/>
+      <stop offset="100%" stop-color="#ffdc54"/>
+    </linearGradient>
+    <linearGradient id="trim" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffefa1"/>
+      <stop offset="75%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#ffdc54"/>
+    </linearGradient>
+  </defs>
+  <!-- Hand-built angular letterforms; no font dependency. -->
+  <g stroke="url(#metal)" stroke-width="12" stroke-linecap="square" stroke-linejoin="miter" fill="none">
+    <path d="M 29,21 L 53,87 L 78,21"/>
+    <path d="M 109,21 V 87 M 100,21 H 120 M 100,87 H 120"/>
+    <path d="M 149,21 H 204 M 177,21 V 87"/>
+    <path d="M 226,87 L 251,21 L 277,87 M 236,62 H 267"/>
+    <path d="M 309,21 V 87 H 353"/>
+    <path d="M 381,21 V 68 Q 381,89 402,89 Q 426,89 426,68 V 21"/>
+    <path d="M 464,21 L 512,87 M 513,21 L 465,87"/>
+  </g>
+  <!-- micro cuts and signature highlights -->
+  <path d="M 56,79 L 65,55 M 244,47 H 256 M 488,54 L 501,35" stroke="#fffce0" stroke-width="3.5" stroke-linecap="square"/>
+  <path d="M 29,10 H 56 M 308,103 H 355 M 473,103 H 515" stroke="url(#trim)" stroke-width="3.5" stroke-linecap="square"/>
+  <path d="M 90,106 H 282" stroke="#a68308" opacity=".5" stroke-width="2"/>
+  <!-- Original vector wordmark with independently designed dark #facc15 palette. -->
+</svg>

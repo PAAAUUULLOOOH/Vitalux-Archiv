@@ -111,13 +111,15 @@ def assert_editor(app):
 
 
 def assert_brand(app):
-    # Only the six presets have individually designed icon + lettering vectors.
+    # Only the eight presets have individually designed icon + lettering vectors.
     presets = {
         "blue": "#4f8cff",
         "cyan": "#52d3ff",
         "violet": "#a78bfa",
         "green": "#73ba25",
         "orange": "#f59e0b",
+        "yellow": "#facc15",
+        "red": "#ef4444",
         "pink": "#f472b6",
     }
     icons = set()

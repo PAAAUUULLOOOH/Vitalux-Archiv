@@ -552,3 +552,18 @@ EN_MORE.update({
     "Standardmäßig startet Vitalux mit Glass und Vitalux Blau. Gespeicherte persönliche Einstellungen bleiben erhalten.": "Vitalux defaults to Glass and Vitalux Blue. Existing personal settings are preserved.",
     "Alle Hintergründe unterstützen auf Wunsch sichtbarere Farbbewegungen. Die sechs Akzentfarben färben auch die App- und Tray-Symbole um.": "All backgrounds support more noticeable optional color motion. The six accent presets also recolor the app and tray icons.",
 })
+
+# v0.9.3.67: static palettes, intrinsic animated wallpapers, fixed sidebar.
+EN_MORE.update({
+    "Animiert · Regenbogen": "Animated · Rainbow",
+    "Animiert · Fade Bunt": "Animated · Color Fade",
+    "Animiert · Funkeln": "Animated · Sparkle",
+    "Animiert · Hell": "Animated · Light",
+    "Gelb": "Yellow",
+    "Rot": "Red",
+    "Statische Hintergründe bleiben unverändert. Animiert: Regenbogen, Fade Bunt, Funkeln und Hell. Adaptiv folgt der Akzentfarbe.": "Static backgrounds stay still. Animated: Rainbow, Color Fade, Sparkle and Light. Adaptive follows the accent color.",
+    "Die Seitenleiste ist wieder fest links angeordnet und lässt sich für mehr Platz ein- und ausklappen.": "The sidebar is fixed on the left again; collapse or expand it for more space.",
+    "Der Verschiebegriff wurde entfernt. Über den Pfeil klappst du die Seitenleiste ein und aus.": "The drag handle has been removed. Use the arrow to collapse and expand the sidebar.",
+    "Die ursprünglichen Hintergründe bleiben erhalten. Neu sind vier automatisch animierte Varianten: Regenbogen, Fade Bunt, Funkeln und Hell.": "The original wallpapers remain. Four new presets animate automatically: Rainbow, Color Fade, Sparkle and Light.",
+    "Statische Hintergrundfarben bleiben unverändert; Adaptiv folgt deiner Akzentfarbe. Gelb und Rot ergänzen die Akzentfarben und färben auch App- und Tray-Symbole.": "Static wallpapers stay still; Adaptive follows your accent color. Yellow and red presets also recolor app and tray icons.",
+})

@@ -35,9 +35,9 @@ SLIDES = [
     ),
     (
         "Die Navigation links",
-        "Über die Seitenleiste wechselst du zwischen den Bereichen; sie kann links oder rechts angeordnet werden.",
+        "Die Seitenleiste ist wieder fest links angeordnet und lässt sich für mehr Platz ein- und ausklappen.",
         "Jeder Reiter öffnet einen anderen Teil der Systemüberwachung.",
-        "Ziehe den Punkte-Griff oben auf die gewünschte Seite (oder klicke ihn zum Wechseln an). Pfeile und Anordnung passen sich an.",
+        "Der Verschiebegriff wurde entfernt. Über den Pfeil klappst du die Seitenleiste ein und aus.",
         "Unten wechselst du jederzeit zwischen Deutsch und Englisch.",
         "navigation",
     ),
@@ -76,9 +76,9 @@ SLIDES = [
     (
         "Darstellung und Einstellungen",
         "Standardmäßig startet Vitalux mit Glass und Vitalux Blau. Gespeicherte persönliche Einstellungen bleiben erhalten.",
-        "Die fünf Originalhintergründe bleiben erhalten. Neue Designs sind als Hell, Regenbogen und Dunkel gruppiert.",
+        "Die ursprünglichen Hintergründe bleiben erhalten. Neu sind vier automatisch animierte Varianten: Regenbogen, Fade Bunt, Funkeln und Hell.",
         "Eigene Akzentfarben lassen sich mit „Bearbeiten“ ändern oder mit „Löschen“ entfernen.",
-        "Alle Hintergründe unterstützen auf Wunsch sichtbarere Farbbewegungen. Die sechs Akzentfarben färben auch die App- und Tray-Symbole um.",
+        "Statische Hintergrundfarben bleiben unverändert; Adaptiv folgt deiner Akzentfarbe. Gelb und Rot ergänzen die Akzentfarben und färben auch App- und Tray-Symbole.",
         "settings",
     ),
     (

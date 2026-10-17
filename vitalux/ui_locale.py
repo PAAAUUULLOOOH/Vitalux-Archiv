@@ -232,18 +232,64 @@ class QListWidgetItem(_QListWidgetItem):
         super().__init__(localized(text), *args, **kwargs)
 
 class QMessageBox(_QMessageBox):
+    """Locale-aware Qt dialogs, including buttons from the application locale.
+
+    On some Plasma builds the bundled Qt runtime has no German qm catalog, so
+    native QMessageBox.question() falls back to English Yes/No even when the
+    application labels are German. Use standard buttons with explicit text.
+    """
+
     @staticmethod
-    def warning(parent, title, text, *args, **kwargs):
-        return _QMessageBox.warning(parent, localized(title), localized(text), *args, **kwargs)
+    def _localized_dialog(icon, parent, title, message, buttons, default):
+        dialog = _QMessageBox(parent)
+        dialog.setIcon(icon)
+        dialog.setWindowTitle(localized(title))
+        dialog.setText(localized(message))
+        dialog.setStandardButtons(buttons)
+        texts = {
+            _QMessageBox.Yes: ('Ja', 'Yes'),
+            _QMessageBox.No: ('Nein', 'No'),
+            _QMessageBox.Ok: ('OK', 'OK'),
+            _QMessageBox.Cancel: ('Abbrechen', 'Cancel'),
+            _QMessageBox.Save: ('Speichern', 'Save'),
+            _QMessageBox.Discard: ('Verwerfen', 'Discard'),
+            _QMessageBox.Retry: ('Erneut versuchen', 'Retry'),
+            _QMessageBox.Close: ('Schließen', 'Close'),
+        }
+        from .i18n import lang
+        for button, (de, en) in texts.items():
+            widget = dialog.button(button)
+            if widget is not None:
+                widget.setText(en if lang() == 'en' else de)
+        if default != _QMessageBox.NoButton and dialog.button(default):
+            dialog.setDefaultButton(default)
+        result = dialog.exec()
+        return _QMessageBox.StandardButton(result)
+
     @staticmethod
-    def information(parent, title, text, *args, **kwargs):
-        return _QMessageBox.information(parent, localized(title), localized(text), *args, **kwargs)
+    def warning(parent, title, text, buttons=_QMessageBox.Ok,
+                defaultButton=_QMessageBox.NoButton):
+        return QMessageBox._localized_dialog(_QMessageBox.Warning, parent, title,
+                                              text, buttons, defaultButton)
+
     @staticmethod
-    def question(parent, title, text, *args, **kwargs):
-        return _QMessageBox.question(parent, localized(title), localized(text), *args, **kwargs)
+    def information(parent, title, text, buttons=_QMessageBox.Ok,
+                    defaultButton=_QMessageBox.NoButton):
+        return QMessageBox._localized_dialog(_QMessageBox.Information, parent, title,
+                                              text, buttons, defaultButton)
+
     @staticmethod
-    def critical(parent, title, text, *args, **kwargs):
-        return _QMessageBox.critical(parent, localized(title), localized(text), *args, **kwargs)
+    def question(parent, title, text, buttons=_QMessageBox.Yes | _QMessageBox.No,
+                 defaultButton=_QMessageBox.NoButton):
+        return QMessageBox._localized_dialog(_QMessageBox.Question, parent, title,
+                                              text, buttons, defaultButton)
+
+    @staticmethod
+    def critical(parent, title, text, buttons=_QMessageBox.Ok,
+                 defaultButton=_QMessageBox.NoButton):
+        return QMessageBox._localized_dialog(_QMessageBox.Critical, parent, title,
+                                              text, buttons, defaultButton)
+
 
 class QFileDialog(_QFileDialog):
     @staticmethod
