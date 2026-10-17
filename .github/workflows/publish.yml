@@ -105,6 +105,17 @@ jobs:
             LD_LIBRARY_PATH="$PWD/lib" \
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_glass_theme_switch.py"
+      - name: Native Anleitung und Übersetzungen testen
+        if: env.RELEASE_EXISTS == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGED="$PWD/build/staged/Vitalux-${TAG}"
+          cd "$STAGED"
+          QT_QPA_PLATFORM=offscreen \
+            LD_LIBRARY_PATH="$PWD/lib" \
+            "$PWD/runtime/bin/python3.12" \
+            "$GITHUB_WORKSPACE/tests/test_guide_locale.py"
       - name: AppImage-Werkzeug bereitstellen
         if: env.RELEASE_EXISTS == 'false'
         shell: bash
