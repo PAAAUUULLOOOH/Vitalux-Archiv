@@ -4,6 +4,14 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.74] - 2026-10-18
+- Disabled expensive offscreen Qt drop shadows inside scrolling cards while retaining frosted glass surfaces and borders, reducing repaint overhead in both CPU and OpenGL modes.
+- Decode imported wallpapers at a bounded target size and reuse cached images; all five placement modes remain available.
+- Restored the original single **Accent color** chooser with presets and custom colors, plus one **Automatically match background** entry. Removed extra tabs and numbered swatches; prior numbered settings migrate to automatic matching.
+- Improved layout of accent and wallpaper controls for narrow windows and KDE fractional scaling.
+- Added **Restart now** when switching CPU/OpenGL; the existing launcher performs a graceful full-process restart after threads shut down. Active benchmarks can prevent restart.
+- Updated German/English documentation and regression tests; previous releases stay available for rollback.
+
 ## [v0.9.3.73] - 2026-10-17
 - Added an experimental, opt-in OpenGL/GPU background renderer and GPU-based composition for the main Qt window. Standard Qt widgets and charts still render on the CPU; improvements are not guaranteed.
 - Settings → Graphics rendering lets you choose CPU (stable default) or OpenGL (experimental), taking effect after restart without touching other preferences.
