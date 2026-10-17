@@ -75,7 +75,9 @@ def check_preferences(app):
                     assert "background:" in popup.styleSheet(), scheme
                     expected = theme.blend(theme.accent(), theme.CARD, .05)
                     assert popup.palette().color(QPalette.Base).name() == expected, scheme
-                    assert popup.palette().color(QPalette.Text).name() == theme.TEXT, scheme
+                    # Some Qt styles map Text to WindowText for popup
+                    # containers. The explicit QSS controls visible glyphs.
+                    assert f"color: {theme.TEXT};" in popup.styleSheet(), scheme
                     dropdown.hidePopup()
             smart.close()
             theme.set_mode("glass")
