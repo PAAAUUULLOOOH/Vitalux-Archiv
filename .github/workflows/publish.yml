@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "vitalux/**"
+      - "CHANGELOG.md"
+      - "scripts/release_notes.py"
       - "assets/**"
       - "run.sh"
       - "Portable-pruefen.sh"
@@ -71,7 +73,7 @@ jobs:
           cp -a "$SOURCE" "$DEST"
           rm -rf "$DEST/vitalux" "$DEST/assets" "$DEST/.github"
           cp -a vitalux assets "$DEST/"
-          cp run.sh Portable-pruefen.sh "$DEST/"
+          cp run.sh Portable-pruefen.sh CHANGELOG.md "$DEST/"
           mkdir -p "$DEST/bin" "$DEST/packaging"
           cp bin/fio "$DEST/bin/fio"
           cp packaging/build-appimage.sh "$DEST/packaging/build-appimage.sh"
@@ -87,6 +89,13 @@ jobs:
           assert (root/'packaging/build-appimage.sh').is_file()
           print('Vitalux source and runtime package assembled')
           PY
+      - name: Changelog-Version prüfen und Release-Notizen erzeugen
+        if: env.RELEASE_EXISTS == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/release_notes.py "$VERSION" "$RUNNER_TEMP/vitalux-release-notes.md"
+          test -s "$RUNNER_TEMP/vitalux-release-notes.md"
       - name: Grafische Qt-Abhängigkeiten für Headless-Tests installieren
         if: env.RELEASE_EXISTS == 'false'
         shell: bash
@@ -207,6 +216,6 @@ jobs:
           set -euo pipefail
           gh release create "$TAG" dist/* \
             --title "Vitalux $TAG" \
-            --notes "Vitalux $TAG – Desktop-AppImage und vollständige Linux-x86_64-ZIP-Version. Automatisch aus dem Quellcode gebaut. Änderungen siehe Repository. Testversion: Kompatibilität kann je nach Distribution und Hardware variieren." \
+            --notes-file "$RUNNER_TEMP/vitalux-release-notes.md" \
             --latest
           gh release view "$TAG" --json assets --jq '.assets[].name'
