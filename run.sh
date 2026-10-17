@@ -64,7 +64,7 @@ if [ "$STATUS" -ne 0 ]; then
   case "$STATUS" in
     129|130|143) ;;
     *)
-      if [ "${VITALUX_ROLLBACK_ACTIVE:-0}" != "1" ] && [ -f "$HERE/.backup/metadata.json" ] && [ -f "$HERE/.backup/vitalux/__main__.py" ]; then
+      if [ -z "${APPIMAGE:-}" ] && [ "${VITALUX_ROLLBACK_ACTIVE:-0}" != "1" ] && [ -f "$HERE/.backup/metadata.json" ] && [ -f "$HERE/.backup/vitalux/__main__.py" ]; then
         printf '\n=== Vitalux: Absturz mit Status %s, vorherige ZIP-Version wird wiederhergestellt ===\n' "$STATUS" >> "$LOG"
         if "$PY" -c '
 import os, shutil
