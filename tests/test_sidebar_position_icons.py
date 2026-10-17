@@ -6,9 +6,8 @@ import tempfile
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 sys.path.insert(0, os.getcwd())
 
-from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import QPixmap
-from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt, QPoint, QPointF, QEvent
+from PySide6.QtGui import QPixmap, QMouseEvent
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QStackedWidget, QWidget
 
 from vitalux import settings, theme
@@ -73,6 +72,16 @@ class TestHost(QWidget):
         MainWindow.set_sidebar_position(self, right)
 
 
+def click_grip(grip):
+    """Generate mouse events without requiring the optional QtTest module."""
+    local = QPointF(13, 15)
+    global_pos = QPointF(grip.mapToGlobal(QPoint(13, 15)))
+    grip.mousePressEvent(QMouseEvent(QEvent.MouseButtonPress, local, global_pos,
+                                    Qt.LeftButton, Qt.LeftButton, Qt.NoModifier))
+    grip.mouseReleaseEvent(QMouseEvent(QEvent.MouseButtonRelease, local, global_pos,
+                                      Qt.LeftButton, Qt.NoButton, Qt.NoModifier))
+
+
 def main():
     app = QApplication.instance() or QApplication([])
     theme.set_mode('glass')
@@ -91,7 +100,7 @@ def main():
             assert host.sidebar_grip.x() < host.collapse_button.x()
             # User clicks the grip to flip; release across midpoint supports
             # actual drag-and-drop with the same signal.
-            QTest.mouseClick(host.sidebar_grip, Qt.LeftButton)
+            click_grip(host.sidebar_grip)
             app.processEvents()
             assert host._sidebar_right
             assert settings.get('sidebar_position') == 'right'
@@ -99,7 +108,7 @@ def main():
             assert host.collapse_button.x() < host.sidebar.width() / 2
             assert host.sidebar_grip.x() > host.collapse_button.x()
             assert host.pages[0][1].right is True
-            QTest.mouseClick(host.sidebar_grip, Qt.LeftButton)
+            click_grip(host.sidebar_grip)
             app.processEvents()
             assert not host._sidebar_right
             assert settings.get('sidebar_position') == 'left'
