@@ -6,6 +6,7 @@ labels all pass through the same translation function.
 """
 from PySide6.QtWidgets import (QLabel as _QLabel, QPushButton as _QPushButton,
     QCheckBox as _QCheckBox, QComboBox as _QComboBox, QDialog as _QDialog,
+    QListView as _QListView, QFrame as _QFrame, QStyleFactory as _QStyleFactory,
     QListWidgetItem as _QListWidgetItem, QMessageBox as _QMessageBox,
     QFileDialog as _QFileDialog)
 from .i18n import tr
@@ -108,6 +109,46 @@ class QComboBox(_QComboBox):
     def __init__(self,*args,**kwargs):
         self._source_items = []
         super().__init__(*args,**kwargs)
+        # KDE/Wayland native popup styles sometimes show black top and bottom
+        # scroll strips. A regular Fusion list popup avoids native menu bands.
+        self._popup_style = _QStyleFactory.create("Fusion")
+        if self._popup_style is not None:
+            self.setStyle(self._popup_style)
+        view = _QListView(self)
+        view.setFrameShape(_QFrame.NoFrame)
+        view.setSpacing(0)
+        view.setUniformItemSizes(True)
+        view.setVerticalScrollMode(_QListView.ScrollPerPixel)
+        view.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        view.setAutoFillBackground(True)
+        view.viewport().setAutoFillBackground(True)
+        self.setView(view)
+        self.setMaxVisibleItems(10)
+
+    def showPopup(self):
+        # The popup is a native Qt window; style its whole frame and viewport
+        # to avoid unthemed black strips above/below the option rows.
+        from . import theme
+        surface = theme.blend(theme.accent(), theme.CARD, .05)
+        border = theme.BORDER
+        accent = theme.accent()
+        view = self.view()
+        container = view.window()
+        container.setObjectName("vitaluxComboPopup")
+        container.setStyleSheet(
+            f"QFrame#vitaluxComboPopup {{ background: {surface}; "
+            f"border: 1px solid {border}; border-radius: 9px; padding: 2px; }}"
+            f"QListView {{ background: {surface}; color: {theme.TEXT}; "
+            f"border: none; outline: none; padding: 0px; }}"
+            f"QListView::item {{ color: {theme.TEXT}; border: none; "
+            f"padding: 7px 10px; min-height: 22px; }}"
+            f"QListView::item:selected {{ background: {theme.blend(accent, surface, .24)}; "
+            f"color: {theme.TEXT}; }}"
+            f"QListView::item:hover {{ background: {theme.blend(accent, surface, .14)}; }}"
+        )
+        super().showPopup()
+
     def addItem(self, *args, **kwargs):
         source = original_text(args[0]) if args and isinstance(args[0],str) else None
         if source is not None:
