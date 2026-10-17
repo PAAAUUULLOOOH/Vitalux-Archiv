@@ -49,11 +49,11 @@
 - **Farbschemas:** Glass mit Vitalux Blau (Standard), Dark, Light, Black Glass und Minimalistisch.
 - **Hintergründe:** 14 integrierte Optionen plus selbst importierte PNG-, JPEG-, WebP- und BMP-Bilder mit Füllen, Einpassen, Strecken, Zentrieren und Kacheln. Nur **Funkeln** ist animiert.
 - **Akzentfarben:** Wie gewohnt feste Farben, Distributionsfarbe und eigene Farben direkt unter **Akzentfarbe** auswählen. Zusätzlich gibt es **Hintergrundfarbe automatisch** – ohne separate Reiter oder nummerierte Farbfelder. Der Akzent passt sich bei einem Hintergrundwechsel an.
-- **Oberfläche:** Einheitliche Glasoptik mit optimiertem Scroll-Rendering: keine teuren Drop-Shadow-Effekte auf scrollenden Karten, effizienteres Hintergrundbild-Decoding. Unter **Einstellungen → Grafik-Rendering** lässt sich weiterhin optional OpenGL wählen; der neue Button **Jetzt neu starten** übernimmt den Wechsel kontrolliert. Normale Qt-Widgets bleiben CPU-gerendert.
+- **Oberfläche:** Einheitliche Glasoptik mit optimiertem Scroll-Rendering: keine teuren Drop-Shadow-Effekte auf scrollenden Karten, effizienteres Hintergrundbild-Decoding. Unter **Einstellungen → Grafik-Rendering** lassen sich **CPU**, **OpenGL** und **Qt Quick · GPU-Test** wählen. Der Button **Jetzt neu starten** übernimmt den Wechsel kontrolliert. Der neue Qt-Quick-Modus nutzt einen GPU-Scene-Graph für den Hintergrund; normale Qt-Widgets und Diagramme bleiben vorerst CPU-gerendert. Auch dieser Modus ist experimentell.
 
 **630 integrierte Kombinationen:** 5 Farbschemas × 14 Hintergründe × 9 Akzentoptionen (davon 8 feste Farben). Eigene Farben erweitern die Auswahl; manche Kombinationen können optisch identisch sein.
 
-**GPU-Test und Rückkehr:** OpenGL ist experimentell und möglicherweise nicht schneller. Bei Problemen unter **Grafik-Rendering → CPU · Standard** zurückschalten und **Jetzt neu starten** klicken. Auch `VITALUX_RENDERER=software ./run.sh` erzwingt die CPU-Darstellung, selbst wenn die OpenGL-Option gespeichert ist. Ein Absturz während des GPU-Starts führt beim nächsten Start zur automatischen CPU-Rückkehr. Die vorherige Version bleibt als separates GitHub-Release verfügbar.
+**GPU-Test und Rückkehr:** OpenGL und Qt Quick sind experimentell und möglicherweise nicht schneller. Bei Problemen unter **Grafik-Rendering → CPU · Standard** zurückschalten und **Jetzt neu starten** klicken. Auch `VITALUX_RENDERER=software ./run.sh` erzwingt die CPU-Darstellung, selbst wenn die OpenGL-Option gespeichert ist. Ein Absturz während des GPU-Starts führt beim nächsten Start zur automatischen CPU-Rückkehr. Die vorherige Version bleibt als separates GitHub-Release verfügbar.
 
 **Systemleiste:** Beim Hover werden CPU-, GPU- und RAM-Auslastung sowie verfügbare Temperaturen angezeigt. Im Kontextmenü lässt sich eine kompakte Live-Vorschau öffnen.
 
@@ -166,6 +166,8 @@ Anwendung und Menüeintrag werden entfernt; **persönliche Einstellungen bleiben
 ## Systemanforderungen
 
 GNU/Linux **x86-64**, Wayland oder X11, glibc **2.38+** als derzeitiges Kompatibilitätsziel; AppImage benötigt je nach Distribution FUSE. Hardwareüberwachung funktioniert offline; Internet ist für Release-Prüfungen nötig. Zielsysteme sind unter anderem openSUSE Tumbleweed, Fedora, Arch/CachyOS und weitere aktuelle Linux-Distributionen.
+
+**Mitwirkende:** Danke an TimBooH für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering). Der Dank steht ebenfalls unter „Made by PAAAUUULLOOOH“ im Info-Reiter.
 
 ## Feedback & Lizenzen
 
