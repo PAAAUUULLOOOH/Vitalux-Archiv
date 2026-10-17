@@ -693,7 +693,7 @@ class NavButton(_SoftHover, QPushButton):
         self.setAutoFillBackground(False)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self._timer = QTimer(self)
-        self._timer.setInterval(55)
+        self._timer.setInterval(70)
         self._timer.timeout.connect(self._tick)
 
     def sizeHint(self):
@@ -726,16 +726,14 @@ class NavButton(_SoftHover, QPushButton):
 
     def set_glow(self, on):
         self.glow = bool(on)
-        if self.glow and theme.mode() != "minimal":
-            self._timer.start()
+        if self.glow:
+            if not self._timer.isActive():
+                self._timer.start()
         else:
             self._timer.stop()
         self.update()
 
     def _tick(self):
-        if theme.mode() == "minimal":
-            self._timer.stop()
-            return
         self._phase += .17
         self.update()
 
@@ -744,6 +742,14 @@ class NavButton(_SoftHover, QPushButton):
         p = QPainter(self)
         if self.isChecked():
             p.fillRect(self.rect(), QColor(theme.CARD))
+        if self.glow:
+            intensity = 0.5 + 0.5 * math.sin(self._phase)
+            background = QColor("#ffb454")
+            background.setAlpha(int(8 + 48 * intensity))
+            p.fillRect(self.rect().adjusted(2, 2, -2, -2), background)
+            left = QColor("#ffb454")
+            left.setAlpha(int(90 + 165 * intensity))
+            p.fillRect(QRectF(2, 4, 3, max(1, self.height()-8)), left)
         text = self.text()
         glyph, caption = text.split('    ', 1) if '    ' in text else ('◈', text)
         color = QColor(theme.accent() if self.isChecked() else theme.TEXT)
@@ -782,6 +788,19 @@ class NavButton(_SoftHover, QPushButton):
                 p.setBrush(c)
                 p.setPen(Qt.NoPen)
                 p.drawRoundedRect(r, 11, 11)
+
+        if self.glow:
+            # Clearly visible full-row pulse, also in collapsed navigation.
+            intensity = 0.5 + 0.5 * math.sin(self._phase)
+            glow = QColor("#ffb454")
+            glow.setAlpha(int(6 + 57 * intensity))
+            p.setPen(Qt.NoPen)
+            p.setBrush(glow)
+            p.drawRoundedRect(r, 11, 11)
+            rail_glow = QColor("#ffb454")
+            rail_glow.setAlpha(int(65 + 170 * intensity))
+            p.setBrush(rail_glow)
+            p.drawRoundedRect(QRectF(r.left()+.3, r.top()+5, 3, r.height()-10), 1.5, 1.5)
 
         if checked:
             # A precision-cut cyan seam indicates the current section.
