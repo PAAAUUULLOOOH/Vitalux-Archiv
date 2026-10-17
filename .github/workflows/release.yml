@@ -1,11 +1,7 @@
 name: Vitalux AppImage Release
+# publish.yml already publishes a tested AppImage. This separate workflow is
+# intentionally manual: do not overwrite automatic release files.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/release.yml'
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       release_tag:
