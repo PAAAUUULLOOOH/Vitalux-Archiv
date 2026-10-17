@@ -131,6 +131,7 @@ QScrollBar:vertical { background: transparent; width: 10px; margin: 2px; }
 QScrollBar::handle:vertical { background: $BORDER; border-radius: 4px; min-height: 28px; }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
 #madeBy { font-size: 32px; font-weight: 800; color: $ACCENT; }
+#supportCredit { font-size: 11px; font-weight: 500; color: $MUTED; }
 #langBtn, #ghostBtn { background: $BUTTON_BG; border: 1px solid $BORDER; border-radius: 10px; color: $TEXT; padding: 9px 14px; font-weight: 700; }
 #langBtn:checked { background: $ACTIVE_BG; border-color: $ACCENT; color: $ACCENT; }
 #ghostBtn:hover, #langBtn:hover { border-color: $ACCENT; background: $ACTIVE_BG; }
