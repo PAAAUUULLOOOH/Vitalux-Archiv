@@ -14,8 +14,13 @@ AUTO = 'wallpaper_auto'
 COUNT = 5
 
 
+def is_legacy_accent(value):
+    """Old numbered swatches are replaced with one automatic accent choice."""
+    return value in {f'wallpaper_{n}' for n in range(COUNT)}
+
+
 def is_wallpaper_accent(value):
-    return value == AUTO or value in {f'wallpaper_{n}' for n in range(COUNT)}
+    return value == AUTO or is_legacy_accent(value)
 
 
 def suggestions():
@@ -110,11 +115,6 @@ def resolve_accent(stored, distro_color='#4f8cff'):
         return distro_color
     if is_wallpaper_accent(stored):
         colors = suggestions()
-        if stored == AUTO:
-            return colors[0]
-        try:
-            return colors[int(stored.rsplit('_', 1)[1])]
-        except (IndexError, ValueError):
-            return '#4f8cff'
+        return colors[0]
     color = QColor(str(stored))
     return color.name() if color.isValid() else '#4f8cff'
