@@ -36,7 +36,7 @@ def main():
     manager = UpdateManager()
     win = MainWindow(info, logo, manager)
     win.show()
-    QTimer.singleShot(4000, manager.check)
+    QTimer.singleShot(0, manager.check)
     sys.exit(app.exec())
 
 
