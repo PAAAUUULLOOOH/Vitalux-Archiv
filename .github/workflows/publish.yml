@@ -137,7 +137,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-util1
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-util1 libxcb-shape0
           echo "XCB platform plugin dependency check:"
           find "build/staged/Vitalux-${TAG}" -type f -name 'libqxcb.so' -exec sh -c 'echo "Plugin: $1"; ldd "$1" | grep -E "not found|xcb|xkb" || true' -- {} \;
           STAGED="$PWD/build/staged/Vitalux-${TAG}"
