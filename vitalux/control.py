@@ -234,7 +234,7 @@ class PreferencesPage(Page):
                 settings.set('custom_accents', self.custom_accents)
         accent.addItem('Automatisch anpassen', wallpaper_accents.AUTO)
         for slot in range(wallpaper_accents.COUNT):
-            accent.addItem(f'Hintergrundfarbe {slot + 1}', f'wallpaper_{slot}')
+            accent.addItem(tr('Hintergrundfarbe') + f' {slot + 1}', f'wallpaper_{slot}')
         for item in self.custom_accents:
             if accent.findData(item['color']) < 0:
                 accent.addItem(item['name'], item['color'])
