@@ -84,6 +84,16 @@ def blend(foreground, background, strength):
                   round(fg.blue()*strength + bg.blue()*(1-strength))).name()
 
 
+def combo_surface():
+    if _mode == "glass":
+        return blend(BORDER, CARD, .17)
+    if _mode == "black_glass":
+        return blend(CARD, SIDEBAR, .72)
+    if _mode == "light":
+        return blend(CARD, SIDEBAR, .82)
+    return CARD if _mode == "minimal" else blend(CARD, SIDEBAR, .78)
+
+
 _QSS = Template(r"""
 QWidget { background: transparent; color: $TEXT; font-family: "Inter", "Noto Sans", "Cantarell", "DejaVu Sans", sans-serif; font-size: 13px; }
 QMainWindow { background: $BG; }
@@ -133,13 +143,14 @@ QScrollBar::handle:vertical:hover { background: $ACCENT_HOVER_BORDER; }
 #primaryBtn:hover { background: $ACCENT_HOVER; }
 QLineEdit, QComboBox, QSpinBox, QTextEdit, QListWidget { background: $INPUT_BG; border: 1px solid $BORDER; border-radius: 9px; color: $TEXT; padding: 8px 12px; }
 QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QListWidget:focus { border-color: $ACCENT; }
-QComboBox { padding-right: 28px; }
+QComboBox { background: $COMBO_BG; padding-right: 25px; }
+QComboBox::down-arrow { image: none; width: 0px; height: 0px; }
 QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top right;
-    width: 25px; border: none; border-left: 1px solid $BORDER;
+    width: 22px; border: none; border-left: 1px solid $BORDER;
     border-top-right-radius: 8px; border-bottom-right-radius: 8px;
     background: $BUTTON_BG; }
 QComboBox::drop-down:hover { background: $ACTIVE_BG; }
-QComboBox QAbstractItemView { background: $INPUT_BG; color: $TEXT;
+QComboBox QAbstractItemView { background: $COMBO_BG; color: $TEXT;
     border: 1px solid $BORDER; outline: none; padding: 0px;
     selection-background-color: $ACTIVE_BG; selection-color: $TEXT; }
 QComboBox QAbstractItemView::item { background: transparent; color: $TEXT;
@@ -197,6 +208,7 @@ def stylesheet():
         ACCENT=base, ACCENT_HOVER=QColor(base).lighter(115).name() if light else QColor(base).lighter(128).name(),
         SECONDARY=secondary_accent(), BUTTON_TEXT="#07111b" if not light else "#ffffff",
         INPUT_BG=blend(base, pal['card'], .035 if light else .045),
+        COMBO_BG=combo_surface(),
         BUTTON_BG=blend(base, pal['card'], .07 if light else .10),
         ACTIVE_BG=active_bg, RESULT_BG=result_bg,
         RESULT_BORDER=blend(base, pal['border'], .30),
