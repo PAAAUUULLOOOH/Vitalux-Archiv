@@ -76,7 +76,7 @@ SLIDES = [
     (
         "Darstellung und Einstellungen",
         "Standardmäßig startet Vitalux mit Glass und Vitalux Blau. Gespeicherte persönliche Einstellungen bleiben erhalten.",
-        "Du kannst 14 Hintergrundeinstellungen wählen. Funkeln ist der einzige animierte Hintergrund; Perlmutt, Eisblau und die übrigen animierten Designs wurden entfernt.",
+        "Wähle einen von 14 integrierten Hintergründen oder importiere eigene Bilder mit Füllen, Einpassen, Strecken, Zentrieren oder Kacheln. Nur Funkeln ist animiert.",
         "Eigene Akzentfarben lassen sich mit „Bearbeiten“ ändern oder mit „Löschen“ entfernen.",
         "Du kannst 5 Farbschemas, 14 Hintergrundeinstellungen und 9 Akzentoptionen kombinieren: 5 × 14 × 9 = 630 Auswahlkombinationen, davon 560 mit festen Akzentfarben. Eigene Farben bieten weitere Möglichkeiten.",
         "settings",
