@@ -55,7 +55,9 @@
 | **Einstellungen** | Akzentfarben, Animationen, Messintervalle und Dashboard-Anordnung |
 | **Updates & Info** | Automatische Versionsprüfung, Aktualisierung auf Wunsch und integrierte Anleitung |
 
-**Farbschemata:** Dark, Light, Glass, Black Glass und Minimalistisch. Glass und Black Glass bieten Glasoptik mit weichgezeichnetem Hintergrund.
+**Farbschemata:** Dark, Light, Glass, Black Glass und Minimalistisch. Glass und Black Glass bieten Glasoptik mit weichgezeichnetem Hintergrund. Die Dropdown-Menüs passen sich farblich an das gewählte Design an. Eigene Akzentfarben kannst du benennen, speichern und über das **X neben der Farbauswahl** wieder löschen.
+
+**Hardware-Warnungen:** In **Einstellungen → Hardware-Warnungen** aktivierst du Grenzwerte. Die kompakten Eingabefelder für CPU-/GPU-Temperatur, RAM-Auslastung und Systemlaufwerk stehen links neben ihren Beschriftungen.
 
 **Laufwerks-Benchmark:** Sequenzielle und zufällige Lese-/Schreibtests mit anpassbaren Testprofilen. Angezeigt werden unter anderem **MB/s** (Datenrate), **IOPS** (Ein-/Ausgabevorgänge pro Sekunde) und **Latenz** (Verzögerung).
 
@@ -139,8 +141,8 @@ Die Datei `Portable-pruefen.sh` im Paket kann bei Problemen mit der Laufzeitumge
 - Vitalux sucht **bei jedem Start** und anschließend ungefähr **alle sechs Stunden** nach neuen Versionen auf GitHub.
 - Ist ein Update verfügbar, **pulsiert der Updates-Reiter** links.
 - Im Reiter kannst du die neue Version und **ihre konkreten Änderungen vor der Installation** prüfen und mit **„Jetzt aktualisieren“** selbst die Installation starten.
-- Der **Changelog** bleibt nach dem Update im Updates-Reiter erhalten – einschließlich der auswählbaren Änderungen früherer installierter Versionen. Er funktioniert auch ohne Internetverbindung und steht zusätzlich als `CHANGELOG.md` im Paket.
-- Jede automatisch veröffentlichte neue Version muss einen Changelog-Eintrag besitzen; genau diese Änderungen erscheinen auch in den GitHub-Release-Notizen.
+- Der **Changelog** bleibt nach dem Update im Updates-Reiter erhalten – einschließlich der auswählbaren Änderungen früherer installierter Versionen. Er funktioniert auch ohne Internetverbindung und wechselt mit **DE / EN** zwischen Deutsch und Englisch. Beide Sprachen liegen im Paket als `CHANGELOG.md` und `CHANGELOG.en.md` vor.
+- Jede automatisch veröffentlichte neue Version muss **deutsche und englische** Changelog-Einträge besitzen. Die GitHub-Release-Notizen enthalten beide Sprachen, sodass du die Änderungen schon **vor dem Update** passend zur gewählten Sprache lesen kannst.
 - Downloads werden mit **SHA-256** überprüft. Für AppImage-Updates ist ein automatischer Neustart vorgesehen; die vorherige Datei wird als `.previous` aufbewahrt.
 
 **Updates werden nicht ohne deine Bestätigung installiert.** Der vollständige Ablauf einschließlich Neustart ist noch nicht auf jeder Distribution praktisch bestätigt; behalte bei Bedarf eine Kopie der bisherigen Version.
