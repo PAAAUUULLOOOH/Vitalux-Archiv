@@ -1,3 +1,3 @@
-__version__ = "0.9.3.56"
+__version__ = "0.9.3.57"
 APP_NAME = "Vitalux"
 APP_ID = "vitalux"
