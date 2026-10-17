@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.59] - 2026-10-17
+- Die zuletzt problematischen Dropdown-Änderungen zurückgenommen und die frühere Darstellung mit dunklem rechten Auswahlbereich wiederhergestellt.
+- Dropdown-Text und vollständige Versionsnummern im Changelog wieder lesbar.
+- Hardware-Warnwerte zeigen wieder die Zahlen einschließlich Einheiten; Warnwert-Felder bleiben einheitlich ausgerichtet.
+- Die grafischen Tests an die wiederhergestellten Bedienelemente angepasst.
+
 ## [v0.9.3.58] - 2026-10-17
 - Warnwert-Felder stehen jetzt in einer festen, gemeinsamen Spalte statt textabhängig zu wandern; „Systemlaufwerk“ als kürzere Beschriftung.
 - Schmalere Warnwert-Felder ohne Auf-/Ab-Pfeile; Eingabe per Tastatur, Pfeiltasten und Mausrad weiterhin möglich.

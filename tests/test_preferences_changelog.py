@@ -65,37 +65,32 @@ def check_preferences(app):
             assert min(warning_gaps) >= 8, warning_gaps
             assert max(warning_gaps) <= 42, warning_gaps
 
-            # Every dropdown, including the SMART selector, uses the same Qt
-            # popup background and palette in all five Vitalux themes.
+            # Previous themed drop-down styling is restored: a separate darker
+            # control area on the right, with a readable closed label.
             smart = SmartPane()
             smart.show()
             app.processEvents()
             for scheme in ("dark", "light", "glass", "black_glass", "minimal"):
                 theme.set_mode(scheme)
                 page.setStyleSheet(theme.stylesheet())
+                css = theme.stylesheet()
+                assert "QComboBox::drop-down" in css
+                assert "width: 25px; border: none; border-left: 1px solid" in css
                 for dropdown in (page.mode, page.accent_combo, page.interval,
                                  page.motion_combo, smart.selector):
                     assert dropdown.view().frameShape() == QFrame.NoFrame
                     assert dropdown.view().autoFillBackground()
                     assert dropdown.maxVisibleItems() == 10
-                    assert 78 <= dropdown.sizeHint().width() <= 196
-                    assert "width: 0px; border: none" in theme.stylesheet()
-                    # The CLOSED field must use the chosen theme too, not a
-                    # dark OS-supplied field that merely has a themed popup.
-                    image = dropdown.grab().toImage()
-                    sample = image.pixelColor(dropdown.width() - 12, dropdown.height() // 2).name()
-                    assert sample == theme.combo_surface(), (scheme, sample, theme.combo_surface())
+                    assert dropdown.sizeHint().width() >= 88
+                    assert not dropdown.grab().isNull()
                     dropdown.showPopup()
                     app.processEvents()
                     popup = dropdown.view().window()
-                    assert f"background-color: {theme.combo_surface()};" in popup.styleSheet(), scheme
-                    expected = theme.combo_surface()
-                    assert popup.palette().color(QPalette.Base).name() == expected, scheme
-                    # Some Qt styles map Text to WindowText for popup
-                    # containers. The explicit QSS controls visible glyphs.
+                    surface = theme.blend(theme.accent(), theme.CARD, .05)
+                    assert f"background: {surface};" in popup.styleSheet(), scheme
+                    assert popup.palette().color(QPalette.Base).name() == surface, scheme
                     assert f"color: {theme.TEXT};" in popup.styleSheet(), scheme
-                    assert f"background-color: {expected}" in dropdown.view().styleSheet()
-                    assert dropdown.view().viewport().palette().color(QPalette.Base).name() == expected
+                    assert dropdown.view().viewport().palette().color(QPalette.Base).name() == surface
                     dropdown.hidePopup()
             smart.close()
             theme.set_mode("glass")

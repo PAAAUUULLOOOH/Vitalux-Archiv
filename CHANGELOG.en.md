@@ -4,6 +4,12 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.59] - 2026-10-17
+- Reverted the problematic recent drop-down styling and restored the previous controls with a darker selection area on the right.
+- Restored readable selection text, including full version numbers in the changelog drop-down.
+- Hardware-warning fields display their values and units again, with consistent alignment.
+- Updated graphical tests for the restored controls.
+
 ## [v0.9.3.58] - 2026-10-17
 - All warning-value controls now line up in one common column regardless of label length.
 - Narrower warning values without up/down buttons; keyboard, arrow-key and mouse-wheel input remain available.
