@@ -306,7 +306,10 @@ def draw_frosted_backdrop(p, widget, target, opacity=1.0, *, softened=True):
                  target.width(), target.height())
     p.save()
     p.setOpacity(opacity)
-    p.setRenderHint(QPainter.SmoothPixmapTransform)
+    # The source crop and destination are equal-sized in scene coordinates.
+    # Avoid the expensive smooth resampling path during every scroll repaint.
+    if abs(src.width()-target.width()) > .01 or abs(src.height()-target.height()) > .01:
+        p.setRenderHint(QPainter.SmoothPixmapTransform)
     p.drawPixmap(target, image, src)
     p.restore()
 
