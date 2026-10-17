@@ -5,8 +5,8 @@ import re
 ROOT = Path(__file__).resolve().parent.parent
 CHANGELOG_PATH = ROOT / "CHANGELOG.md"
 ENGLISH_CHANGELOG_PATH = ROOT / "CHANGELOG.en.md"
-_HEADING = re.compile(r"^## \\[v(\\d+\\.\\d+\\.\\d+(?:\\.\\d+)?)\\](?:\\s+-.*)?$", re.M)
-_LANGUAGE_SECTION = re.compile(r"^## (Deutsch|English)\\s*$", re.M)
+_HEADING = re.compile(r"^## \[v(\d+\.\d+\.\d+(?:\.\d+)?)\](?:\s+-.*)?$", re.M)
+_LANGUAGE_SECTION = re.compile(r"^## (Deutsch|English)\s*$", re.M)
 
 
 def entries(path=None, lang=None):
