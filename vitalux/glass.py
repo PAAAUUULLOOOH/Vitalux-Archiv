@@ -11,7 +11,7 @@ from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer
 from PySide6.QtGui import (QBrush, QColor, QLinearGradient, QPainter,
                            QPainterPath, QPen, QPixmap, QRadialGradient)
 from PySide6.QtWidgets import QFrame, QWidget
-from . import theme, settings, backdrops
+from . import theme, settings, backdrops, user_background
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 
@@ -100,6 +100,19 @@ class AmbientScene(QWidget):
         style = backdrops.resolve(settings.get('background_style', 'theme_default'),
                                   theme.mode())
         if style == 'minimal' and theme.mode() == 'minimal':
+            return
+        if style == 'custom_image':
+            chosen = settings.get('custom_background_selected', '')
+            fit = settings.get('custom_background_fit', 'cover')
+            path = user_background.image_path(chosen)
+            stamp = path.stat().st_mtime_ns if path else None
+            key = (style, chosen, fit, stamp, theme.BG, self.size())
+            if key != self._render_key:
+                self._sharp_cache = user_background.draw(self.size(), chosen, fit)
+                self._soft_cache = self._sharp_cache
+                self._render_key = key
+                self._asset_mode = None
+                self._cache_size = self.size()
             return
         if style not in ('glass', 'black_glass'):
             # Each preset is cached independently and sampled by glass panels.
