@@ -8,6 +8,7 @@ on:
       - "CHANGELOG.md"
       - "CHANGELOG.en.md"
       - "scripts/release_notes.py"
+      - "scripts/bundle-opengl-runtime.py"
       - "scripts/versioning.py"
       - "assets/**"
       - "run.sh"
@@ -103,6 +104,25 @@ jobs:
           assert (root/'CHANGELOG.en.md').is_file()
           print('Vitalux source and runtime package assembled')
           PY
+      - name: OpenGL-Bausteine in die portable Qt-Laufzeit integrieren
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGED="$PWD/build/staged/Vitalux-${TAG}"
+          PY="$STAGED/runtime/bin/python3.12"
+          LIB="$STAGED/lib"
+          if LD_LIBRARY_PATH="$LIB" "$PY" -c "from PySide6.QtOpenGLWidgets import QOpenGLWidget" 2>/dev/null; then
+            echo "PySide6.QtOpenGLWidgets already included in baseline."
+          else
+            VERSION="$(LD_LIBRARY_PATH="$LIB" "$PY" -c 'import PySide6; print(PySide6.__version__)')"
+            mkdir -p build/addons
+            python3 -m pip download --only-binary=:all: --no-deps \
+              "PySide6_Addons==${VERSION}" -d build/addons
+            WHEEL="$(find build/addons -maxdepth 1 -type f -name '*.whl' -print -quit)"
+            test -n "$WHEEL"
+            python3 scripts/bundle-opengl-runtime.py "$WHEEL" "$STAGED"
+          fi
+          LD_LIBRARY_PATH="$LIB" "$PY" -c "from PySide6.QtOpenGLWidgets import QOpenGLWidget; print('OpenGL Qt module imported successfully')"
       - name: Changelog-Version prüfen und Release-Notizen erzeugen
         shell: bash
         run: |
