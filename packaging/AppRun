@@ -14,6 +14,11 @@ case "${1:-}" in
     exec "$BASE/run.sh" "$@"
     ;;
 esac
+# Older Vitalux versions restart the new AppImage without --launch. Guard this
+# *first* post-update launch as well, before any optional first-run dialog.
+if [[ -n "${APPIMAGE:-}" && -f "${APPIMAGE}.previous" && -f "$BASE/packaging/appimage-rollback-watch.sh" ]]; then
+  exec bash "$BASE/packaging/appimage-rollback-watch.sh" "$BASE" "$APPIMAGE" "$@"
+fi
 TARGET="$HOME/.local/opt/vitalux/Vitalux.AppImage"
 LAUNCHER="$HOME/.local/bin/vitalux"
 DESKTOP="${XDG_DATA_HOME:-$HOME/.local/share}/applications/vitalux.desktop"
