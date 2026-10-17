@@ -5,6 +5,13 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.57] - 2026-10-17
+- Schmalere Dropdown-Menüs mit eigener, farblich an das Schema angepasster Pfeilmarkierung.
+- Aufgeklappte Listen in allen fünf Farbschemata mit passendem Hintergrund; keine schwarzen Qt-Menüleisten oben und unten.
+- Warnwerte für CPU, GPU, RAM und Systemlaufwerk stehen einheitlich unmittelbar neben dem zugehörigen Text.
+- Schaltflächen für eigene Akzentfarben neu angeordnet: „Bearbeiten“, „Löschen“, „Eigene Farbe …“.
+- Einstellungen-Tests und README angepasst.
+
 ## [v0.9.3.56] - 2026-10-17
 - Gespeicherte eigene Akzentfarben können über einen neuen Button „Bearbeiten“ in Name und Farbwert geändert werden, ohne einen zusätzlichen Eintrag anzulegen.
 - Für eigene Farben erscheint ein separater Button „Löschen“; beide Aktionen sind nur bei einer ausgewählten eigenen Farbe sichtbar.
