@@ -133,8 +133,23 @@ QScrollBar::handle:vertical:hover { background: $ACCENT_HOVER_BORDER; }
 #primaryBtn:hover { background: $ACCENT_HOVER; }
 QLineEdit, QComboBox, QSpinBox, QTextEdit, QListWidget { background: $INPUT_BG; border: 1px solid $BORDER; border-radius: 9px; color: $TEXT; padding: 8px 12px; }
 QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QListWidget:focus { border-color: $ACCENT; }
-QComboBox QAbstractItemView, QListWidget::item { background: $INPUT_BG; color: $TEXT; }
-QComboBox QAbstractItemView::item:selected, QListWidget::item:selected { background: $ACTIVE_BG; color: $TEXT; }
+QComboBox { padding-right: 30px; }
+QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top right;
+    width: 27px; border: none; border-left: 1px solid $BORDER;
+    border-top-right-radius: 8px; border-bottom-right-radius: 8px;
+    background: $BUTTON_BG; }
+QComboBox::drop-down:hover { background: $ACTIVE_BG; }
+QComboBox QAbstractItemView { background: $INPUT_BG; color: $TEXT;
+    border: 1px solid $BORDER; outline: none; padding: 0px;
+    selection-background-color: $ACTIVE_BG; selection-color: $TEXT; }
+QComboBox QAbstractItemView::item { background: transparent; color: $TEXT;
+    border: none; padding: 7px 10px; min-height: 22px; }
+QComboBox QAbstractItemView::item:selected { background: $ACTIVE_BG; color: $TEXT; }
+QListWidget::item { background: $INPUT_BG; color: $TEXT; }
+QListWidget::item:selected { background: $ACTIVE_BG; color: $TEXT; }
+QToolButton#customAccentRemove { background: $BUTTON_BG; border: 1px solid $BORDER;
+    border-radius: 8px; color: $MUTED; font-size: 19px; padding: 0px; }
+QToolButton#customAccentRemove:hover { color: $ACCENT; border-color: $ACCENT; background: $ACTIVE_BG; }
 QCheckBox { spacing: 8px; }
 QCheckBox::indicator { width: 16px; height: 16px; }
 QCheckBox::indicator:checked { background: $ACCENT; border: 1px solid $ACCENT; border-radius: 4px; }
