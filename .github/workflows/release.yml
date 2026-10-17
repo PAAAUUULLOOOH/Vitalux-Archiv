@@ -27,6 +27,7 @@ jobs:
           TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
           set -euo pipefail
+          if [[ -z "$TAG" ]]; then TAG="$(gh release view --json tagName --jq .tagName)"; fi
           [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || exit 2
           mkdir -p build/source
           ZIP="Vitalux-${TAG}-linux-x86_64-Portabel.zip"
@@ -56,6 +57,22 @@ jobs:
           mkdir -p dist
           bash packaging/build-appimage.sh "$ROOT" "$PWD/dist/Vitalux-${TAG}-x86_64.AppImage" "$PWD/tooling/squashfs-root/AppRun"
           (cd dist && sha256sum *.AppImage > "Vitalux-${TAG}-x86_64.AppImage.sha256")
+      - name: Test AppImage installation integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE="$PWD/dist/Vitalux-${TAG}-x86_64.AppImage"
+          mkdir -p verify
+          (cd verify && "$IMAGE" --appimage-extract >/dev/null)
+          EXTRACT="$PWD/verify/squashfs-root"
+          bash -n "$EXTRACT/AppRun"
+          bash -n "$EXTRACT/packaging/appimage-integration.sh"
+          TMP_HOME="$(mktemp -d)"
+          HOME="$TMP_HOME" APPDIR="$EXTRACT" APPIMAGE="$IMAGE" bash "$EXTRACT/AppRun" --install
+          test -x "$TMP_HOME/.local/opt/vitalux/Vitalux.AppImage"
+          test -f "$TMP_HOME/.local/share/applications/vitalux.desktop"
+          HOME="$TMP_HOME" APPDIR="$EXTRACT" APPIMAGE="$IMAGE" bash "$EXTRACT/AppRun" --uninstall
+          test ! -e "$TMP_HOME/.local/share/applications/vitalux.desktop"
       - uses: actions/upload-artifact@v4
         with:
           name: Vitalux-AppImage
