@@ -177,10 +177,10 @@ class PreferencesPage(Page):
         notifications.body.addWidget(self.alert_toggle)
         notifications.body.addWidget(label('Warnungen erscheinen beim Überschreiten eines Grenzwerts. Erst nach Abkühlung oder sinkender Auslastung kann eine erneute Warnung erfolgen.', 'muted', wrap=True))
         threshold_grid = QGridLayout()
-        # Keep the warning card size. Put narrow, centered numeric fields to
-        # the LEFT of each title; text expands to fill the remaining card width.
-        threshold_grid.setColumnStretch(0, 0)
-        threshold_grid.setColumnStretch(1, 1)
+        # Keep the warning card size. Labels on the left; narrow, centered
+        # numeric fields follow on the right, as requested.
+        threshold_grid.setColumnStretch(0, 1)
+        threshold_grid.setColumnStretch(1, 0)
         threshold_grid.setHorizontalSpacing(14)
         self.alert_boxes = {}
         self.alert_labels = {}
@@ -199,8 +199,8 @@ class PreferencesPage(Page):
             value.setValue(int(settings.get(key, default)))
             value.valueChanged.connect(lambda v, k=key: self._set_preference(k, v))
             text = label(title, 'strong')
-            threshold_grid.addWidget(value, idx, 0, Qt.AlignLeft)
-            threshold_grid.addWidget(text, idx, 1, Qt.AlignLeft | Qt.AlignVCenter)
+            threshold_grid.addWidget(text, idx, 0, Qt.AlignLeft | Qt.AlignVCenter)
+            threshold_grid.addWidget(value, idx, 1, Qt.AlignRight)
             self.alert_boxes[key] = value
             self.alert_labels[key] = text
         notifications.body.addLayout(threshold_grid)
