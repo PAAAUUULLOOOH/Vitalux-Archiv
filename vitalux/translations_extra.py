@@ -449,3 +449,7 @@ EN_MORE.update({
     "Laufwerksmessungen mit fio: wählbare Testprofile, Dateigrößen, Messzeitbegrenzung und Ergebnisauswertung.": "Drive benchmarks with fio: selectable test profiles, file sizes, time limits and result analysis.",
     "Die Testdauer hängt von der Laufwerksgeschwindigkeit ab. Testdateien werden auf dem ausgewählten Dateisystem erstellt und nach Abschluss oder Abbruch entfernt.": "Test duration depends on drive speed. Test files are created on the selected filesystem and deleted on completion or cancellation.",
 })
+
+EN_MORE.update({
+    "Die Testdauer hängt von der Laufwerksgeschwindigkeit ab. Testdateien werden auf dem ausgewählten Dateisystem erstellt und nach Abschluss oder Abbruch entfernt. Achtung: hohe Last und echte Schreibvorgänge. Die Messwerte stammen direkt von fio. Globales Leeren des Linux-Page-Cache erfordert erhöhte Rechte und wird hier nicht automatisch durchgeführt.": "Test duration depends on drive speed. Test files are created on the selected filesystem and removed upon completion or cancellation. Warning: high load and actual writes. The readings come directly from fio. Clearing the system-wide Linux page cache requires elevated privileges and is not done automatically.",
+})
