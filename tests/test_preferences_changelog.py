@@ -295,12 +295,12 @@ def check_changelog(app):
     app.processEvents()
     assert "A new feature" in page.notes.text()
     assert "Etwas Neues" not in page.notes.text()
-    assert "background" in page.changelog_details.text()
+    assert "timestamp" in page.changelog_details.text()
     assert page.changelog_select.currentData() == __version__
     i18n.set_lang("de")
     page.retranslate()
     assert "Etwas Neues" in page.notes.text()
-    assert "Hintergrund" in page.changelog_details.text()
+    assert "Zeitstempel" in page.changelog_details.text()
     manager.status = "uptodate"
     manager.notes = ""
     page.sync()
