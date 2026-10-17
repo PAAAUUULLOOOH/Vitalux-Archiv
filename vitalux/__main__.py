@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication
 from . import APP_NAME, distro, i18n, sensors, settings, theme, diagnostics, hover_hints
 from .logo import load_logo
 from .brand import app_icon
+from .wallpaper_accents import resolve_accent
 from .update_manager import UpdateManager
 
 
@@ -35,7 +36,7 @@ def main():
     if requested_theme != theme.mode():
         settings.set('theme', theme.mode())  # Migrate removed/unknown themes to Glass.
     user_accent = settings.get('accent', '#4f8cff')  # Vitalux Blue for new installs.
-    theme.set_accent(info['color'] if user_accent == 'auto' else user_accent)
+    theme.set_accent(resolve_accent(user_accent, info['color']))
     app.setStyleSheet(theme.stylesheet())
     logo = load_logo(info, 96)
     app.setWindowIcon(app_icon())
