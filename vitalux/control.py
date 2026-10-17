@@ -4,7 +4,7 @@ from datetime import datetime
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout, QInputDialog, QListWidget, QVBoxLayout, QWidget, QSpinBox)
+from PySide6.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout, QInputDialog, QListWidget, QVBoxLayout, QWidget, QSpinBox, QAbstractSpinBox)
 from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
 
 from . import __version__, settings, theme, motion
@@ -176,32 +176,33 @@ class PreferencesPage(Page):
         self.alert_toggle.toggled.connect(lambda checked: self._set_preference('alerts_enabled', checked))
         notifications.body.addWidget(self.alert_toggle)
         notifications.body.addWidget(label('Warnungen erscheinen beim Überschreiten eines Grenzwerts. Erst nach Abkühlung oder sinkender Auslastung kann eine erneute Warnung erfolgen.', 'muted', wrap=True))
-        threshold_grid = QVBoxLayout()
-        threshold_grid.setSpacing(9)
+        # Shared label column: every value begins at precisely the same x position.
+        # A trailing expanding column keeps both columns by the labels, not at the card edge.
+        threshold_grid = QGridLayout()
+        threshold_grid.setContentsMargins(0, 0, 0, 0)
+        threshold_grid.setHorizontalSpacing(10)
+        threshold_grid.setVerticalSpacing(9)
+        threshold_grid.setColumnStretch(2, 1)
         self.alert_boxes = {}
         self.alert_labels = {}
-        for key, title, default, lo, hi, unit in (
+        for row_index, (key, title, default, lo, hi, unit) in enumerate((
             ('cpu_temp', 'CPU-Temperatur', 90, 40, 110, '°C'),
             ('gpu_temp', 'GPU-Temperatur', 90, 40, 115, '°C'),
             ('ram_usage', 'RAM-Auslastung', 90, 50, 100, '%'),
-            ('disk_usage', 'Systemlaufwerk-Belegung', 95, 50, 100, '%'),
-        ):
+            ('disk_usage', 'Systemlaufwerk', 95, 50, 100, '%'),
+        )):
             value = QSpinBox()
             value.setObjectName('alertThresholdSpin')
-            value.setFixedWidth(100)
+            value.setFixedWidth(84)
+            value.setButtonSymbols(QAbstractSpinBox.NoButtons)
             value.setAlignment(Qt.AlignCenter)
             value.setRange(lo, hi)
             value.setSuffix(' ' + unit)
             value.setValue(int(settings.get(key, default)))
             value.valueChanged.connect(lambda v, k=key: self._set_preference(k, v))
             text = label(title, 'strong')
-            threshold_row = QHBoxLayout()
-            threshold_row.setContentsMargins(0, 0, 0, 0)
-            threshold_row.setSpacing(10)
-            threshold_row.addWidget(text, 0, Qt.AlignVCenter)
-            threshold_row.addWidget(value, 0, Qt.AlignVCenter)
-            threshold_row.addStretch(1)
-            threshold_grid.addLayout(threshold_row)
+            threshold_grid.addWidget(text, row_index, 0, Qt.AlignLeft | Qt.AlignVCenter)
+            threshold_grid.addWidget(value, row_index, 1, Qt.AlignLeft | Qt.AlignVCenter)
             self.alert_boxes[key] = value
             self.alert_labels[key] = text
         notifications.body.addLayout(threshold_grid)

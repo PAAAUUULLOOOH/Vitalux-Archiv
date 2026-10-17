@@ -4,6 +4,14 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.58] - 2026-10-17
+- All warning-value controls now line up in one common column regardless of label length.
+- Narrower warning values without up/down buttons; keyboard, arrow-key and mouse-wheel input remain available.
+- More compact drop-downs with no arrows or separate arrow compartments.
+- Closed drop-down fields are painted in the active Vitalux theme, independent of the host KDE/Qt style.
+- Popup lists, borders and scroll areas explicitly use their current theme's background and text colors.
+- Updated tests and README.
+
 ## [v0.9.3.57] - 2026-10-17
 - Slightly narrower drop-downs with matching custom chevrons for each color scheme.
 - Theme-matched popup lists without native black menu strips above and below the items.

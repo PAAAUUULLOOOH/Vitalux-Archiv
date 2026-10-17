@@ -5,6 +5,14 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.58] - 2026-10-17
+- Warnwert-Felder stehen jetzt in einer festen, gemeinsamen Spalte statt textabhängig zu wandern; „Systemlaufwerk“ als kürzere Beschriftung.
+- Schmalere Warnwert-Felder ohne Auf-/Ab-Pfeile; Eingabe per Tastatur, Pfeiltasten und Mausrad weiterhin möglich.
+- Alle Dropdowns ohne Pfeile oder Pfeilbereich; kompaktere Breite auch bei langen Einträgen.
+- Geschlossene Dropdowns werden unabhängig vom KDE-/Qt-Systemstil vollständig im aktiven Vitalux-Farbschema gezeichnet.
+- Aufgeklappte Dropdown-Listen, ihre Ränder und Scrollbereiche erhalten explizit die jeweils passende Hintergrund- und Textfarbe.
+- Tests und README aktualisiert.
+
 ## [v0.9.3.57] - 2026-10-17
 - Schmalere Dropdown-Menüs mit eigener, farblich an das Schema angepasster Pfeilmarkierung.
 - Aufgeklappte Listen in allen fünf Farbschemata mit passendem Hintergrund; keine schwarzen Qt-Menüleisten oben und unten.

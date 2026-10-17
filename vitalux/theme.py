@@ -143,13 +143,10 @@ QScrollBar::handle:vertical:hover { background: $ACCENT_HOVER_BORDER; }
 #primaryBtn:hover { background: $ACCENT_HOVER; }
 QLineEdit, QComboBox, QSpinBox, QTextEdit, QListWidget { background: $INPUT_BG; border: 1px solid $BORDER; border-radius: 9px; color: $TEXT; padding: 8px 12px; }
 QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QListWidget:focus { border-color: $ACCENT; }
-QComboBox { background: $COMBO_BG; padding-right: 25px; }
+/* Combos are painted by ui_locale.QComboBox: no separate arrow or arrow compartment. */
+QComboBox { background: $COMBO_BG; padding: 7px 10px; }
+QComboBox::drop-down { width: 0px; border: none; background: transparent; }
 QComboBox::down-arrow { image: none; width: 0px; height: 0px; }
-QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top right;
-    width: 22px; border: none; border-left: 1px solid $BORDER;
-    border-top-right-radius: 8px; border-bottom-right-radius: 8px;
-    background: $BUTTON_BG; }
-QComboBox::drop-down:hover { background: $ACTIVE_BG; }
 QComboBox QAbstractItemView { background: $COMBO_BG; color: $TEXT;
     border: 1px solid $BORDER; outline: none; padding: 0px;
     selection-background-color: $ACTIVE_BG; selection-color: $TEXT; }

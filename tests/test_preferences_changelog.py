@@ -9,7 +9,7 @@ sys.path.insert(0, os.getcwd())
 
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QColor, QPalette
-from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame, QMessageBox
+from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame, QMessageBox, QAbstractSpinBox
 
 from vitalux import __version__, changelog, i18n, settings, theme
 from vitalux.control import PreferencesPage
@@ -48,15 +48,22 @@ def check_preferences(app):
             page.show()
             app.processEvents()
 
+            warning_x = set()
+            warning_gaps = []
             for name, spin in page.alert_boxes.items():
-                assert spin.width() == 100, (name, spin.width())
+                assert spin.width() == 84, (name, spin.width())
+                assert spin.buttonSymbols() == QAbstractSpinBox.NoButtons, name
                 assert spin.alignment() & Qt.AlignHCenter, name
                 assert spin.alignment() & Qt.AlignVCenter, name
                 assert spin.value() > 0
                 label_widget = page.alert_labels[name]
-                gap = spin.mapTo(page, QPoint(0, 0)).x() - (
-                    label_widget.mapTo(page, QPoint(0, 0)).x() + label_widget.width())
-                assert 0 <= gap <= 14, (name, gap)
+                x = spin.mapTo(page, QPoint(0, 0)).x()
+                warning_x.add(x)
+                gap = x - (label_widget.mapTo(page, QPoint(0, 0)).x() + label_widget.width())
+                warning_gaps.append(gap)
+            assert len(warning_x) == 1, f"Unaligned warning fields: {warning_x}"
+            assert min(warning_gaps) >= 8, warning_gaps
+            assert max(warning_gaps) <= 42, warning_gaps
 
             # Every dropdown, including the SMART selector, uses the same Qt
             # popup background and palette in all five Vitalux themes.
@@ -71,7 +78,13 @@ def check_preferences(app):
                     assert dropdown.view().frameShape() == QFrame.NoFrame
                     assert dropdown.view().autoFillBackground()
                     assert dropdown.maxVisibleItems() == 10
-                    assert dropdown.sizeHint().width() >= 88
+                    assert 78 <= dropdown.sizeHint().width() <= 196
+                    assert "width: 0px; border: none" in theme.stylesheet()
+                    # The CLOSED field must use the chosen theme too, not a
+                    # dark OS-supplied field that merely has a themed popup.
+                    image = dropdown.grab().toImage()
+                    sample = image.pixelColor(dropdown.width() - 12, dropdown.height() // 2).name()
+                    assert sample == theme.combo_surface(), (scheme, sample, theme.combo_surface())
                     dropdown.showPopup()
                     app.processEvents()
                     popup = dropdown.view().window()
@@ -81,6 +94,8 @@ def check_preferences(app):
                     # Some Qt styles map Text to WindowText for popup
                     # containers. The explicit QSS controls visible glyphs.
                     assert f"color: {theme.TEXT};" in popup.styleSheet(), scheme
+                    assert f"background-color: {expected}" in dropdown.view().styleSheet()
+                    assert dropdown.view().viewport().palette().color(QPalette.Base).name() == expected
                     dropdown.hidePopup()
             smart.close()
             theme.set_mode("glass")
