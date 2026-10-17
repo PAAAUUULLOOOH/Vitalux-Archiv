@@ -139,6 +139,20 @@ jobs:
           LD_LIBRARY_PATH="$PWD/lib" \
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_dashboard_brand.py"
+      - name: Einstellungen und Changelog in Qt testen
+        if: env.RELEASE_EXISTS == 'false'
+        shell: bash
+        env:
+          QT_QPA_PLATFORM: offscreen
+          XDG_CONFIG_HOME: ${{ runner.temp }}/vitalux-options-test-config
+        run: |
+          set -euo pipefail
+          STAGED="$PWD/build/staged/Vitalux-${TAG}"
+          mkdir -p "$XDG_CONFIG_HOME"
+          cd "$STAGED"
+          LD_LIBRARY_PATH="$PWD/lib" \
+            "$PWD/runtime/bin/python3.12" \
+            "$GITHUB_WORKSPACE/tests/test_preferences_changelog.py"
       - name: Automatische Wiederherstellung und Shell-Starter testen
         if: env.RELEASE_EXISTS == 'false'
         shell: bash
