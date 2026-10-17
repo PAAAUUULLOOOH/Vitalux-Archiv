@@ -270,8 +270,9 @@ def check_changelog(app):
     versions = changelog.entries()
     assert versions and versions[0][0] == __version__, (versions, __version__)
     assert len(changelog.version_notes(__version__)) >= 3
-    assert "Hintergrund" in " ".join(changelog.version_notes(__version__, lang="de"))
-    assert "background" in " ".join(changelog.version_notes(__version__, lang="en"))
+    # The latest release tests log timestamps, not background features.
+    assert "Zeitstempel" in " ".join(changelog.version_notes(__version__, lang="de"))
+    assert "timestamp" in " ".join(changelog.version_notes(__version__, lang="en"))
 
     manager = UpdateManager()
     page = UpdatePage(manager)
