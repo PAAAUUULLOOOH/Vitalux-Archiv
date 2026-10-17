@@ -4,7 +4,7 @@ from datetime import datetime
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout, QInputDialog, QListWidget, QVBoxLayout, QWidget, QSpinBox, QToolButton)
+from PySide6.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout, QInputDialog, QListWidget, QVBoxLayout, QWidget, QSpinBox)
 from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
 
 from . import __version__, settings, theme, motion
@@ -107,21 +107,26 @@ class PreferencesPage(Page):
         accent.setCurrentIndex(max(0, accent.findData(stored)))
         accent.currentIndexChanged.connect(lambda _: self.change_accent(accent.currentData()))
         r2.addWidget(accent)
-        self.remove_custom_accent_button = QToolButton()
-        self.remove_custom_accent_button.setObjectName('customAccentRemove')
-        self.remove_custom_accent_button.setText('×')
-        self.remove_custom_accent_button.setToolTip(tr('Ausgewählte eigene Farbe löschen'))
-        self.remove_custom_accent_button.setCursor(Qt.PointingHandCursor)
-        self.remove_custom_accent_button.setFixedSize(29, 32)
-        self.remove_custom_accent_button.clicked.connect(self.remove_custom_accent)
-        r2.addWidget(self.remove_custom_accent_button)
+        # Both actions appear only when a saved custom accent is selected.
+        self.edit_custom_accent_button = QPushButton('Bearbeiten')
+        self.edit_custom_accent_button.setObjectName('ghostBtn')
+        self.edit_custom_accent_button.setCursor(Qt.PointingHandCursor)
+        self.edit_custom_accent_button.setToolTip(tr('Ausgewählte eigene Farbe bearbeiten'))
+        self.edit_custom_accent_button.clicked.connect(self.edit_custom_accent)
+        r2.addWidget(self.edit_custom_accent_button)
         custom = QPushButton('Eigene Farbe …')
         custom.setObjectName('ghostBtn')
         custom.clicked.connect(lambda: self.custom_accent(accent))
         r2.addWidget(custom)
+        self.remove_custom_accent_button = QPushButton('Löschen')
+        self.remove_custom_accent_button.setObjectName('ghostBtn')
+        self.remove_custom_accent_button.setCursor(Qt.PointingHandCursor)
+        self.remove_custom_accent_button.setToolTip(tr('Ausgewählte eigene Farbe löschen'))
+        self.remove_custom_accent_button.clicked.connect(self.remove_custom_accent)
+        r2.addWidget(self.remove_custom_accent_button)
         r2.addStretch(1)
         look.body.addLayout(r2)
-        self._sync_custom_remove_button()
+        self._sync_custom_accent_actions()
         look.body.addWidget(label('Akzentfarben gelten für Reiter, Kartenkanten, Kurven und Bedienelemente.', 'muted', wrap=True))
         self.accent_preview = QWidget()
         self.accent_preview.setMinimumHeight(14)
@@ -274,7 +279,7 @@ class PreferencesPage(Page):
         self._refresh_restore_button()
 
     def refresh_appearance(self):
-        self._sync_custom_remove_button()
+        self._sync_custom_accent_actions()
         self.theme_note.setText(tr(self.mode_notes.get(theme.mode(), self.mode_notes['dark'])))
         self.accent_preview.setStyleSheet(f'background: {theme.accent()}; border-radius: 7px;')
 
@@ -288,7 +293,7 @@ class PreferencesPage(Page):
         if not val:
             return
         settings.set('accent', val)
-        self._sync_custom_remove_button()
+        self._sync_custom_accent_actions()
         self.window.apply_appearance()
         self._refresh_restore_button()
 
@@ -308,10 +313,62 @@ class PreferencesPage(Page):
                 seen.add(color.name())
         return result
 
-    def _sync_custom_remove_button(self):
+    def _sync_custom_accent_actions(self):
         selected = self.accent_combo.currentData()
-        self.remove_custom_accent_button.setVisible(
-            any(item['color'] == selected for item in self.custom_accents))
+        own_color_selected = any(item['color'] == selected for item in self.custom_accents)
+        self.edit_custom_accent_button.setVisible(own_color_selected)
+        self.remove_custom_accent_button.setVisible(own_color_selected)
+
+    @staticmethod
+    def _unique_custom_accent_name(combo, requested, exclude_index=None):
+        name = requested.strip()[:32] or tr('Eigene Farbe')
+        taken = {combo.itemText(i).casefold() for i in range(combo.count())
+                 if i != exclude_index}
+        original, number = name, 2
+        while name.casefold() in taken:
+            name = f'{original[:25]} ({number})'
+            number += 1
+        return name
+
+    def edit_custom_accent(self):
+        """Edit name and/or color of the selected saved accent, keeping its slot."""
+        combo = self.accent_combo
+        index = combo.currentIndex()
+        original_color = combo.currentData()
+        entry = next((item for item in self.custom_accents
+                      if item['color'] == original_color), None)
+        if entry is None or index < 0:
+            return
+        updated = QColorDialog.getColor(
+            QColor(original_color), self, tr('Eigene Farbe bearbeiten'))
+        if not updated.isValid():
+            return
+        new_color = updated.name()
+        # The color palette is a unique-keyed collection: don't steal another
+        # preset's value or leave two identically keyed custom entries.
+        if new_color != original_color and any(
+                combo.itemData(i) == new_color for i in range(combo.count()) if i != index):
+            QMessageBox.information(self, 'Vitalux', tr('Diese Akzentfarbe ist bereits vorhanden.'))
+            return
+        new_name, accepted = QInputDialog.getText(
+            self, tr('Eigene Farbe bearbeiten'),
+            tr('Wie soll diese Akzentfarbe heißen?'), text=entry['name'])
+        if not accepted:
+            return
+        new_name = self._unique_custom_accent_name(combo, new_name, index)
+        if new_color == original_color and new_name == entry['name']:
+            return
+        # Apply the edit as a single operation; do not accidentally add an
+        # extra entry or switch to the distribution color along the way.
+        combo.blockSignals(True)
+        try:
+            combo.setItemText(index, new_name)
+            combo.setItemData(index, new_color)
+        finally:
+            combo.blockSignals(False)
+        entry['color'], entry['name'] = new_color, new_name
+        settings.set('custom_accents', self.custom_accents)
+        self.change_accent(new_color)
 
     def remove_custom_accent(self):
         value = self.accent_combo.currentData()
@@ -324,7 +381,7 @@ class PreferencesPage(Page):
             self.accent_combo.removeItem(idx)
         self.accent_combo.setCurrentIndex(0)  # Distribution is a safe fallback.
         self.change_accent('auto')
-        self._sync_custom_remove_button()
+        self._sync_custom_accent_actions()
 
     def custom_accent(self, combo):
         color = QColorDialog.getColor(QColor(theme.accent()), self, tr('Akzentfarbe wählen'))
@@ -340,17 +397,12 @@ class PreferencesPage(Page):
             tr('Wie soll diese Akzentfarbe heißen?'), text=tr('Eigene Farbe'))
         if not accepted:
             return
-        name = name.strip()[:32] or tr('Eigene Farbe')
-        taken = {combo.itemText(i).casefold() for i in range(combo.count())}
-        base, number = name, 2
-        while name.casefold() in taken:
-            name = f'{base[:25]} ({number})'
-            number += 1
+        name = self._unique_custom_accent_name(combo, name)
         self.custom_accents.append({'name': name, 'color': value})
         settings.set('custom_accents', self.custom_accents)
         combo.addItem(name, value)
         combo.setCurrentIndex(combo.count()-1)
-        self._sync_custom_remove_button()
+        self._sync_custom_accent_actions()
 
     def change_motion(self, *_):
         profile = self.motion_combo.currentData()
