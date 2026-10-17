@@ -13,13 +13,18 @@ from .update_manager import UpdateManager
 
 def main():
     sys.excepthook = diagnostics.exception_hook
+    diagnostics.enable_native_crash_trace()
     from .window import MainWindow
     app = QApplication(sys.argv)
     # Hiding the final window must not kill the tray icon and sampler.
     # MainWindow.closeEvent explicitly quits on a genuine Exit command.
     app.setQuitOnLastWindowClosed(False)
     app.setApplicationName(APP_NAME)
-    app.setDesktopFileName("vitalux")  # KDE/Pop!_OS/COSMIC app launcher and taskbar association
+    # Desktop-portal app IDs require an installed .desktop entry; avoid asking
+    # the portal to register an unknown ID when using Vitalux portably.
+    xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    if os.path.isfile(os.path.join(xdg_data, "applications", "vitalux.desktop")):
+        app.setDesktopFileName("vitalux")
     lang = settings.get("lang") or ("de" if os.environ.get("LANG", "").lower().startswith("de") else "en")
     i18n.set_lang(lang)
     info = distro.info()
