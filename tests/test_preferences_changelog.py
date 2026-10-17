@@ -281,7 +281,7 @@ def check_changelog(app):
     i18n.set_lang("en")
     page.retranslate()
     assert page.changelog_select.currentData() == selected
-    assert "drop-down" in page.changelog_details.text().lower()
+    assert page.changelog_details.text() == changelog.displayed_changes(page.changelog_list[page.changelog_select.currentIndex()][1])
     i18n.set_lang("de")
     page.close()
     manager.shutdown()
