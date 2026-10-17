@@ -266,6 +266,16 @@ else:
 
 def create_ambient_scene():
     """Select one backend at startup; never hot-swap a GL surface."""
+    if renderer.desired() == renderer.QTQUICK:
+        if renderer.quick_available():
+            try:
+                from .quick_scene import QuickAmbientScene
+                scene = QuickAmbientScene()
+                scene.render_backend = renderer.QTQUICK
+                return scene
+            except (ImportError, RuntimeError, OSError) as exc:
+                print('Vitalux: Qt Quick konnte nicht initialisiert werden:', exc)
+        renderer.fallback()
     if renderer.desired() == renderer.OPENGL:
         if AcceleratedAmbientScene is not None and renderer.gpu_available():
             try:
