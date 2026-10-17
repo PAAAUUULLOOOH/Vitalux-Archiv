@@ -68,6 +68,27 @@ def assert_abnormal_crash_restores_previous():
         assert "Recovered previous Vitalux version" in log.read_text()
 
 
+def assert_legacy_first_restart_is_guarded():
+    # v0.9.3.51 and earlier restart without a --launch flag. The new
+    # AppImage must still detect and protect its .previous copy.
+    with tempfile.TemporaryDirectory(prefix="vitalux-legacy-restart-") as td:
+        _, target, backup, marker, env = setup(td, 42)
+        # Whether or not an old desktop entry is registered, recovery must
+        # happen *before* any installation prompt on the restart.
+        env.pop("DISPLAY", None)
+        env.pop("WAYLAND_DISPLAY", None)
+        result = subprocess.run(["bash", str(APP_RUN)], env=env,
+                                capture_output=True, text=True, timeout=12)
+        assert result.returncode == 0, result.stderr
+        for _ in range(30):
+            if marker.exists():
+                break
+            time.sleep(.05)
+        assert marker.exists(), "Legacy unflagged post-update restart skipped crash guard"
+        assert not backup.exists()
+        assert "recovered" in target.read_text()
+
+
 def assert_shutdown_never_rolls_back():
     with tempfile.TemporaryDirectory(prefix="vitalux-normal-signal-") as td:
         _, target, backup, marker, env = setup(td, 143)
@@ -90,6 +111,7 @@ def assert_no_backup_unchanged():
 if __name__ == "__main__":
     assert_success_keeps_last_previous()
     assert_abnormal_crash_restores_previous()
+    assert_legacy_first_restart_is_guarded()
     assert_shutdown_never_rolls_back()
     assert_no_backup_unchanged()
     print("AppImage rollback: normal exit, crash recovery, shutdown and fresh launch PASS")
