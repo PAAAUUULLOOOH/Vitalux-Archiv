@@ -5,6 +5,13 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.65] - 2026-10-17
+- Das Vitalux-Symbol im KDE-Systemtray glüht und pulsiert nun bei einem verfügbaren Update. Nach dem Aktualisieren erscheint automatisch wieder das normale Symbol. Das Vitalux-Logo in der App erhält einen besser sichtbaren, farblich abgestimmten Leuchtring; Updates-Reiter und einmalige Tray-Meldung bleiben erhalten.
+- Die ursprüngliche frosted Seitenleiste mit Glasmaterial und beleuchteter Trennkante wurde wiederhergestellt. Für abweichende Hintergrundpaletten passt sich ihre Transparenz behutsam an; das originale Erscheinungsbild der Farbschemas bleibt erhalten.
+- Die bisherigen Zusatzhintergründe entfernt und durch neun abgestimmte Varianten ersetzt: Hell (Perlmutt, Morgenlicht, Eisblau), Regenbogen (Pastell, Prisma) und Dunkel (Tiefsee, Mitternacht, Samt, Graphit). Die fünf ursprünglichen Farbschema-Hintergründe bleiben bestehen.
+- Die neuen Hintergründe übernehmen einen dezenten Anteil der Akzentfarbe und unterstützen Farbintensität, Hintergrundweichheit und optionale sanfte Animationen. Frühere nicht mehr vorhandene Hintergrundauswahlen fallen auf den Standard des Farbschemas zurück.
+- Die kompakte GitHub-README und die integrierte deutsch/englische Anleitung aktualisiert. Regressionstests für Presets und animierte Tray-Symbole ergänzt.
+
 ## [v0.9.3.64] - 2026-10-17
 - Hintergrund, Seitenleiste und Glas-Kacheln verwenden dieselbe fertig abgestimmte Darstellung. Die dunkle zusätzliche Seitenleisten-Überlagerung entfällt; insbesondere Light bleibt einheitlich.
 - Farbharmonien und optionale gleitende Hintergrundanimationen für Aurora Glass, Nebula Purple, Obsidian Black, Arctic Frost und Adaptiv überarbeitet.

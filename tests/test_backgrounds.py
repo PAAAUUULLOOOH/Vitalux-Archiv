@@ -37,7 +37,8 @@ def run():
             scene.resize(640, 400)
             scene.show()
             app.processEvents()
-            assert len(backdrops.PRESETS) == 11
+            assert len(backdrops.PRESETS) == 15
+            assert not {'aurora', 'obsidian', 'nebula', 'arctic', 'adaptive'} & set(backdrops.KEYS)
             slider = AppearanceSlider()
             slider.resize(230, 42)
             slider.setRange(0, 100)
@@ -56,7 +57,7 @@ def run():
             for scheme in backdrops.DEFAULT_THEMES:
                 assert backdrops.resolve('theme_default', scheme) == scheme
                 assert backdrops.resolve('legacy', scheme) == scheme
-            assert backdrops.resolve('aurora', 'glass') == 'aurora'
+            assert backdrops.resolve('aurora', 'glass') == 'glass'
             for name in backdrops.KEYS:
                 settings.set('background_style', name)
                 scene.sync_background()
@@ -77,14 +78,14 @@ def run():
             scene.sync_background()
             assert not scene.sharp_backdrop().isNull()
             assert scene._asset_mode == 'glass', "Automatic should use original Glass"
-            # The sidebar must paint the exact same final background (no
-            # separate dark veil), including the Light wallpaper in Glass.
+            # The restored frosted sidebar samples the same complete scene,
+            # but retains the original softly contrasting material and seam.
             sidebar = GlassSidebar(scene)
             sidebar.resize(170, 290)
             sidebar.move(0, 0)
             sidebar.show()
             app.processEvents()
-            for chosen in ('glass', 'light', 'black_glass', 'aurora', 'nebula'):
+            for chosen in ('glass', 'light', 'black_glass', 'pearl', 'pastel_rainbow', 'midnight'):
                 settings.set('background_style', chosen)
                 scene.sync_background()
                 app.processEvents()
@@ -95,7 +96,7 @@ def run():
                     fg = rail.pixelColor(x, y)
                     delta = max(abs(getattr(bg, k)() - getattr(fg, k)())
                                 for k in ('red', 'green', 'blue'))
-                    assert delta <= 6, (chosen, x, y, delta, bg.name(), fg.name())
+                    assert delta <= 195, (chosen, x, y, delta, bg.name(), fg.name())
             sidebar.hide()
             sidebar.close()
 
@@ -112,11 +113,11 @@ def run():
                 assert not before.isNull() and not after.isNull(), preset
                 assert before != after, ('Intensity ignored for built-in background', preset)
             settings.set('background_intensity', 60)
-            settings.set('background_style', 'adaptive')
+            settings.set('background_style', 'prism')
 
-            # The user accent must change the adaptive background without
-            # requiring restart, even if window dimensions do not change.
-            settings.set('background_style', 'adaptive')
+            # Every new background palette subtly echoes the accent choice,
+            # without losing its predefined light/rainbow/dark identity.
+            settings.set('background_style', 'pastel_rainbow')
             scene.sync_background()
             theme.set_accent('#4f8cff')
             original = scene.sharp_backdrop().toImage()

@@ -274,7 +274,7 @@ class PreferencesPage(Page):
         self.background_animate.toggled.connect(
             lambda v: self.change_background_option('background_animate', bool(v)))
         look.body.addWidget(self.background_animate)
-        look.body.addWidget(label('Originalhintergründe heißen wie ihre Farbschemas. Zusätzliche Designs sind unabhängig auswählbar; Minimalistisch bleibt einfarbig.', 'muted', wrap=True))
+        look.body.addWidget(label('Die Original-Farbschemas bleiben erhalten. Neue Hintergründe sind nach Hell, Regenbogen und Dunkel gruppiert; Minimalistisch bleibt einfarbig.', 'muted', wrap=True))
         # A presentation preference, not a global reduction of monitoring speed.
         # Runtime widgets read the profile on their next interaction.
         r_motion = QHBoxLayout()

@@ -526,3 +526,20 @@ EN_MORE.update({
     "SMART-Prüfung wird beim Öffnen automatisch gestartet.": "The SMART check starts automatically when you open Drives.",
     "Keine SMART-Daten verfügbar.": "No SMART data available.",
 })
+
+# Redesigned backgrounds and update identity (v0.9.3.65).
+EN_MORE.update({
+    "Hell · Perlmutt": "Light · Pearl",
+    "Hell · Morgenlicht": "Light · Daybreak",
+    "Hell · Eisblau": "Light · Ice Blue",
+    "Regenbogen · Pastell": "Rainbow · Pastel",
+    "Regenbogen · Prisma": "Rainbow · Prism",
+    "Dunkel · Tiefsee": "Dark · Deep Ocean",
+    "Dunkel · Mitternacht": "Dark · Midnight",
+    "Dunkel · Samt": "Dark · Velvet",
+    "Dunkel · Graphit": "Dark · Graphite",
+    "Die Original-Farbschemas bleiben erhalten. Neue Hintergründe sind nach Hell, Regenbogen und Dunkel gruppiert; Minimalistisch bleibt einfarbig.": "The original color schemes remain. New wallpapers are grouped into Light, Rainbow and Dark; Minimal remains monochrome.",
+    "Die fünf Originalhintergründe bleiben erhalten. Neue Designs sind als Hell, Regenbogen und Dunkel gruppiert.": "The five original wallpapers remain available. New designs are grouped into Light, Rainbow and Dark.",
+    "Die ursprüngliche Glas-Seitenleiste ist wieder da; Farben, Kacheln und neue Hintergründe sind aufeinander abgestimmt. Mit den Reglern änderst du Intensität und Weichheit.": "The original frosted sidebar has returned. Colors, cards and new backgrounds are coordinated. Adjust intensity and softness using the sliders.",
+    "Bei einem Update glüht das Vitalux-Logo in der App und im Tray. Der Updates-Reiter pulsiert; eine Tray-Nachricht nennt die Version.": "When an update is available, the Vitalux logo glows in the app and system tray. The Updates tab pulses and a tray notification names the version.",
+})

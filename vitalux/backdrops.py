@@ -8,6 +8,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QBrush, QLinearGradient, QPainter, QPainterPath, QPixmap, QRadialGradient
 
 DEFAULT_THEMES = ('dark', 'light', 'glass', 'black_glass', 'minimal')
+# The five original wallpaper/theme pairs are preserved unchanged.
+# Additional designs replace the discontinued Aurora/Obsidian/Nebula/Arctic/Adaptive set.
 PRESETS = (
     ('theme_default', 'Automatisch (Farbschema)'),
     ('dark', 'Dark'),
@@ -15,20 +17,24 @@ PRESETS = (
     ('glass', 'Glass'),
     ('black_glass', 'Black Glass'),
     ('minimal', 'Minimalistisch'),
-    ('aurora', 'Aurora Glass'),
-    ('obsidian', 'Obsidian Black'),
-    ('nebula', 'Nebula Purple'),
-    ('arctic', 'Arctic Frost'),
-    ('adaptive', 'Adaptiv · Akzentfarbe'),
+    ('pearl', 'Hell · Perlmutt'),
+    ('daybreak', 'Hell · Morgenlicht'),
+    ('ice', 'Hell · Eisblau'),
+    ('pastel_rainbow', 'Regenbogen · Pastell'),
+    ('prism', 'Regenbogen · Prisma'),
+    ('deep_ocean', 'Dunkel · Tiefsee'),
+    ('midnight', 'Dunkel · Mitternacht'),
+    ('velvet', 'Dunkel · Samt'),
+    ('graphite', 'Dunkel · Graphit'),
 )
 KEYS = tuple(key for key, _title in PRESETS)
+LIGHT_PRESETS = frozenset(('light', 'pearl', 'daybreak', 'ice', 'pastel_rainbow'))
+RAINBOW_PRESETS = frozenset(('pastel_rainbow', 'prism'))
 
 
 def resolve(style, theme_mode):
-    """Keep older Classic installations intact and match the active theme."""
-    if style in ('legacy', 'theme_default') or style not in KEYS:
-        return theme_mode
-    return style
+    """Discontinued wallpaper selections fall back to the original theme."""
+    return theme_mode if style not in KEYS or style == 'theme_default' else style
 
 
 def bounded(value, default=55):
@@ -38,65 +44,61 @@ def bounded(value, default=55):
         return default
 
 
+# Colors within each collection share similar saturation and luminance.
+# The middle of the window stays quiet so hardware telemetry stays readable.
+_PALETTES = {
+    'dark': ('#0b1321', '#16253c', '#1a2d45', '#10243c'),
+    'light': ('#f6f9fe', '#e9f2fe', '#d8e6fa', '#d9edf7'),
+    'glass': ('#071525', '#217ba2', '#635aa1', '#39a2b5'),
+    'black_glass': ('#06080d', '#38435a', '#5a5b77', '#65727d'),
+    'minimal': ('#141719', '#232528', '#171a1d', '#202326'),
+    'pearl': ('#f6f4f4', '#efe0e8', '#dbe9f1', '#eee2d7'),
+    'daybreak': ('#fff7ef', '#ffcfb8', '#f1b6d2', '#b5d5ef'),
+    'ice': ('#f2faff', '#b3e3ee', '#c5d7f6', '#b8e4e0'),
+    'pastel_rainbow': ('#f9f4fd', '#f4bed3', '#b8d3fc', '#b9ebd9'),
+    'prism': ('#171a34', '#ef659b', '#638ef4', '#4fd3bd'),
+    'deep_ocean': ('#071b2a', '#166886', '#21437e', '#1f8883'),
+    'midnight': ('#0b1123', '#34417f', '#4d3686', '#273b60'),
+    'velvet': ('#200f23', '#75345c', '#493778', '#a24f65'),
+    'graphite': ('#101318', '#343d4c', '#526176', '#414b60'),
+}
+
+
 def _colors(style, accent, light):
-    if style == 'glass':
-        colors = ('#071525', '#217ba2', '#635aa1', '#39a2b5')
-    elif style == 'black_glass':
-        colors = ('#06080d', '#38435a', '#5a5b77', '#65727d')
-    elif style == 'dark':
-        colors = ('#0b1321', '#16253c', '#1a2d45', '#10243c')
-    elif style == 'light':
-        colors = ('#f6f9fe', '#e9f2fe', '#d8e6fa', '#d9edf7')
-    elif style == 'minimal':
-        colors = ('#141719', '#232528', '#171a1d', '#202326')
-    elif style == 'aurora':
-        colors = ('#e9f6fd', '#7bcadf', '#a49be3', '#8cd8c8') if light else (
-            '#081d2c', '#2398af', '#7862bb', '#33b9a6')
-    elif style == 'obsidian':
-        colors = ('#eff1f7', '#a9b7ce', '#9ca8c6', '#d4d9e6') if light else (
-            '#090c15', '#404d65', '#55506c', '#697989')
-    elif style == 'nebula':
-        colors = ('#fbf2fc', '#ac8cde', '#e8a0ce', '#849de0') if light else (
-            '#180f31', '#7442a8', '#af4f9f', '#4759b0')
-    elif style == 'arctic':
-        colors = ('#f5fbff', '#95d2ee', '#d9edfa', '#9abbde') if light else (
-            '#102a3d', '#4b9cb5', '#85c1d7', '#4488b4')
-    else:
-        base = QColor(accent)
-        if not base.isValid():
-            base = QColor('#4f8cff')
-        if light:
-            colors = ('#f4f8ff', base.lighter(165).name(),
-                      motion_colors('adaptive', accent, True)[1].lighter(148).name(),
-                      base.lighter(125).name())
-        else:
-            colors = ('#0c1a2d', base.darker(118).name(),
-                      motion_colors('adaptive', accent)[1].name(),
-                      base.lighter(116).name())
-    return tuple(QColor(c) for c in colors)
+    palette = [QColor(value) for value in _PALETTES.get(style, _PALETTES['glass'])]
+    if style in DEFAULT_THEMES:
+        return tuple(palette)
+    # A very slight echo of the selected accent ties the backgrounds to UI
+    # controls without turning every pastel or rainbow wallpaper the same hue.
+    selected = QColor(accent)
+    if selected.isValid():
+        amount = .075 if style in LIGHT_PRESETS else .10
+        for index in (1, 3):
+            color = palette[index]
+            palette[index] = QColor(
+                round(color.red() * (1 - amount) + selected.red() * amount),
+                round(color.green() * (1 - amount) + selected.green() * amount),
+                round(color.blue() * (1 - amount) + selected.blue() * amount),
+            )
+    return tuple(palette)
+
+
+def material_tint(style, base, accent, amount=.16):
+    """Glass material accent, kept close to the selected UI theme for contrast."""
+    original = QColor(base)
+    if style in DEFAULT_THEMES or style not in KEYS:
+        return original
+    source = _colors(style, accent, False)[1]
+    return QColor(
+        round(original.red() * (1 - amount) + source.red() * amount),
+        round(original.green() * (1 - amount) + source.green() * amount),
+        round(original.blue() * (1 - amount) + source.blue() * amount),
+    )
 
 
 def motion_colors(style, accent, light=False):
-    """The animated light follows the actual preset, not one generic hue."""
-    if style in ('glass', 'aurora'):
-        return QColor('#45b7e4'), QColor('#a77ae5')
-    if style in ('black_glass', 'obsidian'):
-        return QColor('#647994'), QColor('#a0a7bd')
-    if style == 'nebula':
-        return QColor('#a96be7'), QColor('#ee7db9')
-    if style in ('arctic', 'light'):
-        return QColor('#67bde6'), QColor('#a9d4ee')
-    if style == 'dark':
-        return QColor('#267da3'), QColor('#5e6bba')
-    base = QColor(accent)
-    if not base.isValid():
-        base = QColor('#4f8cff')
-    hue, sat, _val, _ = base.getHsv()
-    if hue < 0:
-        hue = 210
-    return (QColor.fromHsv(hue, min(200, max(75, sat)), 225 if not light else 185),
-            QColor.fromHsv((hue + 57) % 360, min(175, max(65, sat)),
-                           218 if not light else 190))
+    colors = _colors(style, accent, light)
+    return colors[1], colors[2]
 
 
 def minimal_color(intensity):
@@ -189,7 +191,7 @@ def render(size, style='adaptive', accent='#4f8cff', intensity=60,
         g.setColorAt(1, end)
         painter.fillRect(0, 0, w, h, QBrush(g))
 
-    # Two wide, translucent satin ribbons lend depth without busy textures.
+    # A restrained, almost invisible satin layer retains legibility.
     # Their edges remain far softer than dashboard charts or labels.
     for index, color in enumerate((second, third)):
         ribbon = QPainterPath()

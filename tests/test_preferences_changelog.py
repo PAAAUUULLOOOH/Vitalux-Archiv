@@ -86,14 +86,19 @@ def check_preferences(app):
 
             # Backdrop controls persist independently of the color scheme and
             # preserve the readable dropdown styles.
-            assert page.background_combo.count() == 11
+            assert page.background_combo.count() == 15
+            assert page.background_combo.findData('aurora') == -1
+            assert page.background_combo.findData('obsidian') == -1
+            assert page.background_combo.findData('nebula') == -1
+            assert page.background_combo.findData('arctic') == -1
+            assert page.background_combo.findData('adaptive') == -1
             assert page.background_combo.findData('theme_default') >= 0
             assert [page.background_combo.itemText(page.background_combo.findData(key))
                     for key in ('dark', 'light', 'glass', 'black_glass', 'minimal')] == [
                     'Dark', 'Light', 'Glass', 'Black Glass', 'Minimalistisch']
             assert page.background_sliders['background_intensity'].objectName() == 'backgroundSlider'
-            page.background_combo.setCurrentIndex(page.background_combo.findData('nebula'))
-            assert settings.get('background_style') == 'nebula'
+            page.background_combo.setCurrentIndex(page.background_combo.findData('pastel_rainbow'))
+            assert settings.get('background_style') == 'pastel_rainbow'
             page.background_sliders['background_intensity'].setValue(73)
             assert settings.get('background_intensity') == 73
             page.background_sliders['background_softness'].setValue(42)

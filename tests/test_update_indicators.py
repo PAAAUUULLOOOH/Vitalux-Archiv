@@ -8,7 +8,7 @@ sys.path.insert(0, os.getcwd())
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QApplication
 from vitalux import theme
-from vitalux.brand import PulseCore
+from vitalux.brand import PulseCore, TrayPulse
 from vitalux.widgets import NavButton
 from vitalux.window import MainWindow
 from vitalux.update_manager import UpdateManager
@@ -21,6 +21,24 @@ assert manager._timer.isActive(), 'Background update checks are not running'
 assert manager._timer.interval() == 6 * 3600 * 1000
 manager._timer.stop()
 manager.shutdown()
+
+class FakeTray:
+    def __init__(self):
+        self.icon = None
+    def setIcon(self, icon):
+        self.icon = icon
+
+fake_tray = FakeTray()
+tray_glow = TrayPulse(fake_tray)
+tray_glow.set_active(True)
+assert tray_glow.active and tray_glow._timer.isActive()
+first = tray_glow._render(0.1).toImage()
+second = tray_glow._render(1.7).toImage()
+assert first != second, "The tray update icon must visibly glow and pulse"
+assert fake_tray.icon is not None and not fake_tray.icon.isNull()
+tray_glow.set_active(False)
+assert not tray_glow.active and not tray_glow._timer.isActive()
+assert fake_tray.icon is not None and not fake_tray.icon.isNull()
 
 nav = NavButton('↻    Updates')
 nav.resize(235, 47)
@@ -54,4 +72,4 @@ assert not logo._update_available
 assert not status._tray_update_action.isVisible()
 nav.close()
 logo.close()
-print('Update animations, tray label and six-hour polling: PASS')
+print('App and tray logo glow, notification state and six-hour polling: PASS')

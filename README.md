@@ -46,13 +46,13 @@
 
 ### Design & Hintergründe
 
-- **Farbschemas:** Dark, Light, Glass, Black Glass und Minimalistisch. Die Seitenleiste bleibt farblich auf den jeweiligen Hintergrund abgestimmt; Glass und Black Glass behalten die ursprüngliche Glasoptik.
-- **Hintergründe:** **Automatisch (Farbschema)** nutzt den passenden Originalhintergrund. Die fünf ursprünglichen Designs sind außerdem einzeln als **Dark, Light, Glass, Black Glass und Minimalistisch** verfügbar. Zusätzlich: **Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost und Adaptiv** (folgt deiner Akzentfarbe). Farbschema und Hintergrund sind separat wählbar; das Farbschema Minimalistisch bleibt einfarbig.
+- **Farbschemas:** Dark, Light, Glass, Black Glass und Minimalistisch. Die **ursprüngliche Seitenleiste** mit Frosted-Glass-Material, Akzentkante und gewohntem Kontrast ist wiederhergestellt.
+- **Hintergründe:** **Automatisch (Farbschema)** sowie die Originale Dark, Light, Glass, Black Glass und Minimalistisch. Dazu neun neue Stile: **Hell** (Perlmutt, Morgenlicht, Eisblau), **Regenbogen** (Pastell, Prisma) und **Dunkel** (Tiefsee, Mitternacht, Samt, Graphit). Vorherige Zusatzhintergründe wurden entfernt; gespeicherte frühere Auswahlen fallen automatisch auf das aktuelle Farbschema zurück.
 - **Anpassung:** Feinere, farblich abgestimmte Slider für **Farbintensität** und **Hintergrundweichheit** (0–100 %); optionale sanfte Hintergrundanimation (standardmäßig **aus**). Die zusätzlichen Hintergründe bieten weichere Lichtverläufe und dezente Satinstrukturen.
 - **Akzentfarben:** Vorgaben oder benannte eigene Farben; **Bearbeiten → Löschen → Eigene Farbe …** sind die passenden Aktionen.
 - **Bedienung:** Keine aufschwebenden Hover-Texthinweise mehr innerhalb von Vitalux; sichtbare Hervorhebungen beim Überfahren bleiben. Dropdowns sind an das Farbschema angepasst und zeigen lange Bezeichnungen in geöffneten Listen.
 
-**Einheitliches Design:** Seitenleiste, Hintergrund und Glass-Kacheln verwenden dieselbe vorab abgestimmte Darstellung – einschließlich Light. Die Farbstärke lässt sich **auch für Dark, Light, Glass, Black Glass und Minimalistisch** anpassen. Minimalistisch bleibt bewusst einfarbig. Die Slider werden vollständig nativ gezeichnet; die Hintergrundanimation ist optional und abgestimmt auf das jeweilige Design.
+**Abgestimmtes Design:** Die klassische Seitenleiste ist zurück. Neue Paletten verwenden dezente Anteile der gewählten Akzentfarbe; Glaskacheln bleiben kontrastreich und die Schrift lesbar. Farbstärke und Weichheit lassen sich über nativ gezeichnete Regler ändern. Animationen sind optional und standardmäßig deaktiviert.
 
 Die Hintergrundeffekte sind **lokal gerenderte Qt-Farbverläufe**. Es werden weder ein Browser noch externe Hintergrunddateien benötigt.
 
@@ -116,7 +116,7 @@ XDG-Konfigurationen können die Pfade beeinflussen.
 
 ## Updates
 
-Vitalux prüft **beim Start und ungefähr alle sechs Stunden** GitHub Releases. Eine verfügbare Version wird durch ein sanftes Pulsieren des **Updates-Reiters und Vitalux-Logos** sichtbar. Zusätzlich erscheint **einmal pro Version** eine Tray-Benachrichtigung und ein Eintrag im Tray-Menü, sofern Benachrichtigungen unterstützt werden. **Installiert wird ausschließlich nach deiner Bestätigung**. Dort stehen auch die Neuerungen vorab und der **offline verfügbare, deutsch/englisch umschaltbare Changelog**. Downloads werden per SHA-256 geprüft; bei AppImage-Updates bleibt eine vorherige Version als Sicherung erhalten.
+Vitalux prüft **beim Start und ungefähr alle sechs Stunden** GitHub Releases. Bei einem Update **glühen und pulsieren das Vitalux-Logo in der App und das Tray-Symbol**, außerdem wird der Updates-Reiter hervorgehoben. Eine Benachrichtigung erscheint **einmal pro Version**, sofern die Systemleiste dies unterstützt; das Tray-Menü bietet einen direkten Zugang zu Updates. **Installiert wird ausschließlich nach deiner Bestätigung**. Dort stehen auch die Neuerungen vorab und der **offline verfügbare, deutsch/englisch umschaltbare Changelog**. Downloads werden per SHA-256 geprüft; bei AppImage-Updates bleibt eine vorherige Version als Sicherung erhalten.
 
 GitHub Actions veröffentlicht je Version **AppImage, Vollversion, passendes Differenzupdate und Prüfsummen**. Die vollständige Aktualisierung samt Neustart kann sich je nach Distribution unterscheiden.
 

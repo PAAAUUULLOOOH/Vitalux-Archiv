@@ -379,7 +379,9 @@ def paint_glass_body(p, widget, rect, radius, *, strong=False, compact=False, ac
     p.setClipPath(glass)
     if theme.mode() not in ('glass', 'black_glass'):
         # Solid cards are intentional. Dark and Light must not resemble frosted glass.
-        bg = QColor(theme.CARD)
+        bg_style = backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                     theme.mode())
+        bg = backdrops.material_tint(bg_style, theme.CARD, theme.accent(), .085)
         tint = QColor(theme.accent())
         bg2 = QColor(theme.CARD)
         bg2.setRed(round(bg2.red()*.94+tint.red()*.06))
@@ -400,6 +402,19 @@ def paint_glass_body(p, widget, rect, radius, *, strong=False, compact=False, ac
             overlay.setColorAt(0, rgba(28, 62, 88, 108 if strong else 80))
             overlay.setColorAt(.54, rgba(13, 27, 49, 130 if strong else 103))
             overlay.setColorAt(1, rgba(27, 31, 61, 123 if strong else 103))
+        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                  theme.mode())
+        if style not in backdrops.DEFAULT_THEMES:
+            # New wallpapers reflect subtly in the cards, but the accent hue
+            # does not overwrite the text contrast of Glass/Black Glass.
+            material = backdrops.material_tint(style, theme.CARD, theme.accent(), .24)
+            top = QColor(material)
+            top.setAlpha(174 if strong else
+                         149 if style in backdrops.LIGHT_PRESETS else 128)
+            bottom = QColor(material).darker(125)
+            bottom.setAlpha(166 if strong else 136)
+            overlay.setColorAt(0, top)
+            overlay.setColorAt(1, bottom)
         p.fillPath(glass, QBrush(overlay))
         accent = theme.accent_qcolor()
         accent.setAlpha(43 if strong or active else 17)
@@ -454,23 +469,51 @@ class GlassSidebar(QFrame):
         self._position_toggle()
 
     def paintEvent(self, event):
+        """Restore the original Vitalux frosted sidebar and luminous seam.
+
+        Matching Glass/Black Glass/Light/Dark schemes keep their original
+        treatment. For new wallpapers, the frost adapts gently to the chosen
+        palette so it remains related to the cards and the scene.
+        """
         p = QPainter(self)
+        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                  theme.mode())
+        matching = style == theme.mode()
         if theme.mode() == 'minimal':
-            # Match the same monochrome intensity as the central scene.
-            p.fillRect(self.rect(),
-                       backdrops.minimal_color(settings.get('background_intensity', 60)))
+            # Original opaque rail, with a small monochrome response to the
+            # global intensity slider.
+            base = backdrops.minimal_color(settings.get('background_intensity', 60))
+            p.fillRect(self.rect(), QColor(theme.blend(theme.SIDEBAR, base.name(), .68)))
         else:
-            # Use the exact same composed canvas at the actual sidebar origin.
-            # Never add a second opaque tint (the source of the dark strip).
-            draw_frosted_backdrop(p, self, QRectF(self.rect()),
-                                  softened=False)
-        # Only the seam separates navigation from content.
+            p.setRenderHint(QPainter.Antialiasing)
+            rect = QRectF(self.rect())
+            if theme.mode() in ('glass', 'black_glass'):
+                draw_frosted_backdrop(p, self, rect, 1.0)
+                shade = QLinearGradient(0, 0, self.width(), 0)
+                if theme.mode() == 'black_glass':
+                    # Original two-sided black-glass frost.
+                    left, right = (215, 179) if matching else (145, 118)
+                    shade.setColorAt(0, rgba(2, 2, 3, left))
+                    shade.setColorAt(1, rgba(13, 13, 16, right))
+                else:
+                    # Original blue-grey transparent glass material.
+                    left, right = (175, 133) if matching else (
+                        (139, 117) if style in backdrops.LIGHT_PRESETS
+                        else (112, 96))
+                    shade.setColorAt(0, rgba(7, 15, 30, left))
+                    shade.setColorAt(1, rgba(15, 28, 47, right))
+                p.fillRect(rect, QBrush(shade))
+            else:
+                material = QColor(theme.SIDEBAR)
+                if not matching:
+                    material.setAlpha(226 if theme.mode() == 'light' else 188)
+                p.fillRect(rect, material)
         side = QLinearGradient(0, 0, 0, max(1, self.height()))
-        accent = theme.accent_qcolor(82)
+        accent = theme.accent_qcolor(130 if theme.mode() in ('glass', 'black_glass') else 82)
         side.setColorAt(0, QColor(theme.BORDER))
         side.setColorAt(.5, accent)
         side.setColorAt(1, QColor(theme.BORDER))
-        p.setPen(QPen(QBrush(side), 1.0))
+        p.setPen(QPen(QBrush(side), 1.1))
         p.drawLine(self.width()-1, 0, self.width()-1, self.height())
         p.end()
 

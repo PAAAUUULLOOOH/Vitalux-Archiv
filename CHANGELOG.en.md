@@ -4,6 +4,13 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.65] - 2026-10-17
+- The Vitalux system tray icon now glows and breathes when an update is available, returning to the normal icon afterwards. The in-app logo has a brighter accent-coordinated halo; Updates navigation and the one-time tray notification remain intact.
+- Restored the original frosted sidebar with its illuminated seam. For non-default background palettes, frost intensity adjusts modestly while original color schemes retain their familiar look.
+- Replaced all former additional backgrounds with nine coordinated options: Light (Pearl, Daybreak, Ice Blue), Rainbow (Pastel, Prism), Dark (Deep Ocean, Midnight, Velvet, Graphite). The five original color-scheme backgrounds remain.
+- The new gradients subtly echo the accent color and support intensity, softness and optional animation. Removed saved presets automatically fall back to the current theme's original background.
+- Updated the compact GitHub README and bilingual built-in guide, and extended regression coverage for wallpapers and animated tray icons.
+
 ## [v0.9.3.64] - 2026-10-17
 - Composed one shared background for the canvas, sidebar and frosted cards, removing the separate dark sidebar tint and harmonizing Light.
 - Refined color palettes and optional, smoothly moving ambient gradients for Aurora Glass, Nebula Purple, Obsidian Black, Arctic Frost and Adaptive.

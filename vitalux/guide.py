@@ -76,15 +76,15 @@ SLIDES = [
     (
         "Darstellung und Einstellungen",
         "Passe Vitalux mit Farbschemas, Hintergründen, Farbstärke und optionalen Animationen an.",
-        "Die fünf Originalhintergründe heißen Dark, Light, Glass, Black Glass und Minimalistisch.",
+        "Die fünf Originalhintergründe bleiben erhalten. Neue Designs sind als Hell, Regenbogen und Dunkel gruppiert.",
         "Eigene Akzentfarben lassen sich mit „Bearbeiten“ ändern oder mit „Löschen“ entfernen.",
-        "Seitenleiste und Kacheln bleiben farblich einheitlich, auch bei Light. Die eleganten Regler verändern die Farbstärke bei allen Standardhintergründen und die Weichheit des Hintergrunds.",
+        "Die ursprüngliche Glas-Seitenleiste ist wieder da; Farben, Kacheln und neue Hintergründe sind aufeinander abgestimmt. Mit den Reglern änderst du Intensität und Weichheit.",
         "settings",
     ),
     (
         "Updates und Informationen",
         "Vitalux prüft automatisch beim Start und etwa alle sechs Stunden auf Updates.",
-        "Bei einem Update pulsieren die Kategorie und das Logo dezent; eine Tray-Nachricht nennt die Version.",
+        "Bei einem Update glüht das Vitalux-Logo in der App und im Tray. Der Updates-Reiter pulsiert; eine Tray-Nachricht nennt die Version.",
         "Vor dem Aktualisieren siehst du die Neuerungen; erst „Jetzt aktualisieren“ startet den Download.",
         "Der Changelog bleibt auch danach im Updates-Reiter auf Deutsch oder Englisch lesbar.",
         "updates",

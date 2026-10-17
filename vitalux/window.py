@@ -10,7 +10,7 @@ from .i18n import tr
 from .pages import CpuPage, DiskPage, GpuPage, MemoryPage, NetworkPage, OverviewPage, SystemPage
 from .pages_extra import InfoPage, UpdatePage
 from .control import SensorsPage, PreferencesPage
-from .brand import PulseCore, wordmark_pixmap
+from .brand import PulseCore, TrayPulse, wordmark_pixmap
 from .widgets import NavButton, SidebarToggle, ChartPanel, Gauge, label
 from .glass import AmbientScene, GlassSidebar, GlassSurface
 from .sidebar_transition import SidebarTransition, SidebarFreeze
@@ -73,6 +73,7 @@ class MainWindow(QMainWindow):
         from .brand import app_icon
         self._tray = QSystemTrayIcon(app_icon(), self)
         self._tray.setToolTip('')
+        self._tray_glow = TrayPulse(self._tray, self)
         self._tray_menu = QMenu(self)
         self._tray_open_action = QAction(tr('Vitalux öffnen'), self._tray_menu)
         self._tray_quit_action = QAction(tr('Beenden'), self._tray_menu)
@@ -305,6 +306,8 @@ class MainWindow(QMainWindow):
             self.update_btn.setToolTip('')
         if hasattr(self, 'pulse_core'):
             self.pulse_core.set_update_available(on)
+        if hasattr(self, '_tray_glow'):
+            self._tray_glow.set_active(on)
         if self._tray is not None:
             self._tray_update_action.setVisible(on)
             if on:
@@ -592,6 +595,7 @@ class MainWindow(QMainWindow):
         QApplication.instance().setStyleSheet(theme.stylesheet())
         self.brand_mark.setPixmap(wordmark_pixmap(200, 42))
         self.pulse_core.sync_theme()
+        self._tray_glow.refresh()
         minimal = theme.mode() == 'minimal'
         self.centralWidget().set_low_power(minimal)
         # Disabling graphics effects (rather than removing them) retains the
@@ -745,6 +749,7 @@ class MainWindow(QMainWindow):
         self.sampler.requestInterruption()
         self.sampler.wait(7000)
         self._tray_click_timer.stop()
+        self._tray_glow.stop()
         if self._tray is not None:
             self._tray.hide()
         self.manager.shutdown()
