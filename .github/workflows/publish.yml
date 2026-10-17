@@ -13,6 +13,8 @@ on:
       - "Portable-pruefen.sh"
       - "bin/fio"
       - "tests/**"
+      - "scripts/create-release-archives.py"
+      - "packaging/**"
       - ".github/workflows/publish.yml"
   workflow_dispatch:
 
@@ -44,31 +46,35 @@ jobs:
           echo "TAG=$TAG" >> "$GITHUB_ENV"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "RELEASE_EXISTS=true" >> "$GITHUB_ENV"
-            echo "::notice::Release $TAG already exists; skipped to avoid silently replacing public files."
+            echo "::notice::Release $TAG already exists; tests still run but files will not be overwritten."
           else
             echo "RELEASE_EXISTS=false" >> "$GITHUB_ENV"
           fi
-      - name: Historische gepackte Laufzeit laden
-        if: env.RELEASE_EXISTS == 'false'
+          PREVIOUS_TAG="$(gh release view --json tagName --jq .tagName)"
+          [[ "$PREVIOUS_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || exit 1
+          echo "BASELINE_TAG=$PREVIOUS_TAG" >> "$GITHUB_ENV"
+          echo "PREVIOUS_VERSION=${PREVIOUS_TAG#v}" >> "$GITHUB_ENV"
+      - name: Gepackte Laufzeit aus dem vorherigen Release laden
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p build/baseline
-          gh release download v0.9.3.46 \
-            --pattern "Vitalux-v0.9.3.46-linux-x86_64-Portabel.zip" \
-            --dir build
-          unzip -tq build/Vitalux-v0.9.3.46-linux-x86_64-Portabel.zip
-          unzip -q build/Vitalux-v0.9.3.46-linux-x86_64-Portabel.zip -d build/baseline
-          test -x build/baseline/Vitalux-v0.9.3.46/runtime/bin/python3.12
-          test -f build/baseline/Vitalux-v0.9.3.46/bin/fio.real
+          ZIP="Vitalux-${BASELINE_TAG}-linux-x86_64.zip"
+          if ! gh release view "$BASELINE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$ZIP"; then
+            ZIP="Vitalux-${BASELINE_TAG}-linux-x86_64-Portabel.zip"
+          fi
+          gh release download "$BASELINE_TAG" --pattern "$ZIP" --dir build
+          unzip -tq "build/$ZIP"
+          unzip -q "build/$ZIP" -d build/baseline
+          test -x "build/baseline/Vitalux-${BASELINE_TAG}/runtime/bin/python3.12"
+          test -f "build/baseline/Vitalux-${BASELINE_TAG}/bin/fio.real"
       - name: Vollständiges Programm aus Repository-Quellcode zusammensetzen
-        if: env.RELEASE_EXISTS == 'false'
         shell: bash
         run: |
           set -euo pipefail
-          SOURCE="build/baseline/Vitalux-v0.9.3.46"
+          SOURCE="build/baseline/Vitalux-${BASELINE_TAG}"
           DEST="build/staged/Vitalux-${TAG}"
           mkdir -p build/staged
           cp -a "$SOURCE" "$DEST"
@@ -92,21 +98,18 @@ jobs:
           print('Vitalux source and runtime package assembled')
           PY
       - name: Changelog-Version prüfen und Release-Notizen erzeugen
-        if: env.RELEASE_EXISTS == 'false'
         shell: bash
         run: |
           set -euo pipefail
           python3 scripts/release_notes.py "$VERSION" "$RUNNER_TEMP/vitalux-release-notes.md"
           test -s "$RUNNER_TEMP/vitalux-release-notes.md"
       - name: Grafische Qt-Abhängigkeiten für Headless-Tests installieren
-        if: env.RELEASE_EXISTS == 'false'
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y libegl1 libgl1 libopengl0 libxkbcommon-x11-0 libxcb-cursor0
       - name: Theme-Wechsel in Qt testen (Glass → Minimal → Glass)
-        if: env.RELEASE_EXISTS == 'false'
         shell: bash
         run: |
           set -euo pipefail
@@ -117,7 +120,6 @@ jobs:
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_glass_theme_switch.py"
       - name: Native Anleitung und Übersetzungen testen
-        if: env.RELEASE_EXISTS == 'false'
         shell: bash
         run: |
           set -euo pipefail
@@ -128,7 +130,6 @@ jobs:
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_guide_locale.py"
       - name: Dashboard-Logo und themenabhängiges Branding prüfen
-        if: env.RELEASE_EXISTS == 'false'
         shell: bash
         env:
           QT_QPA_PLATFORM: offscreen
@@ -142,7 +143,6 @@ jobs:
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_dashboard_brand.py"
       - name: Einstellungen und Changelog in Qt testen
-        if: env.RELEASE_EXISTS == 'false'
         shell: bash
         env:
           QT_QPA_PLATFORM: offscreen
@@ -155,14 +155,15 @@ jobs:
           LD_LIBRARY_PATH="$PWD/lib" \
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_preferences_changelog.py"
+          LD_LIBRARY_PATH="$PWD/lib" "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_warning_render.py"
       - name: Automatische Wiederherstellung und Shell-Starter testen
-        if: env.RELEASE_EXISTS == 'false'
         shell: bash
         run: |
           set -euo pipefail
           bash -n run.sh packaging/AppRun packaging/build-appimage.sh packaging/appimage-rollback-watch.sh
           python3 tests/test_update_rollback.py
           python3 tests/test_zip_rollback.py
+          python3 tests/test_core_behaviors.py
       - name: AppImage-Werkzeug bereitstellen
         if: env.RELEASE_EXISTS == 'false'
         shell: bash
@@ -212,8 +213,8 @@ jobs:
           set -euo pipefail
           python3 scripts/create-release-archives.py \
             "build/staged/Vitalux-${TAG}" \
-            "build/baseline/Vitalux-v0.9.3.46" \
-            dist "0.9.3.46"
+            "build/baseline/Vitalux-${BASELINE_TAG}" \
+            dist "$PREVIOUS_VERSION"
           (cd dist && sha256sum *.AppImage *.zip > "Vitalux-${TAG}-SHA256SUMS.txt")
           unzip -tq "dist/Vitalux-${TAG}-linux-x86_64.zip"
       - name: Build-Artefakte zum Prüfen aufbewahren
