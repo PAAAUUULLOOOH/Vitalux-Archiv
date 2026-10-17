@@ -468,3 +468,11 @@ EN_MORE.update({
     "Für diese installierte Version ist kein Changelog verfügbar.": "No changelog is available for this installed version.",
     "Changelog": "Changelog",
 })
+
+# New guide copy (v0.9.3.55): matched translations for runtime DE/EN switches.
+EN_MORE.update({
+    "Unter Einstellungen aktivierst du Hardware-Warnungen; die Zahlenfelder stehen links neben der jeweiligen Bezeichnung.": "Enable hardware alerts in Settings; each number field sits to the left of its label.",
+    "Eigene Akzentfarben lassen sich benennen, speichern und über das X wieder entfernen.": "Custom accent colors can be named, saved and removed again using the X.",
+    "Vor dem Aktualisieren siehst du die Neuerungen; erst „Jetzt aktualisieren“ startet den Download.": "Review what's new before updating; only “Update now” starts the download.",
+    "Der Changelog bleibt auch danach im Updates-Reiter auf Deutsch oder Englisch lesbar.": "After updating, the changelog remains available in the Updates tab in German or English.",
+})
