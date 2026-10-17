@@ -5,6 +5,14 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.56] - 2026-10-17
+- Gespeicherte eigene Akzentfarben können über einen neuen Button „Bearbeiten“ in Name und Farbwert geändert werden, ohne einen zusätzlichen Eintrag anzulegen.
+- Für eigene Farben erscheint ein separater Button „Löschen“; beide Aktionen sind nur bei einer ausgewählten eigenen Farbe sichtbar.
+- Alle Dropdown-Menüs an Dark, Light, Glass, Black Glass und Minimalistisch angepasst, einschließlich SMART-Laufwerksauswahl; die Auswahlfelder wurden nur geringfügig schmaler gemacht.
+- Temperatur- und Auslastungswarnwerte stehen wieder rechts hinter den Beschriftungen, weiterhin mit schmalen, zentrierten Zahlenfeldern.
+- Im Update-Changelog wird immer nur die gerade ausgewählte Sprache angezeigt: Deutsch oder Englisch.
+- Integrierte Anleitung und GitHub-README zu den neuen Bedienelementen aktualisiert.
+
 ## [v0.9.3.55] - 2026-10-17
 - Dropdown-Menüs mit durchgängig gestalteten Hintergründen überarbeitet; störende schwarze Leisten oben und unten beseitigt.
 - Schmale, mittig ausgerichtete Temperatur- und Auslastungswarnwerte links vor ihre Beschriftungen verschoben, ohne die Kachelgröße zu verändern.
