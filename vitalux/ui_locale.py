@@ -6,12 +6,12 @@ labels all pass through the same translation function.
 """
 from PySide6.QtWidgets import (QLabel as _QLabel, QPushButton as _QPushButton,
     QCheckBox as _QCheckBox, QComboBox as _QComboBox, QDialog as _QDialog,
-    QListView as _QListView, QFrame as _QFrame, QStyleFactory as _QStyleFactory,
+    QListView as _QListView, QFrame as _QFrame, QStyleFactory as _QStyleFactory, QStyle as _QStyle, QProxyStyle as _QProxyStyle,
     QListWidgetItem as _QListWidgetItem, QMessageBox as _QMessageBox,
     QFileDialog as _QFileDialog)
 from .i18n import tr
-from PySide6.QtCore import Qt, QRectF, QSize
-from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPalette
+from PySide6.QtCore import Qt, QRectF, QSize, QPointF
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPalette, QPolygonF
 
 
 def localized(x):
@@ -105,13 +105,21 @@ class QCheckBox(_QCheckBox):
                          Qt.AlignLeft | Qt.AlignVCenter, self.text())
         painter.end()
 
+class _ListPopupStyle(_QProxyStyle):
+    def styleHint(self, hint, option=None, widget=None, returnData=None):
+        if hint == _QStyle.SH_ComboBox_Popup:
+            return 0
+        return super().styleHint(hint, option, widget, returnData)
+
+
 class QComboBox(_QComboBox):
     def __init__(self,*args,**kwargs):
         self._source_items = []
         super().__init__(*args,**kwargs)
         # KDE/Wayland native popup styles sometimes show black top and bottom
         # scroll strips. A regular Fusion list popup avoids native menu bands.
-        self._popup_style = _QStyleFactory.create("Fusion")
+        fusion = _QStyleFactory.create("Fusion")
+        self._popup_style = _ListPopupStyle(fusion) if fusion is not None else None
         if self._popup_style is not None:
             self.setStyle(self._popup_style)
         view = _QListView(self)
@@ -130,13 +138,25 @@ class QComboBox(_QComboBox):
         # Trim just a few pixels without forcing a width that would truncate
         # longer localized dropdown values or user-named accent colors.
         preferred = super().sizeHint()
-        return QSize(max(88, preferred.width() - 8), preferred.height())
+        return QSize(max(88, preferred.width() - 16), preferred.height())
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        from . import theme
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(QPen(QColor(theme.accent() if self.isEnabled() else theme.MUTED), 1.8,
+                            Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        x, y = self.width() - 11.5, self.height() / 2
+        painter.drawPolyline(QPolygonF([QPointF(x-4, y-2), QPointF(x, y+2),
+                                        QPointF(x+4, y-2)]))
+        painter.end()
 
     def showPopup(self):
         # The popup is a native Qt window; style its whole frame and viewport
         # to avoid unthemed black strips above/below the option rows.
         from . import theme
-        surface = theme.blend(theme.accent(), theme.CARD, .05)
+        surface = theme.combo_surface()
         border = theme.BORDER
         accent = theme.accent()
         view = self.view()
@@ -153,11 +173,12 @@ class QComboBox(_QComboBox):
         view.setPalette(popup_palette)
         view.viewport().setPalette(popup_palette)
         container.setAutoFillBackground(True)
+        container.setAttribute(Qt.WA_StyledBackground, True)
         container.setObjectName("vitaluxComboPopup")
         container.setStyleSheet(
             f"QFrame#vitaluxComboPopup {{ background: {surface}; "
             f"border: 1px solid {border}; border-radius: 9px; padding: 2px; }}"
-            f"QListView {{ background: {surface}; color: {theme.TEXT}; "
+            f"QListView, QListView QWidget#qt_scrollarea_viewport {{ background: {surface}; color: {theme.TEXT}; "
             f"border: none; outline: none; padding: 0px; }}"
             f"QListView::item {{ color: {theme.TEXT}; border: none; "
             f"padding: 7px 10px; min-height: 22px; }}"
