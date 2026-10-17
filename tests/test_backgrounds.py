@@ -61,6 +61,7 @@ def run():
                 assert not scene.sharp_backdrop().isNull(), key
             settings.set('background_style', 'theme_default')
             scene.sync_background()
+            assert not scene.sharp_backdrop().isNull()
             assert scene._asset_mode == 'glass', "Automatic should use original Glass"
             # The user accent must change the adaptive background without
             # requiring restart, even if window dimensions do not change.
