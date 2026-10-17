@@ -4,6 +4,11 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.71] - 2026-10-17
+- Condensed the GitHub README's Design & Backgrounds section into a concise, professional overview, retaining its features, 14 wallpaper options and 630 selectable combinations.
+- Enforced the four-part version sequence: the last component runs from 1 through 99, then the preceding component increments. v0.9.3.99 is followed by v0.9.4.1, not v0.9.3.100.
+- GitHub Actions now validates the exact successor of each released version, with regression tests covering ordinary increments and the .99-to-.1 transition.
+
 ## [v0.9.3.70] - 2026-10-17
 - Unified four log files: `vitalux.log`, `errors.log`, `installation.log` and `restart.log` now include local ISO timestamps with timezone and the relevant Vitalux version. Native crash frames have timestamped start and crash-end markers.
 - Removed the Northern Lights, Night Waves and Violet Mist animations, palettes and rendering branches. Sparkle is the only remaining animated wallpaper.

@@ -46,17 +46,12 @@
 
 ### Design & Hintergründe
 
-- **Farbschemas:** Standardmäßig **Glass mit Vitalux Blau**. Auch Dark, Light, Black Glass und Minimalistisch stehen zur Verfügung. Bereits gespeicherte Einstellungen bleiben unverändert.
-- **Hintergründe:** Insgesamt **14 Auswahlmöglichkeiten**: Automatisch (Farbschema), die Originale **Dark, Light, Glass, Black Glass, Minimalistisch**, **Morgenlicht**, **Prisma**, **Tiefsee**, **Mitternacht**, **Samt**, **Graphit**, **Adaptiv · Akzentfarbe** und **Funkeln**. **Nur Funkeln ist animiert**. Perlmutt, Eisblau, Nordlicht, Nachtwellen und Violetter Nebel wurden vollständig entfernt.
-- **Anpassung:** Jeder Hintergrund besitzt fest abgestimmte Farben und Weichheit. Die globalen Regler für Farbintensität und Hintergrundweichheit sowie der Schalter „Hintergrund sanft animieren“ wurden entfernt. Helle Wallpaper behalten ihre Helligkeit unabhängig vom gewählten Farbschema.
-- **Akzentfarben & Symbole:** **Vitalux Blau, Cyan, Violett, Grün, Orange, Gelb, Rot und Rosa** besitzen eigene Logo-Varianten für Fenster, Taskleiste und Tray. Eine Benutzerinstallation verwendet pro Farbe einen eigenen Icon-Dateinamen, damit KDE den Wechsel besser erkennt. Bei einem verfügbaren Update leuchten die Logos in der ausgewählten Akzentfarbe.
-- **Bedienung:** Die Seitenleiste bleibt wie ursprünglich **fest links**; der Ziehgriff und die Rechtspositionierung wurden vollständig entfernt. Der Pfeil für die Dashboard-Layoutbearbeitung verliert nach dem Schließen seine Markierung. Hover-Texthinweise bleiben deaktiviert.
+- **Farbschemas:** Glass mit Vitalux Blau (Standard), Dark, Light, Black Glass und Minimalistisch.
+- **Hintergründe:** 14 Optionen – von dezenten Verläufen bis **Adaptiv · Akzentfarbe**. Nur **Funkeln** ist animiert.
+- **Akzentfarben:** Acht Voreinstellungen, Distributionsfarbe und frei definierbare Farben; passende App- und Tray-Symbole.
+- **Oberfläche:** Einheitliche Glasoptik, links angeordnete Seitenleiste und lokal gerenderte Qt-Hintergründe ohne Browser.
 
-**Farbkombinationen:** 5 Farbschemas × 14 Hintergrund-Auswahlmöglichkeiten × 9 Akzentoptionen (8 feste Farben + 1 Distributionsfarbe) = **630 auswählbare Kombinationen**. Davon sind **560 Kombinationen mit festen Akzentfarben** möglich (5 × 14 × 8). Die 70 zusätzlichen Einstellungen mit der Distributionsfarbe hängen von deiner Distribution ab. „Automatisch (Farbschema)“ verwendet den zum Schema gehörenden Hintergrund, sodass einige Auswahlen optisch identisch sein können. Benutzerdefinierte Akzentfarben schaffen weitere, nicht fest begrenzte Möglichkeiten.
-
-**Abgestimmtes Design:** Die fest links angeordnete Seitenleiste ist farblich auf die Kacheln abgestimmt. Der Dashboard-Pfeil und das Glühen bei Updates behalten ihre vertraute Position; die Benachrichtigungsanimation nutzt die jeweils ausgewählte Symbolfarbe.
-
-Die Hintergrundeffekte sind **lokal gerenderte Qt-Farbverläufe**. Es werden weder ein Browser noch externe Hintergrunddateien benötigt.
+**630 wählbare Kombinationen:** 5 Farbschemas × 14 Hintergründe × 9 Akzentoptionen (davon 8 feste Farben). Eigene Farben erweitern die Auswahl; manche Kombinationen können optisch identisch sein.
 
 ### Monitoring, Warnungen & Benchmarks
 
@@ -121,6 +116,8 @@ XDG-Konfigurationen können die Pfade beeinflussen.
 Vitalux prüft **beim Start und ungefähr alle sechs Stunden** GitHub Releases. Bei einem Update **glühen und pulsieren das Vitalux-Logo in der App und das Tray-Symbol**, außerdem wird der Updates-Reiter hervorgehoben. Eine Benachrichtigung erscheint **einmal pro Version**, sofern die Systemleiste dies unterstützt; das Tray-Menü bietet einen direkten Zugang zu Updates. **Installiert wird ausschließlich nach deiner Bestätigung**. Dort stehen auch die Neuerungen vorab und der **offline verfügbare, deutsch/englisch umschaltbare Changelog**. Downloads werden per SHA-256 geprüft; bei AppImage-Updates bleibt eine vorherige Version als Sicherung erhalten.
 
 GitHub Actions veröffentlicht je Version **AppImage, Vollversion, passendes Differenzupdate und Prüfsummen**. Die vollständige Aktualisierung samt Neustart kann sich je nach Distribution unterscheiden.
+
+**Versionierung:** Die letzte Ziffer zählt von 1 bis 99. Danach steigt die vorletzte Ziffer und die letzte beginnt wieder bei 1: **v0.9.3.99 → v0.9.4.1** (nicht v0.9.3.100). Dies wird beim Veröffentlichen automatisch geprüft.
 
 ## Hilfe
 

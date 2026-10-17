@@ -8,6 +8,7 @@ on:
       - "CHANGELOG.md"
       - "CHANGELOG.en.md"
       - "scripts/release_notes.py"
+      - "scripts/versioning.py"
       - "assets/**"
       - "run.sh"
       - "Portable-pruefen.sh"
@@ -54,6 +55,9 @@ jobs:
           [[ "$PREVIOUS_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || exit 1
           echo "BASELINE_TAG=$PREVIOUS_TAG" >> "$GITHUB_ENV"
           echo "PREVIOUS_VERSION=${PREVIOUS_TAG#v}" >> "$GITHUB_ENV"
+          if [[ "$RELEASE_EXISTS" == "false" ]]; then
+            python3 scripts/versioning.py verify "$PREVIOUS_TAG" "$VERSION"
+          fi
       - name: Gepackte Laufzeit aus dem vorherigen Release laden
         shell: bash
         env:
@@ -171,6 +175,7 @@ jobs:
           python3 tests/test_update_rollback.py
           python3 tests/test_zip_rollback.py
           python3 tests/test_core_behaviors.py
+          python3 tests/test_versioning.py
           python3 tests/test_log_timestamps.py
       - name: AppImage-Werkzeug bereitstellen
         if: env.RELEASE_EXISTS == 'false'
