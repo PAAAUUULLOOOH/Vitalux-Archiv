@@ -197,6 +197,7 @@ oldpid={os.getpid()}
 target={q(target)}
 staged={q(staged)}
 backup={q(target + '.previous')}
+state_dir={q(os.path.join(os.environ.get('XDG_STATE_HOME') or os.path.expanduser('~/.local/state'), 'vitalux'))}
 for i in $(seq 1 150); do
   if ! kill -0 "$oldpid" 2>/dev/null; then break; fi
   sleep 0.2
@@ -207,7 +208,10 @@ cp -p -- "$target" "${{backup}}.tmp"
 mv -f -- "${{backup}}.tmp" "$backup"
 mv -f -- "$staged" "$target"
 unset APPDIR APPIMAGE LD_LIBRARY_PATH LD_PRELOAD PYTHONHOME PYTHONPATH PYTHONUSERBASE
-"$target" >/dev/null 2>&1 &
+mkdir -p "$state_dir"
+printf '\\n=== Vitalux update restart: %s ===\\n' "$(date -Is)" >> "$state_dir/restart.log"
+# Bypass first-run dialog; the user has already chosen how to run Vitalux.
+"$target" --launch >> "$state_dir/restart.log" 2>&1 &
 """
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as f:
@@ -220,6 +224,45 @@ unset APPDIR APPIMAGE LD_LIBRARY_PATH LD_PRELOAD PYTHONHOME PYTHONPATH PYTHONUSE
         except OSError: pass
         raise
 
+
+
+def cleanup_previous_versions(root=None, appimage=None):
+    """Remove only Vitalux-managed rollback copies after a healthy new launch.
+
+    Called several seconds *after* the window opens. A failed launch leaves
+    the previous AppImage / ZIP snapshot available for manual recovery.
+    Never touch other downloaded AppImages, ZIP archives or personal files.
+    """
+    if appimage is None:
+        appimage = appimage_path()
+    if appimage:
+        target = os.path.realpath(appimage)
+        if not target.endswith('.AppImage') or not os.path.isfile(target):
+            return False
+        previous = target + '.previous'
+        if os.path.isfile(previous) and not os.path.islink(previous):
+            os.unlink(previous)
+            return True
+        return False
+
+    root = os.path.realpath(root or app_root())
+    previous = os.path.join(root, '.backup')
+    meta = os.path.join(previous, 'metadata.json')
+    if os.path.islink(previous) or not backup_available(root):
+        return False
+    try:
+        with open(meta, encoding='utf-8') as src:
+            old_version = str(json.load(src).get('version', ''))
+    except (OSError, ValueError, TypeError):
+        return False
+    # A metadata file from a newer version must never be deleted by
+    # running an older installed executable.
+    if not re.fullmatch(r'\d+\.\d+\.\d+(?:\.\d+)?', old_version):
+        return False
+    if _ver(old_version) >= _ver(__version__):
+        return False
+    shutil.rmtree(previous)
+    return True
 
 
 def _find_root(extracted):
