@@ -130,6 +130,8 @@ class DashboardBoard(QWidget):
         old = settings.get('dashboard_layout', {})
         self.order = normalize_order(settings.get('dashboard_order', None),old)
         self.hidden = set(k for k in settings.get('dashboard_hidden', []) if k in ORDER)
+        # The distro mark belongs to the hero card but can be hidden independently.
+        self.distro_logo_visible = settings.get('dashboard_distro_logo_visible', True) is not False
         self.tiles = {}
         self.editing = False
         self.history = []
@@ -268,7 +270,7 @@ class DashboardBoard(QWidget):
         QApplication.instance().installEventFilter(self)
         self.undo_shortcut.setEnabled(True)
         self.history.clear()
-        self._snapshot=(list(self.order),set(self.hidden))
+        self._snapshot=(list(self.order),set(self.hidden),self.distro_logo_visible)
         for tile in self.tiles.values():tile.set_editing(True)
         self.refresh_geometry()
 
@@ -277,6 +279,7 @@ class DashboardBoard(QWidget):
         QApplication.instance().removeEventFilter(self)
         if not save and self._snapshot is not None:
             self.order,self.hidden=list(self._snapshot[0]),set(self._snapshot[1])
+            self.distro_logo_visible = self._snapshot[2]
         self.editing=False
         self.undo_shortcut.setEnabled(False)
         self.history.clear()
@@ -287,22 +290,26 @@ class DashboardBoard(QWidget):
         if save:
             settings.set('dashboard_order',list(self.order))
             settings.set('dashboard_hidden',sorted(self.hidden))
+            settings.set('dashboard_distro_logo_visible',self.distro_logo_visible)
             # Retain normalized positions for compatibility with earlier builds.
             settings.set('dashboard_layout',{k:list(v) for k,v in grid_pack(self.order,(),12).items()})
 
     def _push_undo(self):
         if self.editing:
-            self.history.append((list(self.order),set(self.hidden)))
+            self.history.append((list(self.order),set(self.hidden),self.distro_logo_visible))
             self.history=self.history[-30:]
             self.changed.emit()
 
     def undo(self):
         if not self.editing or not self.history:return
-        self.order,self.hidden=self.history.pop()
+        self.order,self.hidden,self.distro_logo_visible=self.history.pop()
         self.refresh_geometry(animate=True)
         self.changed.emit()
 
     def hide_tile(self,key):
+        if key == 'distro_logo':
+            self.hide_distro_logo()
+            return
         if not self.editing or key in self.hidden:return
         self._push_undo()
         self.hidden.add(key)
@@ -310,10 +317,25 @@ class DashboardBoard(QWidget):
         self.changed.emit()
 
     def show_tile(self,key):
+        if key == 'distro_logo':
+            self.show_distro_logo()
+            return
         if not self.editing or key not in self.hidden:return
         self._push_undo()
         self.hidden.remove(key)
         self.refresh_geometry(animate=True)
+        self.changed.emit()
+
+    def hide_distro_logo(self):
+        if not self.editing or not self.distro_logo_visible:return
+        self._push_undo()
+        self.distro_logo_visible = False
+        self.changed.emit()
+
+    def show_distro_logo(self):
+        if not self.editing or self.distro_logo_visible:return
+        self._push_undo()
+        self.distro_logo_visible = True
         self.changed.emit()
 
     def reset(self):
@@ -321,6 +343,7 @@ class DashboardBoard(QWidget):
         self._push_undo()
         self.order=list(ORDER)
         self.hidden.clear()
+        self.distro_logo_visible = True
         self.refresh_geometry(animate=True)
         self.changed.emit()
 
@@ -361,7 +384,8 @@ class DashboardBoard(QWidget):
         if owner is None or not owner.isVisible() or owner.key in self.hidden:
             return super().eventFilter(watched,event)
         # The remove button must receive the click without starting a drag.
-        if watched is owner.remove or owner.remove.isAncestorOf(watched):
+        if (watched is owner.remove or owner.remove.isAncestorOf(watched)
+                or (isinstance(watched, QToolButton) and watched.property('distroLogoRemove'))):
             return super().eventFilter(watched,event)
         self.begin_drag(owner.key,event.globalPosition().toPoint())
         owner.grabMouse()
@@ -430,4 +454,7 @@ class DashboardBoard(QWidget):
         self.tiles[state['key']]._sync_grips()
 
     def available_hidden(self):
-        return [(key,tr(TITLES[key])) for key in ORDER if key in self.hidden]
+        hidden = [(key,tr(TITLES[key])) for key in ORDER if key in self.hidden]
+        if not self.distro_logo_visible:
+            hidden.append(('distro_logo', tr('Distributionslogo')))
+        return hidden
