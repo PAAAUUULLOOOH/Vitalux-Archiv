@@ -172,6 +172,7 @@ class PulseCore(QWidget):
         painter = QPainter(self)
         if self._low_power():
             # Retain the recognizable logo; skip the moving halo and orbit.
+            size = min(self.width(), self.height())
             themed = themed_icon_pixmap(size)
             painter.drawPixmap(QRectF(self.rect()), themed, QRectF(themed.rect()))
             painter.end()
