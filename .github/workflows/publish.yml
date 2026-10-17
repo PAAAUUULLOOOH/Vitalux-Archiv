@@ -125,6 +125,27 @@ jobs:
             python3 scripts/bundle-opengl-runtime.py "$WHEEL" "$STAGED"
           fi
           LD_LIBRARY_PATH="$LIB" "$PY" -c "from PySide6.QtOpenGLWidgets import QOpenGLWidget; print('OpenGL Qt module imported successfully')"
+      - name: Qt Quick GPU-Scene-Graph in die portable Laufzeit integrieren
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGED="$PWD/build/staged/Vitalux-${TAG}"
+          PY="$STAGED/runtime/bin/python3.12"
+          LIB="$STAGED/lib"
+          if LD_LIBRARY_PATH="$LIB" "$PY" -c "from PySide6.QtQuickWidgets import QQuickWidget; from PySide6.QtQuick import QQuickImageProvider" 2>/dev/null; then
+            echo "Qt Quick bindings already included in this runtime."
+          else
+            VERSION="$(LD_LIBRARY_PATH="$LIB" "$PY" -c 'import PySide6; print(PySide6.__version__)')"
+            mkdir -p build/addons
+            WHEEL="$(find build/addons -maxdepth 1 -name '*essentials*.whl' -print -quit)"
+            if [[ -z "$WHEEL" ]]; then
+              python3 -m pip download --only-binary=:all: --no-deps "PySide6_Essentials==${VERSION}" -d build/addons
+              WHEEL="$(find build/addons -maxdepth 1 -name '*essentials*.whl' -print -quit)"
+            fi
+            test -n "$WHEEL"
+            python3 scripts/bundle-quick-runtime.py "$WHEEL" "$STAGED"
+          fi
+          LD_LIBRARY_PATH="$LIB" "$PY" -c "from PySide6.QtQuickWidgets import QQuickWidget; from PySide6.QtQuick import QQuickImageProvider; print('Qt Quick bindings ready')"
       - name: Changelog-Version prüfen und Release-Notizen erzeugen
         shell: bash
         run: |
@@ -157,6 +178,8 @@ jobs:
             "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_scroll_pipeline.py"
           QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
             "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_renderer_backends.py"
+          QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
+            "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_quick_renderer.py"
       - name: Experimentellen OpenGL-Renderer unter Mesa testen
         shell: bash
         run: |
@@ -169,6 +192,15 @@ jobs:
           QT_DEBUG_PLUGINS=1 QT_QPA_PLATFORM=xcb VITALUX_GL_SMOKE=1 LIBGL_ALWAYS_SOFTWARE=1 \
             LD_LIBRARY_PATH="$PWD/lib" \
             xvfb-run -a "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_renderer_backends.py"
+      - name: Qt Quick mit echter Qt RHI/Scene-Graph-Ausgabe unter Mesa prüfen
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGED="$PWD/build/staged/Vitalux-${TAG}"
+          cd "$STAGED"
+          QT_QPA_PLATFORM=xcb VITALUX_QUICK_SMOKE=1 QSG_RHI_BACKEND=opengl LIBGL_ALWAYS_SOFTWARE=1 \
+            LD_LIBRARY_PATH="$PWD/lib" \
+            xvfb-run -a "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_quick_renderer.py"
       - name: Native Anleitung und Übersetzungen testen
         shell: bash
         run: |
