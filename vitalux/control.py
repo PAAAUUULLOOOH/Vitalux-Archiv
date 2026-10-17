@@ -172,10 +172,13 @@ class PreferencesPage(Page):
         notifications.body.addWidget(self.alert_toggle)
         notifications.body.addWidget(label('Warnungen erscheinen beim Überschreiten eines Grenzwerts. Erst nach Abkühlung oder sinkender Auslastung kann eine erneute Warnung erfolgen.', 'muted', wrap=True))
         threshold_grid = QGridLayout()
-        # Compact controls, unchanged card dimensions: labels fill spare space.
-        threshold_grid.setColumnStretch(0, 1)
-        threshold_grid.setColumnStretch(1, 0)
+        # Keep the warning card size. Put narrow, centered numeric fields to
+        # the LEFT of each title; text expands to fill the remaining card width.
+        threshold_grid.setColumnStretch(0, 0)
+        threshold_grid.setColumnStretch(1, 1)
+        threshold_grid.setHorizontalSpacing(14)
         self.alert_boxes = {}
+        self.alert_labels = {}
         for idx, (key, title, default, lo, hi, unit) in enumerate((
             ('cpu_temp', 'CPU-Temperatur', 90, 40, 110, '°C'),
             ('gpu_temp', 'GPU-Temperatur', 90, 40, 115, '°C'),
@@ -190,9 +193,11 @@ class PreferencesPage(Page):
             value.setSuffix(' ' + unit)
             value.setValue(int(settings.get(key, default)))
             value.valueChanged.connect(lambda v, k=key: self._set_preference(k, v))
-            threshold_grid.addWidget(label(title, 'strong'), idx, 0)
-            threshold_grid.addWidget(value, idx, 1, Qt.AlignRight)
+            text = label(title, 'strong')
+            threshold_grid.addWidget(value, idx, 0, Qt.AlignLeft)
+            threshold_grid.addWidget(text, idx, 1, Qt.AlignLeft | Qt.AlignVCenter)
             self.alert_boxes[key] = value
+            self.alert_labels[key] = text
         notifications.body.addLayout(threshold_grid)
         self.content.addWidget(notifications)
 
