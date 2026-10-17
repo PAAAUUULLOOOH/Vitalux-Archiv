@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+BASE="${APPDIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
+case "${1:-}" in
+  --install|--uninstall) exec bash "$BASE/packaging/appimage-integration.sh" "$1" ;;
+  --portable|--launch) shift; exec "$BASE/run.sh" "$@" ;;
+esac
+if [[ -n "${APPIMAGE:-}" && ! -f "${XDG_DATA_HOME:-$HOME/.local/share}/applications/vitalux.desktop" && -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
+  if LD_LIBRARY_PATH="$BASE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$BASE/runtime/bin/python3.12" "$BASE/packaging/appimage-first-run.py"; then
+    bash "$BASE/packaging/appimage-integration.sh" --install
+    exec "$HOME/.local/opt/vitalux/Vitalux.AppImage" --launch "$@"
+  fi
+fi
+exec "$BASE/run.sh" "$@"
