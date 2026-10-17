@@ -48,7 +48,7 @@
 
 - **Farbschemas:** Glass mit Vitalux Blau (Standard), Dark, Light, Black Glass und Minimalistisch.
 - **Hintergründe:** 14 integrierte Optionen plus selbst importierte PNG-, JPEG-, WebP- und BMP-Bilder mit Füllen, Einpassen, Strecken, Zentrieren und Kacheln. Nur **Funkeln** ist animiert.
-- **Akzentfarben:** Acht Voreinstellungen, Distributionsfarbe und frei definierbare Farben; passende App- und Tray-Symbole.
+- **Akzentfarben:** Acht Voreinstellungen, Distributionsfarbe und frei definierbare Farben. Unter **Einstellungen → Farbakzente → Passend zum Hintergrund** kannst du automatisch passende Akzente aktivieren oder einen von fünf erkannten Farbtönen wählen. Die Farben folgen auch importierten Hintergrundbildern.
 - **Oberfläche:** Einheitliche Glasoptik, links angeordnete Seitenleiste und lokal gerenderte Qt-Hintergründe ohne Browser.
 
 **630 integrierte Kombinationen:** 5 Farbschemas × 14 Hintergründe × 9 Akzentoptionen (davon 8 feste Farben). Eigene Farben erweitern die Auswahl; manche Kombinationen können optisch identisch sein.
