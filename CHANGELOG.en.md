@@ -4,6 +4,12 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.72] - 2026-10-17
+- Added two accent-color tabs in Settings: Manual Accent Colors (existing colors, edit and delete preserved) and Match Background (five suggested accent colors sampled from the active wallpaper).
+- The Match Automatically mode updates accent colors when the user changes a built-in background or personal image. Explicitly selected wallpaper swatches also track the active wallpaper.
+- Local, low-resolution color sampling avoids feedback loops with the Adaptive Accent Color background and adds no external dependency.
+- Styled tabs for all five Vitalux themes and updated README, bilingual guidance and regression tests. The existing 630 fixed-preset combinations remain unchanged.
+
 ## [v0.9.3.71] - 2026-10-17
 - Restored KDE tray hover CPU, GPU, RAM and available temperature metrics using real live readings.
 - Added an optional compact live popup through the tray context menu; the native KDE tooltip serves the Wayland hover.
