@@ -221,7 +221,7 @@ def stylesheet():
     result_bg = blend(base, pal['card'], .055 if light else .10)
     active_bg = blend(base, pal['sidebar'], .18 if light else .22)
     return _QSS.substitute(
-        BG=BG, TEXT=TEXT, MUTED=MUTED, CARD=CARD, BORDER=BORDER,
+        BG=BG, TEXT=TEXT, MUTED=MUTED, CARD=CARD, BORDER=BORDER, TRACK=TRACK,
         ACCENT=base, ACCENT_HOVER=QColor(base).lighter(115).name() if light else QColor(base).lighter(128).name(),
         SECONDARY=secondary_accent(), BUTTON_TEXT="#07111b" if not light else "#ffffff",
         INPUT_BG=blend(base, pal['card'], .035 if light else .045),
