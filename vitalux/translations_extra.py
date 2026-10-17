@@ -472,6 +472,8 @@ EN_MORE.update({
 # New guide copy (v0.9.3.55): matched translations for runtime DE/EN switches.
 EN_MORE.update({
     "Unter Einstellungen aktivierst du Hardware-Warnungen; die Zahlenfelder stehen links neben der jeweiligen Bezeichnung.": "Enable hardware alerts in Settings; each number field sits to the left of its label.",
+    "Unter Einstellungen aktivierst du Hardware-Warnungen; die schmalen Zahlenfelder stehen rechts neben der Bezeichnung.": "Enable hardware alerts in Settings; the compact number fields sit to the right of the labels.",
+    "Eigene Akzentfarben lassen sich mit „Bearbeiten“ ändern oder mit „Löschen“ entfernen.": "Use “Edit” to change a custom accent color or “Delete” to remove it.",
     "Eigene Akzentfarben lassen sich benennen, speichern und über das X wieder entfernen.": "Custom accent colors can be named, saved and removed again using the X.",
     "Vor dem Aktualisieren siehst du die Neuerungen; erst „Jetzt aktualisieren“ startet den Download.": "Review what's new before updating; only “Update now” starts the download.",
     "Der Changelog bleibt auch danach im Updates-Reiter auf Deutsch oder Englisch lesbar.": "After updating, the changelog remains available in the Updates tab in German or English.",
