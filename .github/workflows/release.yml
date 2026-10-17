@@ -30,7 +30,11 @@ jobs:
           if [[ -z "$TAG" ]]; then TAG="$(gh release view --json tagName --jq .tagName)"; fi
           [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || exit 2
           mkdir -p build/source
-          ZIP="Vitalux-${TAG}-linux-x86_64-Portabel.zip"
+          # Neuer Release-Name ohne Portabel; alte Archive bleiben lesbar.
+          ZIP="Vitalux-${TAG}-linux-x86_64.zip"
+          if ! gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fxq "$ZIP"; then
+            ZIP="Vitalux-${TAG}-linux-x86_64-Portabel.zip"
+          fi
           gh release download "$TAG" --pattern "$ZIP" --dir build
           unzip -tq "build/$ZIP"
           unzip -q "build/$ZIP" -d build/source
