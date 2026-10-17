@@ -1,8 +1,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout
-from .ui_locale import QPushButton
+from .ui_locale import QPushButton, QComboBox
 
-from . import APP_NAME, __version__
+from . import APP_NAME, __version__, changelog
 from .i18n import tr
 from .pages import Page
 from .widgets import Bar, Card, KeyValue, label
@@ -60,11 +60,37 @@ class UpdatePage(Page):
         self.update_card.body.addWidget(self.install_button)
         self.content.addWidget(self.update_card)
 
+        # This file is packaged with Vitalux, so current/past release changes
+        # remain accessible even offline and after a successful upgrade.
+        self.changelog_card = Card("Changelog")
+        self.changelog_list = changelog.entries()
+        self.changelog_select = QComboBox()
+        for version, _changes in self.changelog_list:
+            self.changelog_select.addItem(f"v{version}", version)
+        self.changelog_select.setEnabled(bool(self.changelog_list))
+        self.changelog_card.body.addWidget(self.changelog_select)
+        self.changelog_details = label("", "muted", wrap=True)
+        self.changelog_details.setTextFormat(Qt.PlainText)
+        self.changelog_details.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.changelog_card.body.addWidget(self.changelog_details)
+        self.changelog_select.currentIndexChanged.connect(self._show_changelog_version)
+        self._show_changelog_version()
+        self.content.addWidget(self.changelog_card)
+
         self.check_button.clicked.connect(self.m.check)
         self.install_button.clicked.connect(self.m.install)
         self.m.changed.connect(self.sync)
         self.m.progress.connect(self.progress_bar.set_value)
         self.sync()
+
+    def _show_changelog_version(self, *_):
+        index = self.changelog_select.currentIndex()
+        if 0 <= index < len(self.changelog_list):
+            self.changelog_details.setText(
+                changelog.displayed_changes(self.changelog_list[index][1]))
+        else:
+            self.changelog_details.setText(
+                tr("Für diese installierte Version ist kein Changelog verfügbar."))
 
     def sync(self):
         m = self.m
@@ -76,9 +102,10 @@ class UpdatePage(Page):
         self.install_button.setVisible(m.status == "available")
         self.install_button.setEnabled(m.status == "available")
         self.progress_bar.setVisible(m.status == "installing")
-        self.notes_header.setVisible(bool(m.notes) and m.status == "available")
-        self.notes.setVisible(bool(m.notes) and m.status == "available")
-        self.notes.setText((m.notes or "")[:6000])
+        notes_available = bool(m.notes) and m.status in ("available", "installing", "installed")
+        self.notes_header.setVisible(notes_available)
+        self.notes.setVisible(notes_available)
+        self.notes.setText((m.notes or "").replace("### ", "").replace("## ", "").replace("- ", "• ")[:6000])
 
 
 class InfoPage(Page):
