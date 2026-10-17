@@ -4,6 +4,8 @@ Called using Vitalux's bundled interpreter inside the staged release package.
 """
 from pathlib import Path
 import ast
+import faulthandler
+faulthandler.enable()
 import os
 import re
 import sys
@@ -76,19 +78,26 @@ def check_translations():
 
 
 def check_gui():
+    print("CHECK GUI: entering", flush=True)
     app = QApplication.instance() or QApplication([])
+    print("CHECK GUI: QApplication initialized", flush=True)
     theme.set_mode("glass")
     theme.set_accent("#52d3ff")
     app.setStyleSheet(theme.stylesheet())
 
     for locale in ("de", "en"):
+        print("CHECK GUI: locale", locale, flush=True)
         i18n.set_lang(locale)
+        print("CHECK GUI: before dialog", flush=True)
         guide = GuideDialog()
+        print("CHECK GUI: after dialog", flush=True)
         guide.show()
+        print("CHECK GUI: after show", flush=True)
         app.processEvents()
         assert guide.windowTitle() == tr("Vitalux-Anleitung")
         assert len(SLIDES) == 9
         for idx, (title, intro, *_rest) in enumerate(SLIDES):
+            print("CHECK GUI: slide", locale, idx, flush=True)
             guide.show_step(idx)
             app.processEvents()
             assert guide.heading.text() == tr(title), (locale, idx, "heading")
@@ -99,6 +108,7 @@ def check_gui():
                 assert line.text(), (locale, idx, "empty bullet")
                 if locale == "en":
                     assert not re.search(r"[äöüÄÖÜß]", line.text()), line.text()
+        print("CHECK GUI: before illustration grab", flush=True)
         assert not guide.illustration.grab().isNull(), "No guide illustration painted"
         guide.show_step(0)
         assert not guide.back_btn.isEnabled()
@@ -107,6 +117,7 @@ def check_gui():
         guide.close()
 
     # Switching languages in the live Info page must update the guide button.
+    print("CHECK GUI: before InfoPage", flush=True)
     i18n.set_lang("de")
     page = InfoPage({"name": "TestLinux"})
     assert page.guide_button.text() == "Anleitung öffnen"
@@ -122,5 +133,7 @@ def check_gui():
 
 
 if __name__ == "__main__":
+    print("CHECK GUI: before translations", flush=True)
     check_translations()
+    print("CHECK GUI: after translations", flush=True)
     check_gui()
