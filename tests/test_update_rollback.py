@@ -17,6 +17,7 @@ def setup(temp, code, backup=True):
     (appdir / "run.sh").write_text(
         "#!/bin/bash\n"
         f"exit {code}\n", encoding="utf-8")
+    (appdir / "run.sh").chmod(0o755)
     target = temp / "Vitalux.AppImage"
     target.write_text("#!/bin/sh\nexit 4\n", encoding="utf-8")
     target.chmod(0o755)
