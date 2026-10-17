@@ -88,7 +88,7 @@ def check_preferences(app):
                     dropdown.showPopup()
                     app.processEvents()
                     popup = dropdown.view().window()
-                    assert "background:" in popup.styleSheet(), scheme
+                    assert f"background-color: {theme.combo_surface()};" in popup.styleSheet(), scheme
                     expected = theme.combo_surface()
                     assert popup.palette().color(QPalette.Base).name() == expected, scheme
                     # Some Qt styles map Text to WindowText for popup
