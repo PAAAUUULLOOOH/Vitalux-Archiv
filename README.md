@@ -1,234 +1,263 @@
 <p align="center">
-  <img src="assets/vitalux-wordmark.svg" alt="Vitalux – Linux-Systemmonitor" width="420">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/vitalux-readme-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/vitalux-readme-light.svg">
+    <img src="assets/vitalux-readme-light.svg" alt="Vitalux – Original-Logo und Schriftzug" width="340">
+  </picture>
 </p>
 
 <h3 align="center">Dein Linux-System. Alle wichtigen Informationen. Eine Anwendung.</h3>
 
 <p align="center">
-  <strong>Vitalux</strong> ist eine eigenständige Linux-Desktop-Anwendung, die Hardware, Systemauslastung, Sensorwerte und Laufwerksleistung in einer modernen, übersichtlichen Oberfläche zusammenführt.
+  Vitalux ist ein nativer Linux-Systemmonitor mit Live-Dashboard, Hardwareinformationen, Sensoren und integriertem Laufwerks-Benchmark.
 </p>
 
 <p align="center">
-  <a href="https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest"><img alt="Aktuelle Version" src="https://img.shields.io/github/v/release/PAAAUUULLOOOH/Vitalux?label=Aktuelle%20Version"></a>
+  <a href="https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest"><img alt="Aktuelle Version" src="https://img.shields.io/github/v/release/PAAAUUULLOOOH/Vitalux?label=Version"></a>
   <img alt="Linux x86-64" src="https://img.shields.io/badge/Linux-x86__64-1793d1?logo=linux&logoColor=white">
-  <img alt="Sprachen Deutsch und Englisch" src="https://img.shields.io/badge/Sprachen-Deutsch%20%7C%20English-5375bf">
-  <img alt="Status Entwicklung" src="https://img.shields.io/badge/Status-In%20Entwicklung-orange">
+  <img alt="Deutsch und Englisch" src="https://img.shields.io/badge/Sprachen-DE%20%7C%20EN-5375bf">
+  <img alt="Status Entwicklung" src="https://img.shields.io/badge/Status-Entwicklung-orange">
 </p>
 
 <p align="center">
-  <a href="https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest"><strong>⬇ Vitalux herunterladen</strong></a>
+  <a href="https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest"><strong>⬇ Aktuelle Version herunterladen</strong></a>
   &nbsp;·&nbsp;
   <a href="#funktionen">Funktionen</a>
   &nbsp;·&nbsp;
   <a href="#installation">Installation</a>
   &nbsp;·&nbsp;
-  <a href="#sprachen">Sprachen</a>
-  &nbsp;·&nbsp;
-  <a href="#integrierte-anleitung">Anleitung</a>
-  &nbsp;·&nbsp;
   <a href="#updates">Updates</a>
+  &nbsp;·&nbsp;
+  <a href="#probleme-beheben">Hilfe</a>
 </p>
 
 ---
 
 > [!NOTE]
-> **Vitalux befindet sich in der Entwicklung.** Die verfügbaren System- und Sensorwerte hängen von der Hardware, den Linux-Treibern und den Berechtigungen ab. Einige Funktionen können je nach Distribution unterschiedlich verfügbar sein.
+> **Vitalux befindet sich in der Entwicklung.** Welche Sensoren und Hardwarewerte verfügbar sind, hängt von der Distribution, den Treibern und den Zugriffsrechten ab.
 
-## Vitalux im Überblick
+## Funktionen
 
-Mit Vitalux behältst du dein System im Blick, ohne zwischen mehreren Programmen wechseln zu müssen. Die Oberfläche ist eine **native Linux-Anwendung** – keine Webseite und kein Browserfenster.
-
-### Funktionen
-
-| Bereich | Beschreibung |
+| Bereich | Funktionen |
 | --- | --- |
-| **Übersicht** | Zentrales Dashboard mit wichtigen Live-Werten, Systeminformationen und Diagrammen zur aktuellen Auslastung. |
-| **Prozessor** | CPU-Auslastung, Taktraten, Kerne und Threads sowie verfügbare Temperatur- und Leistungswerte. |
-| **Grafik** | Informationen zur Grafikkarte, zum Grafiktreiber, zur GPU-Auslastung und zum Videospeicher, soweit verfügbar. |
-| **Arbeitsspeicher** | Belegter und verfügbarer RAM, Swap-Speicher und Verlauf der Speichernutzung. |
-| **Netzwerk** | Netzwerkschnittstellen, Verbindungsinformationen sowie aktuelle Download- und Uploadraten. |
-| **Laufwerke** | Datenträger, Partitionen, Speicherauslastung, Laufwerksinformationen und integrierter Benchmark. |
-| **Sensoren** | Verfügbare Temperaturen, Lüfterdrehzahlen, Spannungen und weitere Messwerte. |
-| **System** | Details zur Linux-Distribution, zum Kernel, zur Hardware und zur Systemumgebung. |
-| **Einstellungen** | Farbschemata, Akzentfarben, Animationen, Messintervalle und weitere Anpassungen. |
-| **Updates** | Automatische Prüfung auf neue Vitalux-Versionen und Installation auf Wunsch. |
-| **Info** | Informationen zur Anwendung und Zugriff auf die bebilderte Schritt-für-Schritt-Anleitung. |
+| **Übersicht** | Anpassbares Live-Dashboard mit Systemdaten, Kacheln und Diagrammen |
+| **Prozessor & Grafik** | Auslastung, Takt, GPU-/CPU-Informationen und verfügbare Sensorwerte |
+| **Arbeitsspeicher & Netzwerk** | RAM und Swap, Schnittstellen sowie Download- und Uploadraten |
+| **Laufwerke** | Partitionen, Speicherbelegung, SMART-Daten und Laufwerks-Benchmark mit `fio` |
+| **Sensoren & System** | Temperaturen, Lüfter, Spannungen, Distribution, Kernel und Systemumgebung |
+| **Einstellungen** | Akzentfarben, Animationen, Messintervalle und Dashboard-Anordnung |
+| **Updates & Info** | Automatische Versionsprüfung, Aktualisierung auf Wunsch und integrierte Anleitung |
 
-### Persönlich anpassbares Dashboard
+**Farbschemata:** Dark, Light, Glass, Black Glass und Minimalistisch. Glass und Black Glass bieten Glasoptik mit weichgezeichnetem Hintergrund.
 
-Passe Vitalux an deinen Geschmack an. Du kannst die Anordnung und Sichtbarkeit von Dashboard-Kacheln verändern, Akzentfarben wählen und das Erscheinungsbild wechseln.
-
-**Verfügbare Farbschemata:** Dark, Light, Glass, Black Glass und Minimalistisch.
-
-Glass und Black Glass kombinieren halbtransparente Elemente mit einem weichgezeichneten Hintergrund. Minimalistisch verzichtet auf aufwendige Glaseffekte und reduziert die grafische Darstellung.
-
-### Laufwerks-Benchmark
-
-Mit dem integrierten Benchmark kannst du die Leistung eines Laufwerks messen und verschiedene Testprofile verwenden. Vitalux zeigt unter anderem:
-
-- **MB/s:** Wie viele Megabyte pro Sekunde gelesen oder geschrieben werden.
-- **IOPS:** Wie viele Ein- und Ausgabevorgänge pro Sekunde stattfinden.
-- **Latenz:** Wie lange einzelne Laufwerkszugriffe dauern.
-
-Unterstützt werden unter anderem sequenzielle und zufällige Lese-/Schreibtests sowie anpassbare Testgrößen, Laufzeiten und Durchläufe. Die Ergebnisse können von Dateisystem, Laufwerkstemperatur, Cache und laufenden Programmen beeinflusst werden.
+**Laufwerks-Benchmark:** Sequenzielle und zufällige Lese-/Schreibtests mit anpassbaren Testprofilen. Angezeigt werden unter anderem **MB/s** (Datenrate), **IOPS** (Ein-/Ausgabevorgänge pro Sekunde) und **Latenz** (Verzögerung).
 
 > [!CAUTION]
-> **Wichtig bei Schreibtests:** Benchmarks erzeugen echte Schreibzugriffe und benötigen freien Speicherplatz. Sichere wichtige Daten, bevor du ein Laufwerk belastest, und wähle den gewünschten Datenträger sorgfältig aus.
+> Laufwerks-Benchmarks erzeugen echte Schreibzugriffe und benötigen freien Speicherplatz. Wähle das Ziel sorgfältig und sichere wichtige Daten vorher.
 
-## Sprachen
+### Sprachen und integrierte Anleitung
 
-Vitalux kann vollständig über die Oberfläche zwischen **Deutsch und Englisch** umgeschaltet werden.
+Vitalux unterstützt **Deutsch und Englisch**. Über die Schaltflächen **DE / EN** unten in der Seitenleiste kannst du die Sprache direkt wechseln, ohne die App neu zu starten.
 
-- **Deutsch (DE)** – deutschsprachige Menüs, Schaltflächen und Erklärungen.
-- **English (EN)** – englischsprachige Benutzeroberfläche und Anleitung.
-
-Die Sprachschaltflächen **DE** und **EN** findest du unten in der linken Seitenleiste. Die Sprache lässt sich jederzeit wechseln, ohne Vitalux neu zu starten.
-
-## Integrierte Anleitung
-
-Neu bei Vitalux ist eine **bebilderte, interaktive Schritt-für-Schritt-Anleitung**, mit der du die wichtigsten Funktionen der Anwendung kennenlernst.
-
-Die Anleitung öffnet sich in einem eigenen Fenster direkt in Vitalux. Sie besteht aus **neun übersichtlichen Seiten** mit einer beispielhaften Programmoberfläche, **Pfeilen und farbigen Markierungen**. So erkennst du, wo sich Funktionen befinden und wofür sie gedacht sind.
-
-Die Einführung erklärt beispielsweise das Dashboard, die linke Navigation, CPU und GPU, Netzwerk und Laufwerke, den Benchmark, Sensoren, Einstellungen und Updates. Auch Begriffe wie **MB/s, IOPS und Latenz** werden verständlich erläutert.
-
-**So öffnest du die Anleitung:**
-
-1. Öffne in der linken Seitenleiste den Bereich **Info**.
-2. Klicke auf **„Anleitung öffnen“**.
-3. Wechsle mit **„Weiter“** und **„Zurück“** zwischen den Erklärungen.
-
-Beim ersten Start bietet Vitalux die Einführung optional an. Du kannst sie sofort ansehen, auf später verschieben oder die automatische Nachfrage deaktivieren. **Über Info bleibt die Anleitung jederzeit erreichbar.** Sie steht auf Deutsch und Englisch zur Verfügung.
+Unter **Info → Anleitung öffnen** findest du eine **interaktive Anleitung mit neun Seiten**. Pfeile, Markierungen und eine beispielhafte Vitalux-Oberfläche erklären die Funktionen Schritt für Schritt. Beim ersten Start wird die Einführung optional angeboten; sie bleibt später jederzeit im Info-Reiter erreichbar.
 
 ## Download
 
-**➡️ [Zur neuesten Vitalux-Version auf GitHub](https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest)**
+**[➡️ Neueste Vitalux-Version auf GitHub Releases](https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest)**
 
-Öffne dort den Bereich **Assets**. Die wichtigsten Dateien sind:
+Öffne bei der neuesten Veröffentlichung den Bereich **Assets**:
 
-| Datei | Wofür sie gedacht ist |
+| Download | Verwendung |
 | --- | --- |
-| `Vitalux-vX.Y.Z-x86_64.AppImage` | **Empfohlen:** Fertige Desktop-Anwendung mit optionaler Integration ins Anwendungsmenü. |
-| `Vitalux-vX.Y.Z-linux-x86_64.zip` | Vollständiges ZIP-Paket zum Entpacken und Starten. |
-| `Vitalux-vX.Y.Z-SHA256SUMS.txt` | Prüfsummen zur Kontrolle der heruntergeladenen Dateien. |
+| **`Vitalux-vVERSION-x86_64.AppImage`** | **Empfohlen:** Direkter Start oder Integration ins Anwendungsmenü |
+| `Vitalux-vVERSION-linux-x86_64.zip` | Vollständige Version zum Entpacken und Starten |
+| `Vitalux-vVERSION-SHA256SUMS.txt` | Prüfsummen zur Überprüfung der Downloads |
 
-Die Versionsnummer `X.Y.Z` ist ein Platzhalter; die tatsächlichen Dateinamen stehen bei der jeweiligen Veröffentlichung.
+`VERSION` steht für die jeweils aktuelle Versionsnummer.
 
 ## Installation
 
 ### AppImage – empfohlen
 
-Das AppImage ist die einfachste Möglichkeit, Vitalux zu verwenden. Es enthält die für die Anwendung benötigten Programmkomponenten und benötigt normalerweise keine separate Python- oder Qt-Installation.
+1. Lade das aktuelle **AppImage** unter [Releases](https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest) herunter.
+2. Erlaube im Dateimanager die Ausführung der Datei – bei **KDE Dolphin** unter **Eigenschaften → Berechtigungen**.
+3. Öffne das AppImage per **Doppelklick**.
+4. Beim ersten Start wählst du **„Jetzt installieren“** oder **„Nur einmal starten“**.
 
-1. Lade das aktuelle **AppImage** über [GitHub Releases](https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest) herunter.
-2. Öffne die **Eigenschaften** der Datei im Dateimanager, beispielsweise Dolphin, und erlaube unter **Berechtigungen** die Ausführung.
-3. Starte die Datei per **Doppelklick**.
-4. Beim ersten Start kannst du wählen, ob Vitalux **installiert** oder **ohne Installation gestartet** werden soll.
+Bei der Installation wird Vitalux für deinen Benutzer ins Anwendungsmenü integriert – normalerweise **ohne Administratorrechte**. Die benötigten Python-/Qt-Komponenten sind im Paket enthalten.
 
-**Bei der Installation** legt Vitalux einen Eintrag mit Programmsymbol im Anwendungsmenü an. Du kannst die Anwendung anschließend wie gewohnt aus dem Startmenü öffnen. Die Integration gilt für dein Benutzerkonto und benötigt normalerweise keine Administratorrechte.
+**Manuell installieren:** Öffne ein Terminal im Ordner mit der heruntergeladenen Datei. Beispiel für v0.9.3.50 (bei einer neueren Version den Dateinamen entsprechend ersetzen):
 
-**Ohne Installation** kannst du das AppImage direkt verwenden. Deine Wahl lässt sich später ändern, indem du die Anwendung entsprechend erneut startest.
+```bash
+chmod +x Vitalux-v0.9.3.50-x86_64.AppImage
+./Vitalux-v0.9.3.50-x86_64.AppImage --install
+```
 
-### Alternative: ZIP-Paket
+**Ohne Installation direkt starten:**
 
-Lade die ZIP-Vollversion herunter, entpacke sie und starte im entpackten Vitalux-Ordner die Datei `run.sh`. Für die übliche Desktop-Nutzung empfehlen wir das AppImage.
+```bash
+./Vitalux-v0.9.3.50-x86_64.AppImage --portable
+```
+
+> [!TIP]
+> Das AppImage kann direkt genutzt werden. „Installieren“ bedeutet hier, dass es ins Benutzerverzeichnis kopiert und ein Startmenüeintrag angelegt wird – keine systemweite RPM-/DEB-Installation.
+
+<details>
+<summary><strong>Wo wird Vitalux installiert?</strong></summary>
+
+| Bestandteil | Standardpfad |
+| --- | --- |
+| Installiertes AppImage | `~/.local/opt/vitalux/Vitalux.AppImage` |
+| Eintrag im Anwendungsmenü | `~/.local/share/applications/vitalux.desktop` |
+| Startbefehl | `~/.local/bin/vitalux` |
+| Programmsymbol | `~/.local/share/icons/hicolor/scalable/apps/vitalux.svg` |
+
+Die XDG-Pfade können bei abweichender Desktopkonfiguration variieren.
+
+</details>
+
+### Alternative: ZIP-Vollversion
+
+Entpacke das ZIP-Archiv und starte im entpackten Vitalux-Ordner die Datei `run.sh`. Falls erforderlich:
+
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+Die Datei `Portable-pruefen.sh` im Paket kann bei Problemen mit der Laufzeitumgebung helfen. Für die normale Desktop-Nutzung empfehlen wir das AppImage.
 
 ## Updates
 
-Vitalux prüft **bei jedem Programmstart** automatisch, ob eine neue Version auf dem offiziellen GitHub-Projekt verfügbar ist. Während das Programm geöffnet bleibt, folgen ungefähr alle sechs Stunden weitere Prüfungen.
+- Vitalux sucht **bei jedem Start** und anschließend ungefähr **alle sechs Stunden** nach neuen Versionen auf GitHub.
+- Ist ein Update verfügbar, **pulsiert der Updates-Reiter** links.
+- Im Reiter kannst du die neue Version prüfen und mit **„Jetzt aktualisieren“** selbst die Installation starten.
+- Downloads werden mit **SHA-256** überprüft. Für AppImage-Updates ist ein automatischer Neustart vorgesehen; die vorherige Datei wird als `.previous` aufbewahrt.
 
-Wenn ein Update verfügbar ist, **pulsiert der Updates-Reiter links in der Seitenleiste**. Im Reiter kannst du die neue Versionsnummer und die verfügbaren Versionshinweise ansehen.
+**Updates werden nicht ohne deine Bestätigung installiert.** Der vollständige Ablauf einschließlich Neustart ist noch nicht auf jeder Distribution praktisch bestätigt; behalte bei Bedarf eine Kopie der bisherigen Version.
 
-Mit **„Jetzt aktualisieren“** startest du den Download und die Installation. Die heruntergeladene Datei wird anhand einer SHA-256-Prüfsumme geprüft. Das AppImage-Update ist auf einen automatischen Neustart ausgelegt.
-
-**Wichtig:** Vitalux sucht selbst nach Updates, **installiert sie aber nicht ohne deine Bestätigung**.
-
-> [!NOTE]
-> Die vollständige Aktualisierung einschließlich Neustart ist noch nicht für jede Linux-Distribution praktisch bestätigt. Bewahre vor wichtigen Updates gegebenenfalls eine Kopie deines bisherigen AppImages auf.
-
-## Systemanforderungen
-
-| Voraussetzung | Hinweise |
-| --- | --- |
-| **Betriebssystem** | GNU/Linux |
-| **Architektur** | x86-64 (AMD64) |
-| **Desktop** | Grafische Sitzung unter Wayland oder X11 |
-| **Systembibliotheken** | Derzeitiges Kompatibilitätsziel: glibc 2.38 oder neuer |
-| **AppImage** | Abhängig von der Distribution kann FUSE-Unterstützung notwendig sein |
-| **Internet** | Nur für das Abrufen und Installieren von Updates erforderlich |
-
-Vitalux ist unter anderem für **openSUSE Tumbleweed, CachyOS/Arch, Fedora und Pop!_OS/COSMIC** vorgesehen. Die genaue Unterstützung hängt von Linux-Version, Grafiktreiber, Hardware und bereitgestellten Systemdiensten ab.
-
-## Häufige Fragen und Problemlösungen
+## Probleme beheben
 
 <details>
-<summary><strong>Beim Doppelklick öffnet sich Vitalux nicht. Was kann ich tun?</strong></summary>
+<summary><strong>Vitalux öffnet sich beim Doppelklick nicht</strong></summary>
 
-Prüfe, ob das AppImage ausführbar ist. In KDE Dolphin findest du die Einstellung unter **Eigenschaften → Berechtigungen**. Falls es weiterhin nicht startet, führe die Datei aus einem Terminal aus, um die Fehlermeldung zu sehen.
+**1. Ausführung erlauben:** Öffne in Dolphin **Eigenschaften → Berechtigungen** und aktiviere die Ausführungsberechtigung.
+
+**2. Über das Terminal starten:** Öffne ein Terminal im Downloadordner und führe die folgenden Befehle aus (Dateiname gegebenenfalls anpassen):
+
+```bash
+chmod +x Vitalux-v0.9.3.50-x86_64.AppImage
+./Vitalux-v0.9.3.50-x86_64.AppImage
+```
+
+So bleibt eine mögliche Fehlermeldung im Terminal sichtbar. Prüfe auch, ob deine Distribution die benötigte **AppImage-/FUSE-Unterstützung** bereitstellt.
 
 </details>
 
 <details>
-<summary><strong>Warum erscheint Vitalux nicht im Anwendungsmenü?</strong></summary>
+<summary><strong>Vitalux startet, erscheint aber nicht im Anwendungsmenü</strong></summary>
 
-Möglicherweise hast du beim ersten Start die Verwendung ohne Installation gewählt. Starte das AppImage erneut und wähle die Installation. Danach sollte der Eintrag im Anwendungsmenü verfügbar sein.
+Vielleicht wurde nur **„Nur einmal starten“** gewählt. Die Integration kannst du jederzeit nachholen:
 
-</details>
+```bash
+./Vitalux-v0.9.3.50-x86_64.AppImage --install
+```
 
-<details>
-<summary><strong>Warum werden bestimmte Sensorwerte nicht angezeigt?</strong></summary>
-
-Nicht jede Hardware stellt alle Messwerte bereit. Besonders Temperatur-, Lüfter-, Spannungs- und SMART-Werte hängen von Treibern, Systemdiensten und Berechtigungen ab. Vitalux zeigt keine erfundenen Ersatzwerte an.
-
-</details>
-
-<details>
-<summary><strong>Wo finde ich die Anleitung?</strong></summary>
-
-Öffne den Bereich **Info** und klicke auf **„Anleitung öffnen“**. Dort findest du neun bebilderte Erklärungsseiten mit Pfeilen und Markierungen. Du kannst die Anleitung sowohl auf Deutsch als auch auf Englisch verwenden.
+Danach sollte Vitalux mit eigenem Symbol im Anwendungsmenü erscheinen. Alternativ kannst du es über `~/.local/bin/vitalux` aufrufen.
 
 </details>
 
 <details>
-<summary><strong>Wie deinstalliere ich Vitalux?</strong></summary>
+<summary><strong>Installationsdialog erscheint nicht oder Installation schlägt fehl</strong></summary>
 
-Wenn Vitalux über das AppImage ins Anwendungsmenü integriert wurde, kannst du die installierte AppImage-Datei mit der Option `--uninstall` starten. Zum Beispiel im Terminal:
+Starte das AppImage im Terminal mit `--install`, wie oben gezeigt. Das Installationsprotokoll liegt normalerweise unter:
+
+```text
+~/.local/state/vitalux/installation.log
+```
+
+Du kannst den Inhalt mit folgendem Befehl anzeigen:
+
+```bash
+cat ~/.local/state/vitalux/installation.log
+```
+
+Bei geänderten XDG-Einstellungen liegt die Datei im entsprechenden State-Verzeichnis.
+
+</details>
+
+<details>
+<summary><strong>Es fehlen Sensor-, SMART- oder Benchmarkwerte</strong></summary>
+
+Nicht jeder Sensor ist auf jeder Hardware verfügbar. Die Anzeige hängt von Linux-Treibern, Schnittstellen, Diensten und Zugriffsrechten ab. SMART-Werte lassen sich nur von unterstützten Laufwerken und Controllern abfragen.
+
+Prüfe bei Laufwerks-Benchmarks außerdem das ausgewählte Laufwerk und ausreichend freien Speicherplatz. Bei der ZIP-Vollversion kann `Portable-pruefen.sh` Hinweise auf fehlende Laufzeitkomponenten liefern.
+
+</details>
+
+<details>
+<summary><strong>Der Update-Reiter meldet keine Verbindung zu GitHub</strong></summary>
+
+Prüfe zuerst deine Internetverbindung und öffne [GitHub Releases](https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest) im Browser.
+
+Im Reiter **Updates** kannst du über **„Erneut nach Updates suchen“** die Prüfung wiederholen. Falls ein Zertifikats- oder DNS-Fehler angezeigt wird, beachte die genaue Fehlermeldung. Für eine Fehlermeldung sind auch die Systemzeit und die installierten CA-Zertifikate relevant.
+
+</details>
+
+<details>
+<summary><strong>Download auf Beschädigungen überprüfen</strong></summary>
+
+Lade die Datei `Vitalux-vVERSION-SHA256SUMS.txt` **aus derselben GitHub-Veröffentlichung** wie dein AppImage herunter. Öffne ein Terminal im Ordner mit den beiden Dateien.
+
+Beispiel für v0.9.3.50 – prüft gezielt nur das AppImage, sodass die anderen Dateien aus der Prüfsummenliste nicht heruntergeladen werden müssen:
+
+```bash
+grep 'AppImage$' Vitalux-v0.9.3.50-SHA256SUMS.txt | sha256sum -c -
+```
+
+Wenn die Prüfsumme stimmt, erscheint `OK`. Bei neueren Veröffentlichungen den Dateinamen entsprechend anpassen.
+
+</details>
+
+## Deinstallation
+
+Wenn Vitalux ins Anwendungsmenü integriert wurde, entfernst du die Anwendung mit:
 
 ```bash
 ~/.local/opt/vitalux/Vitalux.AppImage --uninstall
 ```
 
-Dabei werden die installierte Anwendung und ihre Menüintegration entfernt. Deine persönlichen Einstellungen bleiben erhalten. Falls du Vitalux lediglich ohne Installation gestartet hast, kannst du einfach die heruntergeladene Datei entfernen.
+Dadurch werden das installierte AppImage, der Startmenüeintrag, der Startbefehl und das Symbol entfernt. **Deine persönlichen Einstellungen bleiben erhalten.** Wenn du Vitalux nur ohne Installation gestartet hast, kannst du die heruntergeladene Datei einfach löschen.
 
-</details>
+## Systemanforderungen
 
-<details>
-<summary><strong>Wie überprüfe ich den Download?</strong></summary>
+| Voraussetzung | Hinweis |
+| --- | --- |
+| **Betriebssystem** | GNU/Linux, x86-64 (AMD64) |
+| **Desktop** | Wayland oder X11 |
+| **C-Laufzeit** | Derzeitiges Kompatibilitätsziel: glibc 2.38 oder neuer |
+| **AppImage** | Je nach Distribution ist FUSE-Unterstützung erforderlich |
+| **Internet** | Für GitHub-Updateprüfungen und Downloads; lokale Systemanzeige funktioniert offline |
 
-Lade zusammen mit dem AppImage die Datei `Vitalux-vX.Y.Z-SHA256SUMS.txt` aus demselben Release herunter. Befinden sich die Dateien im gleichen Ordner, kannst du im Terminal mit `sha256sum -c Vitalux-vX.Y.Z-SHA256SUMS.txt` die Prüfsummen kontrollieren. Ersetze dabei `X.Y.Z` durch die tatsächliche Versionsnummer.
-
-</details>
+Vitalux ist unter anderem für openSUSE Tumbleweed, CachyOS/Arch, Fedora und Pop!_OS/COSMIC vorgesehen. Die tatsächliche Unterstützung hängt von der jeweiligen Systemkonfiguration ab.
 
 ## Feedback und Fehler melden
 
-Du hast einen Fehler entdeckt oder eine Idee für Vitalux? Über **[GitHub Issues](https://github.com/PAAAUUULLOOOH/Vitalux/issues)** kannst du Rückmeldungen und Verbesserungsvorschläge einreichen.
-
-Hilfreich sind die verwendete Vitalux-Version, deine Linux-Distribution, die Desktopumgebung und eine kurze Beschreibung des Problems. Teile bitte keine Passwörter, Zugangsdaten oder andere private Informationen.
+Fehler, Verbesserungsvorschläge oder Fragen kannst du über [**GitHub Issues**](https://github.com/PAAAUUULLOOOH/Vitalux/issues) melden. Bitte gib möglichst die Vitalux-Version, Distribution, Desktopumgebung und eine kurze Beschreibung an. Veröffentliche keine privaten Zugangsdaten oder persönlichen Dateien.
 
 ## Lizenzen
 
-Vitalux verwendet unter anderem Python, Qt/PySide6, psutil und fio. Lizenzinformationen zu gebündelten Drittkomponenten befinden sich im jeweiligen Downloadpaket im Ordner `licenses/`.
+Vitalux nutzt unter anderem **Python 3, Qt 6 / PySide6, psutil, fio und libaio**. Informationen zu gebündelten Drittkomponenten und deren Lizenzen findest du im Release-Paket unter `licenses/`.
 
-Für den Vitalux-Projektcode ist derzeit keine eigene allgemeine Lizenzdatei hinterlegt. Die öffentliche Sichtbarkeit des Quellcodes bedeutet daher nicht automatisch, dass der Code beliebig weiterverwendet oder weiterverteilt werden darf.
+Für den Vitalux-Projektcode ist derzeit keine eigene allgemeine Lizenzdatei hinterlegt. Die öffentliche Sichtbarkeit des Codes bedeutet daher nicht automatisch, dass er beliebig weiterverwendet werden darf.
 
 ---
 
 <p align="center">
   <strong>Vitalux · Dein Linux-System im Blick.</strong>
 </p>
-
 <p align="center">
   <a href="https://github.com/PAAAUUULLOOOH/Vitalux/releases/latest">Download</a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/PAAAUUULLOOOH/Vitalux/issues">Feedback & Fehler melden</a>
+  <a href="https://github.com/PAAAUUULLOOOH/Vitalux/issues">Fehler melden & Feedback</a>
 </p>
