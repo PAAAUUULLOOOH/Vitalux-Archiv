@@ -9,6 +9,8 @@ on:
       - "run.sh"
       - "Portable-pruefen.sh"
       - "bin/fio"
+      - "tests/**"
+      - ".github/workflows/publish.yml"
   workflow_dispatch:
 
 permissions:
@@ -85,6 +87,13 @@ jobs:
           assert (root/'packaging/build-appimage.sh').is_file()
           print('Vitalux source and runtime package assembled')
           PY
+      - name: Grafische Qt-Abhängigkeiten für Headless-Tests installieren
+        if: env.RELEASE_EXISTS == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libopengl0 libxkbcommon-x11-0 libxcb-cursor0
       - name: Theme-Wechsel in Qt testen (Glass → Minimal → Glass)
         if: env.RELEASE_EXISTS == 'false'
         shell: bash
