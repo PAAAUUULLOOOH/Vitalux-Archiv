@@ -46,9 +46,11 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "TAG=$TAG" >> "$GITHUB_ENV"
           if gh release view "$TAG" >/dev/null 2>&1; then
+            RELEASE_EXISTS=true
             echo "RELEASE_EXISTS=true" >> "$GITHUB_ENV"
             echo "::notice::Release $TAG already exists; tests still run but files will not be overwritten."
           else
+            RELEASE_EXISTS=false
             echo "RELEASE_EXISTS=false" >> "$GITHUB_ENV"
           fi
           PREVIOUS_TAG="$(gh release view --json tagName --jq .tagName)"
