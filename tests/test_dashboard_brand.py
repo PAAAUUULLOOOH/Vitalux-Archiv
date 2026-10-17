@@ -111,28 +111,57 @@ def assert_editor(app):
 
 
 def assert_brand(app):
-    icon_digests = set()
-    text_digests = set()
-    for mode in ("dark", "light", "glass", "black_glass", "minimal"):
-        theme.set_mode(mode)
-        for accent in ("#4f8cff", "#f5588d"):
-            theme.set_accent(accent)
+    # Only the six presets have individually designed icon + lettering vectors.
+    presets = {
+        "blue": "#4f8cff",
+        "cyan": "#52d3ff",
+        "violet": "#a78bfa",
+        "green": "#73ba25",
+        "orange": "#f59e0b",
+        "pink": "#f472b6",
+    }
+    icons = set()
+    dark_words = set()
+    light_words = set()
+    for name, color in presets.items():
+        settings.set("accent", color)
+        theme.set_accent(color)
+        for scheme in ("dark", "light", "glass", "black_glass", "minimal"):
+            theme.set_mode(scheme)
             icon = themed_icon_pixmap(152)
-            text = wordmark_pixmap(205, 44)
-            icon_digests.add(fingerprint(icon))
-            text_digests.add(fingerprint(text))
-            assert icon.hasAlphaChannel()
-            assert text.hasAlphaChannel()
+            word = wordmark_pixmap(205, 44)
+            assert icon.hasAlphaChannel(), (name, scheme)
+            assert word.hasAlphaChannel(), (name, scheme)
+            if scheme == "dark":
+                icons.add(fingerprint(icon))
+                dark_words.add(fingerprint(word))
+            elif scheme == "light":
+                light_words.add(fingerprint(word))
             pulse = PulseCore(size=152)
             pulse.show()
             app.processEvents()
-            assert not pulse.grab().isNull(), f"No painted logo in {mode}"
-            if mode == "minimal":
-                assert not pulse._timer.isActive(), "Minimal theme should remain animation-free"
+            assert not pulse.grab().isNull(), (name, scheme, "pulse did not paint")
+            if scheme == "minimal":
+                assert not pulse._timer.isActive(), "Minimal theme still animating"
             pulse.close()
-    assert len(icon_digests) == 10, "Top-left icon did not respond to every theme + accent"
-    assert len(text_digests) == 10, "Top-left wordmark did not respond to every theme + accent"
-    print("Original Vitalux symbol + lettering: all 5 themes and accent colors PASSED",flush=True)
+    assert len(icons) == len(presets), "Preset icon palettes must be different"
+    assert len(dark_words) == len(presets), "Preset wordmarks must be different"
+    assert len(light_words) == len(presets), "Light variants must be individually designed"
+
+    # 'Distribution' and custom accents must leave the original untouched.
+    from vitalux.brand import _pixmap
+    for selected in ("auto", "#aabbcc"):
+        settings.set("accent", selected)
+        for scheme in ("dark", "light", "glass", "black_glass", "minimal"):
+            theme.set_mode(scheme)
+            icon = themed_icon_pixmap(152)
+            assert fingerprint(icon) == fingerprint(_pixmap("vitalux-pulse.svg", 152, 152))
+            source = "vitalux-wordmark-light.svg" if scheme == "light" else "vitalux-wordmark.svg"
+            assert fingerprint(wordmark_pixmap(205, 44)) == fingerprint(
+                _pixmap(source, 205, 44, ratio=2.0)), (selected, scheme)
+    settings.set("accent", "auto")
+    theme.set_mode("glass")
+    print("Six newly authored SVG palettes + original fallback for auto/custom: PASS", flush=True)
 
 
 if __name__ == "__main__":
