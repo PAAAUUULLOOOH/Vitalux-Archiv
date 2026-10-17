@@ -4,6 +4,13 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.57] - 2026-10-17
+- Slightly narrower drop-downs with matching custom chevrons for each color scheme.
+- Theme-matched popup lists without native black menu strips above and below the items.
+- CPU, GPU, RAM and system drive thresholds now sit uniformly right next to their labels.
+- Reordered custom accent actions: Edit, Delete, Custom color.
+- Updated settings tests and README.
+
 ## [v0.9.3.56] - 2026-10-17
 - Saved custom accent colors now support editing both the name and color value through a new Edit button, without creating duplicate entries.
 - A separate Delete button appears alongside Edit only when a saved custom color is selected.
