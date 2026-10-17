@@ -4,7 +4,7 @@ from datetime import datetime
 
 from PySide6.QtCore import Qt, Signal, QSize
 from PySide6.QtGui import QColor, QIntValidator
-from PySide6.QtWidgets import (QColorDialog, QFrame, QGridLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QSizePolicy, QVBoxLayout, QWidget, QTabWidget)
+from PySide6.QtWidgets import (QColorDialog, QFrame, QGridLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QSizePolicy, QVBoxLayout, QWidget)
 from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
 
 from . import __version__, settings, theme, motion, backdrops, user_background, wallpaper_accents, renderer
@@ -178,46 +178,6 @@ class PreferencesPage(Page):
             'minimal': 'Minimalistisch · Einfache Flächen ohne Glas, Schatten und dekorative Animationen. Spart Zeichenaufwand.',
         }
         self.theme_note.setText(tr(self.mode_notes.get(theme.mode(), self.mode_notes['dark'])))
-        # Separate accent tabs keep the existing manual colors intact, while
-        # background-aware suggestions can be previewed and selected directly.
-        self.accent_tabs = QTabWidget()
-        self.accent_tabs.setObjectName('accentTabs')
-        manual_tab = QWidget()
-        manual_layout = QVBoxLayout(manual_tab)
-        manual_layout.setContentsMargins(8, 12, 8, 10)
-        manual_layout.setSpacing(9)
-        self.accent_tabs.addTab(manual_tab, tr('Manuelle Farbakzente'))
-        image_tab = QWidget()
-        palette_layout = QVBoxLayout(image_tab)
-        palette_layout.setContentsMargins(8, 12, 8, 10)
-        palette_layout.setSpacing(9)
-        self.accent_tabs.addTab(image_tab, tr('Passend zum Hintergrund'))
-        palette_layout.addWidget(label(
-            'Vitalux erkennt passende Farbtöne aus deinem gewählten Hintergrund. '
-            'Die Akzentfarbe passt sich beim Hintergrundwechsel automatisch an.',
-            'muted', wrap=True))
-        self.wallpaper_auto_button = QPushButton('Automatisch anpassen')
-        self.wallpaper_auto_button.setObjectName('ghostBtn')
-        self.wallpaper_auto_button.setCheckable(True)
-        self.wallpaper_auto_button.clicked.connect(
-            lambda: self.change_accent(wallpaper_accents.AUTO))
-        palette_layout.addWidget(self.wallpaper_auto_button)
-        palette_layout.addWidget(label('Alternativ einen der erkannten Farbtöne wählen:', 'muted', wrap=True))
-        palette_row = QHBoxLayout()
-        palette_row.setSpacing(9)
-        self.wallpaper_color_buttons = []
-        for slot in range(wallpaper_accents.COUNT):
-            button = QPushButton(str(slot + 1))
-            button.setObjectName('wallpaperAccentSwatch')
-            button.setFixedSize(56, 42)
-            button.clicked.connect(
-                lambda _checked=False, index=slot: self.change_accent(f'wallpaper_{index}'))
-            self.wallpaper_color_buttons.append(button)
-            palette_row.addWidget(button)
-        palette_row.addStretch(1)
-        palette_layout.addLayout(palette_row)
-        self.wallpaper_accent_info = label('', 'muted', wrap=True)
-        palette_layout.addWidget(self.wallpaper_accent_info)
         r2 = QHBoxLayout()
         r2.addWidget(label('Akzentfarbe', 'strong'))
         accent = QComboBox()
@@ -228,14 +188,15 @@ class PreferencesPage(Page):
             accent.addItem(title, value)
         self.custom_accents = self._read_custom_accents()
         stored = settings.get('accent', '#4f8cff')
+        if wallpaper_accents.is_legacy_accent(stored):
+            stored = wallpaper_accents.AUTO
+            settings.set('accent', stored)
         if accent.findData(stored) < 0 and QColor(str(stored)).isValid():
             # Migrate the unnamed color from earlier Vitalux installations.
             if not any(item['color'] == QColor(stored).name() for item in self.custom_accents):
                 self.custom_accents.append({'name': 'Eigene Farbe', 'color': QColor(stored).name()})
                 settings.set('custom_accents', self.custom_accents)
-        accent.addItem('Automatisch anpassen', wallpaper_accents.AUTO)
-        for slot in range(wallpaper_accents.COUNT):
-            accent.addItem(tr('Hintergrundfarbe') + f' {slot + 1}', f'wallpaper_{slot}')
+        accent.addItem('Hintergrundfarbe automatisch', wallpaper_accents.AUTO)
         for item in self.custom_accents:
             if accent.findData(item['color']) < 0:
                 accent.addItem(item['name'], item['color'])
@@ -260,17 +221,14 @@ class PreferencesPage(Page):
         custom.clicked.connect(lambda: self.custom_accent(accent))
         r2.addWidget(custom)
         r2.addStretch(1)
-        manual_layout.addLayout(r2)
+        look.body.addLayout(r2)
         self._sync_custom_accent_actions()
-        manual_layout.addWidget(label('Akzentfarben gelten für Reiter, Kartenkanten, Kurven und Bedienelemente.', 'muted', wrap=True))
+        look.body.addWidget(label('Akzentfarben gelten für Reiter, Kartenkanten, Kurven und Bedienelemente.', 'muted', wrap=True))
         self.accent_preview = QWidget()
         self.accent_preview.setMinimumHeight(14)
         self.accent_preview.setObjectName('accentPreview')
         self.accent_preview.setStyleSheet(f'background: {theme.accent()}; border-radius: 7px;')
-        manual_layout.addWidget(self.accent_preview)
-        self.accent_tabs.setCurrentIndex(1 if wallpaper_accents.is_wallpaper_accent(stored) else 0)
-        look.body.addWidget(self.accent_tabs)
-        self.refresh_wallpaper_palette()
+        look.body.addWidget(self.accent_preview)
         # Native gradients are independent of the selected visual theme.
         bg_row = QHBoxLayout()
         bg_row.addWidget(label('Hintergrund', 'strong'))
@@ -362,6 +320,10 @@ class PreferencesPage(Page):
             'muted', wrap=True))
         self.render_status = label('', 'muted', wrap=True)
         render_card.body.addWidget(self.render_status)
+        self.render_restart_button = QPushButton('Jetzt neu starten')
+        self.render_restart_button.setObjectName('primaryBtn')
+        self.render_restart_button.clicked.connect(self.restart_for_renderer)
+        render_card.body.addWidget(self.render_restart_button, 0, Qt.AlignLeft)
         self._refresh_renderer_status()
         self.content.addWidget(render_card)
 
@@ -453,6 +415,7 @@ class PreferencesPage(Page):
         else:
             status = tr('Aktiv: CPU-Rendering (Standard)')
         self.render_status.setText(status)
+        self.render_restart_button.setVisible(selected != active)
 
     def change_renderer(self, *_):
         selected = self.render_combo.currentData()
@@ -463,6 +426,14 @@ class PreferencesPage(Page):
         # is created. Hot-swapping a live window here would be unsafe.
         self._refresh_renderer_status()
         self._refresh_restore_button()
+
+    def restart_for_renderer(self):
+        """Ask MainWindow for a graceful full-process restart via run.sh."""
+        if self.render_combo.currentData() == getattr(self.window, 'render_backend_active', renderer.SOFTWARE):
+            return
+        if not self.window.restart_for_renderer():
+            QMessageBox.warning(self, 'Vitalux',
+                tr('Vitalux kann wegen eines laufenden Vorgangs gerade nicht neu starten.'))
 
     def _set_preference(self, key, value):
         settings.set(key, value)
@@ -491,7 +462,6 @@ class PreferencesPage(Page):
         self.accent_combo.blockSignals(True)
         self.accent_combo.setCurrentIndex(self.accent_combo.findData('#4f8cff'))
         self.accent_combo.blockSignals(False)
-        self.accent_tabs.setCurrentIndex(0)
         self.render_combo.blockSignals(True)
         self.render_combo.setCurrentIndex(self.render_combo.findData(renderer.SOFTWARE))
         self.render_combo.blockSignals(False)
@@ -528,35 +498,13 @@ class PreferencesPage(Page):
         self.theme_note.setText(tr(self.mode_notes.get(theme.mode(), self.mode_notes['dark'])))
         self.accent_preview.setStyleSheet(f'background: {theme.accent()}; border-radius: 7px;')
         self.sync_background_controls()
-        self.refresh_wallpaper_palette()
         self._refresh_renderer_status()
-        self.accent_tabs.setTabText(0, tr('Manuelle Farbakzente'))
-        self.accent_tabs.setTabText(1, tr('Passend zum Hintergrund'))
 
     def change_mode(self, *_):
         val = self.mode.currentData()
         settings.set('theme', val)
         self.window.apply_appearance()
         self._refresh_restore_button()
-
-    def refresh_wallpaper_palette(self):
-        colors = wallpaper_accents.suggestions()
-        selected = settings.get('accent', '#4f8cff')
-        self.wallpaper_auto_button.setChecked(selected == wallpaper_accents.AUTO)
-        self.wallpaper_auto_button.setStyleSheet(
-            f'border: 2px solid {theme.accent()};'
-            if selected == wallpaper_accents.AUTO else '')
-        for index, (button, color) in enumerate(zip(self.wallpaper_color_buttons, colors)):
-            button.setToolTip(tr('Erkannte Farbe') + f' {index+1}: {color}')
-            active = selected == f'wallpaper_{index}'
-            button.setStyleSheet(
-                f'background: {color}; color: #ffffff; font-weight: 800; '
-                f'border: {"3px solid " + theme.TEXT if active else "1px solid " + theme.BORDER};'
-                'border-radius: 11px;')
-        self.wallpaper_accent_info.setText(
-            tr('Aktuelle Akzentfarbe') + ': ' + theme.accent()
-            if wallpaper_accents.is_wallpaper_accent(selected)
-            else tr('Aktiviere den automatischen Modus oder wähle eine Bildfarbe.'))
 
     def change_accent(self, val):
         if not val:
@@ -567,7 +515,6 @@ class PreferencesPage(Page):
             self.accent_combo.blockSignals(True)
             self.accent_combo.setCurrentIndex(index)
             self.accent_combo.blockSignals(False)
-        self.accent_tabs.setCurrentIndex(1 if wallpaper_accents.is_wallpaper_accent(val) else 0)
         self._sync_custom_accent_actions()
         self.window.apply_appearance()
         self._refresh_restore_button()
