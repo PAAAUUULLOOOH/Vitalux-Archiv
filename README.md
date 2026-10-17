@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/vitalux-readme-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/vitalux-readme-light.svg">
-    <img src="assets/vitalux-readme-light.svg" alt="Vitalux – Original-Logo und Schriftzug" width="340">
+    <img src="assets/vitalux-readme-light.svg" alt="Vitalux – Original-Logo und Schriftzug" width="270">
   </picture>
 </p>
 
@@ -26,6 +26,8 @@
   &nbsp;·&nbsp;
   <a href="#installation">Installation</a>
   &nbsp;·&nbsp;
+  <a href="#sprachen-und-integrierte-anleitung">Anleitung & Sprachen</a>
+  &nbsp;·&nbsp;
   <a href="#updates">Updates</a>
   &nbsp;·&nbsp;
   <a href="#probleme-beheben">Hilfe</a>
@@ -35,6 +37,11 @@
 
 > [!NOTE]
 > **Vitalux befindet sich in der Entwicklung.** Welche Sensoren und Hardwarewerte verfügbar sind, hängt von der Distribution, den Treibern und den Zugriffsrechten ab.
+
+<p align="center">
+  <img src="assets/vitalux-dashboard-preview.png" alt="Authentischer Screenshot des Vitalux-Dashboards im Glass-Design mit Systeminformationen, Live-Kacheln und Diagrammen" width="1080">
+</p>
+<p align="center"><sub>Vitalux-Dashboard im Glass-Design · Aufnahme auf einem Linux-Testsystem – angezeigte Werte variieren je nach Hardware.</sub></p>
 
 ## Funktionen
 
@@ -86,17 +93,17 @@ Unter **Info → Anleitung öffnen** findest du eine **interaktive Anleitung mit
 
 Bei der Installation wird Vitalux für deinen Benutzer ins Anwendungsmenü integriert – normalerweise **ohne Administratorrechte**. Die benötigten Python-/Qt-Komponenten sind im Paket enthalten.
 
-**Manuell installieren:** Öffne ein Terminal im Ordner mit der heruntergeladenen Datei. Beispiel für v0.9.3.50 (bei einer neueren Version den Dateinamen entsprechend ersetzen):
+**Manuell installieren:** Öffne ein Terminal im Downloadordner. Die folgenden Befehle funktionieren unabhängig von der Versionsnummer. Im Ordner sollte sich dafür **nur das gewünschte Vitalux-AppImage** befinden:
 
 ```bash
-chmod +x Vitalux-v0.9.3.50-x86_64.AppImage
-./Vitalux-v0.9.3.50-x86_64.AppImage --install
+chmod +x ./Vitalux-v*-x86_64.AppImage
+./Vitalux-v*-x86_64.AppImage --install
 ```
 
 **Ohne Installation direkt starten:**
 
 ```bash
-./Vitalux-v0.9.3.50-x86_64.AppImage --portable
+./Vitalux-v*-x86_64.AppImage --portable
 ```
 
 > [!TIP]
@@ -143,11 +150,11 @@ Die Datei `Portable-pruefen.sh` im Paket kann bei Problemen mit der Laufzeitumge
 
 **1. Ausführung erlauben:** Öffne in Dolphin **Eigenschaften → Berechtigungen** und aktiviere die Ausführungsberechtigung.
 
-**2. Über das Terminal starten:** Öffne ein Terminal im Downloadordner und führe die folgenden Befehle aus (Dateiname gegebenenfalls anpassen):
+**2. Über das Terminal starten:** Öffne im Downloadordner ein Terminal. Dort sollte nur die gewünschte Vitalux-AppImage-Datei liegen:
 
 ```bash
-chmod +x Vitalux-v0.9.3.50-x86_64.AppImage
-./Vitalux-v0.9.3.50-x86_64.AppImage
+chmod +x ./Vitalux-v*-x86_64.AppImage
+./Vitalux-v*-x86_64.AppImage
 ```
 
 So bleibt eine mögliche Fehlermeldung im Terminal sichtbar. Prüfe auch, ob deine Distribution die benötigte **AppImage-/FUSE-Unterstützung** bereitstellt.
@@ -160,7 +167,7 @@ So bleibt eine mögliche Fehlermeldung im Terminal sichtbar. Prüfe auch, ob dei
 Vielleicht wurde nur **„Nur einmal starten“** gewählt. Die Integration kannst du jederzeit nachholen:
 
 ```bash
-./Vitalux-v0.9.3.50-x86_64.AppImage --install
+./Vitalux-v*-x86_64.AppImage --install
 ```
 
 Danach sollte Vitalux mit eigenem Symbol im Anwendungsmenü erscheinen. Alternativ kannst du es über `~/.local/bin/vitalux` aufrufen.
@@ -209,13 +216,13 @@ Im Reiter **Updates** kannst du über **„Erneut nach Updates suchen“** die P
 
 Lade die Datei `Vitalux-vVERSION-SHA256SUMS.txt` **aus derselben GitHub-Veröffentlichung** wie dein AppImage herunter. Öffne ein Terminal im Ordner mit den beiden Dateien.
 
-Beispiel für v0.9.3.50 – prüft gezielt nur das AppImage, sodass die anderen Dateien aus der Prüfsummenliste nicht heruntergeladen werden müssen:
+Der folgende Befehl prüft die vorhandenen Dateien aus dem Release. Andere Dateien aus der Prüfsummenliste müssen dafür nicht heruntergeladen werden:
 
 ```bash
-grep 'AppImage$' Vitalux-v0.9.3.50-SHA256SUMS.txt | sha256sum -c -
+sha256sum --ignore-missing -c Vitalux-v*-SHA256SUMS.txt
 ```
 
-Wenn die Prüfsumme stimmt, erscheint `OK`. Bei neueren Veröffentlichungen den Dateinamen entsprechend anpassen.
+Stimmt die Prüfsumme, erscheint `OK`. Verwende immer die Prüfsummenliste **aus demselben Release** wie die heruntergeladene Datei.
 
 </details>
 
