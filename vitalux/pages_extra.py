@@ -92,6 +92,21 @@ class UpdatePage(Page):
             self.changelog_details.setText(
                 tr("Für diese installierte Version ist kein Changelog verfügbar."))
 
+    def retranslate(self):
+        # Called by the existing in-place language switcher. Preserve the
+        # selected release while replacing its body with localized content.
+        selected = self.changelog_select.currentData()
+        self.changelog_list = changelog.entries()
+        self.changelog_select.blockSignals(True)
+        self.changelog_select.clear()
+        for version, _changes in self.changelog_list:
+            self.changelog_select.addItem(f"v{version}", version)
+        target = self.changelog_select.findData(selected)
+        self.changelog_select.setCurrentIndex(max(0, target))
+        self.changelog_select.blockSignals(False)
+        self._show_changelog_version()
+        self.sync()
+
     def sync(self):
         m = self.m
         self.status.setText(tr(m.error if m.status == "error" else STATUS_TEXT.get(m.status, "")))
@@ -102,10 +117,13 @@ class UpdatePage(Page):
         self.install_button.setVisible(m.status == "available")
         self.install_button.setEnabled(m.status == "available")
         self.progress_bar.setVisible(m.status == "installing")
-        notes_available = bool(m.notes) and m.status in ("available", "installing", "installed")
+        notes_available = bool(changelog.localized_release_notes(m.notes)) and m.status in ("available", "installing", "installed")
         self.notes_header.setVisible(notes_available)
         self.notes.setVisible(notes_available)
-        self.notes.setText((m.notes or "").replace("### ", "").replace("## ", "").replace("- ", "• ")[:6000])
+        translated = changelog.localized_release_notes(m.notes)
+        # No HTML interpretation: downloaded GitHub text is untrusted input.
+        self.notes.setText(translated.replace("### ", "").replace("## ", "")
+                           .replace("- ", "• ")[:6000])
 
 
 class InfoPage(Page):
