@@ -47,11 +47,13 @@
 ### Design & Hintergründe
 
 - **Farbschemas:** Glass mit Vitalux Blau (Standard), Dark, Light, Black Glass und Minimalistisch.
-- **Hintergründe:** 14 Optionen – von dezenten Verläufen bis **Adaptiv · Akzentfarbe**. Nur **Funkeln** ist animiert.
+- **Hintergründe:** 14 integrierte Optionen plus selbst importierte PNG-, JPEG-, WebP- und BMP-Bilder mit Füllen, Einpassen, Strecken, Zentrieren und Kacheln. Nur **Funkeln** ist animiert.
 - **Akzentfarben:** Acht Voreinstellungen, Distributionsfarbe und frei definierbare Farben; passende App- und Tray-Symbole.
 - **Oberfläche:** Einheitliche Glasoptik, links angeordnete Seitenleiste und lokal gerenderte Qt-Hintergründe ohne Browser.
 
-**630 wählbare Kombinationen:** 5 Farbschemas × 14 Hintergründe × 9 Akzentoptionen (davon 8 feste Farben). Eigene Farben erweitern die Auswahl; manche Kombinationen können optisch identisch sein.
+**630 integrierte Kombinationen:** 5 Farbschemas × 14 Hintergründe × 9 Akzentoptionen (davon 8 feste Farben). Eigene Farben erweitern die Auswahl; manche Kombinationen können optisch identisch sein.
+
+**Systemleiste:** Beim Hover werden CPU-, GPU- und RAM-Auslastung sowie verfügbare Temperaturen angezeigt. Im Kontextmenü lässt sich eine kompakte Live-Vorschau öffnen.
 
 ### Monitoring, Warnungen & Benchmarks
 
