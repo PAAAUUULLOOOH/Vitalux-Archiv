@@ -34,7 +34,7 @@ RAINBOW_PRESETS = frozenset(('prism',))
 
 def resolve(style, theme_mode):
     """Discontinued wallpaper selections fall back to the original theme."""
-    return theme_mode if style not in KEYS or style == 'theme_default' else style
+    return style if style == 'custom_image' else (theme_mode if style not in KEYS or style == 'theme_default' else style)
 
 
 # Colors within each collection share similar saturation and luminance.
