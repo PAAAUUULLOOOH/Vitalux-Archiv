@@ -239,8 +239,10 @@ class PreferencesPage(Page):
         bg_row.addStretch(1)
         look.body.addLayout(bg_row)
         look.body.addWidget(label(
-            'Statische Hintergründe bleiben unverändert. Animiert: Regenbogen, '
-            'Fade Bunt, Funkeln und Hell. Adaptiv folgt der Akzentfarbe.',
+            'Statische Hintergründe bleiben unverändert. Animiert: Funkeln, '
+            'Nordlicht, Nachtwellen und Violetter Nebel. Alle drei neuen '
+            'Designs sind so dunkel und ruhig abgestimmt wie Glass. '
+            'Adaptiv folgt der Akzentfarbe.',
             'muted', wrap=True))
         # A presentation preference, not a global reduction of monitoring speed.
         # Runtime widgets read the profile on their next interaction.

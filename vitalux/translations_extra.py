@@ -532,7 +532,6 @@ EN_MORE.update({
     "Hell · Perlmutt": "Light · Pearl",
     "Hell · Morgenlicht": "Light · Daybreak",
     "Hell · Eisblau": "Light · Ice Blue",
-    "Regenbogen · Pastell": "Rainbow · Pastel",
     "Regenbogen · Prisma": "Rainbow · Prism",
     "Dunkel · Tiefsee": "Dark · Deep Ocean",
     "Dunkel · Mitternacht": "Dark · Midnight",
@@ -555,15 +554,19 @@ EN_MORE.update({
 
 # v0.9.3.67: static palettes, intrinsic animated wallpapers, fixed sidebar.
 EN_MORE.update({
-    "Animiert · Regenbogen": "Animated · Rainbow",
-    "Animiert · Fade Bunt": "Animated · Color Fade",
     "Animiert · Funkeln": "Animated · Sparkle",
-    "Animiert · Hell": "Animated · Light",
     "Gelb": "Yellow",
     "Rot": "Red",
-    "Statische Hintergründe bleiben unverändert. Animiert: Regenbogen, Fade Bunt, Funkeln und Hell. Adaptiv folgt der Akzentfarbe.": "Static backgrounds stay still. Animated: Rainbow, Color Fade, Sparkle and Light. Adaptive follows the accent color.",
     "Die Seitenleiste ist wieder fest links angeordnet und lässt sich für mehr Platz ein- und ausklappen.": "The sidebar is fixed on the left again; collapse or expand it for more space.",
     "Der Verschiebegriff wurde entfernt. Über den Pfeil klappst du die Seitenleiste ein und aus.": "The drag handle has been removed. Use the arrow to collapse and expand the sidebar.",
-    "Die ursprünglichen Hintergründe bleiben erhalten. Neu sind vier automatisch animierte Varianten: Regenbogen, Fade Bunt, Funkeln und Hell.": "The original wallpapers remain. Four new presets animate automatically: Rainbow, Color Fade, Sparkle and Light.",
     "Statische Hintergrundfarben bleiben unverändert; Adaptiv folgt deiner Akzentfarbe. Gelb und Rot ergänzen die Akzentfarben und färben auch App- und Tray-Symbole.": "Static wallpapers stay still; Adaptive follows your accent color. Yellow and red presets also recolor app and tray icons.",
+})
+
+# v0.9.3.68: Glass-brightness muted motion with three curated replacements.
+EN_MORE.update({
+    "Animiert · Nordlicht": "Animated · Northern Lights",
+    "Animiert · Nachtwellen": "Animated · Night Waves",
+    "Animiert · Violetter Nebel": "Animated · Violet Mist",
+    "Statische Hintergründe bleiben unverändert. Animiert: Funkeln, Nordlicht, Nachtwellen und Violetter Nebel. Alle drei neuen Designs sind so dunkel und ruhig abgestimmt wie Glass. Adaptiv folgt der Akzentfarbe.": "Static wallpapers remain still. Animated: Sparkle, Northern Lights, Night Waves and Violet Mist. The three new designs are as dark and subtle as Glass. Adaptive follows your accent color.",
+    "Die ursprünglichen Hintergründe bleiben erhalten, außer Regenbogen Pastell. Animiert sind Funkeln sowie die drei ruhigeren Designs Nordlicht, Nachtwellen und Violetter Nebel.": "The original wallpapers remain, except Rainbow Pastel. Animated options are Sparkle and three subtler styles: Northern Lights, Night Waves and Violet Mist.",
 })

@@ -5,6 +5,13 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.68] - 2026-10-17
+- Hintergrund „Regenbogen Pastell“ sowie die animierten Hintergründe „Regenbogen“, „Fade Bunt“ und „Hell“ inklusive nicht mehr verwendeter Farbpaletten und Animationseffekte aus dem Programm entfernt.
+- Der animierte Hintergrund „Funkeln“ bleibt unverändert erhalten.
+- Drei neue, bewusst weniger grelle, automatisch animierte Hintergründe ergänzt: „Nordlicht“ (Petrol/Türkis/Violett), „Nachtwellen“ (Tiefblau/gedämpftes Petrol) und „Violetter Nebel“ (Blauviolett). Die Helligkeit orientiert sich am Standard-Glass-Hintergrund.
+- Auswahl und Übersetzungen bereinigt; bisher gespeicherte, entfernte Hintergrundauswahlen fallen auf den Standardhintergrund des aktiven Farbschemas zurück.
+- Tests für erlaubte Hintergrundauswahl, automatische Animationen, dunkle Farbwerte und Regressionen angepasst. README und integrierte Anleitung aktualisiert.
+
 ## [v0.9.3.67] - 2026-10-17
 - Die globale Option „Hintergrund sanft animieren“ samt gespeicherter Einstellung und Zeichenlogik entfernt. Statische Designs bleiben nun stets statisch.
 - Vier eigens animierte Hintergründe ergänzt: Regenbogen, Fade Bunt, Funkeln und Hell. Sie animieren direkt bei Auswahl; hellere Farbtöne bleiben unabhängig vom Farbschema erhalten. Adaptiv · Akzentfarbe ist wieder verfügbar.

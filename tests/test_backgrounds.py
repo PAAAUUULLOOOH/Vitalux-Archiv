@@ -29,12 +29,16 @@ def run():
             settings.set('theme', 'glass')
             theme.set_mode('glass')
             theme.set_accent('#4f8cff')
-            assert len(backdrops.PRESETS) == 20
+            assert len(backdrops.PRESETS) == 19
             assert backdrops.resolve('legacy', 'glass') == 'glass'
             assert backdrops.resolve('theme_default', 'light') == 'light'
             assert backdrops.ANIMATED_PRESETS == frozenset((
-                'animated_rainbow', 'animated_fade',
-                'animated_sparkle', 'animated_light'))
+                'animated_sparkle', 'animated_aurora',
+                'animated_waves', 'animated_mist'))
+            for removed in ('pastel_rainbow', 'animated_rainbow',
+                            'animated_fade', 'animated_light'):
+                assert removed not in backdrops.KEYS
+                assert backdrops.resolve(removed, 'glass') == 'glass'
             assert 'adaptive' in backdrops.KEYS
             assert not {'aurora', 'obsidian', 'nebula', 'arctic'} & set(backdrops.KEYS)
 
@@ -58,8 +62,8 @@ def run():
                 scene.sync_background()
                 assert not scene._wallpaper_timer.isActive(), style
 
-            # Only these four wallpapers move on selection, even if the
-            # separate UI motion profile is set to Off.
+            # Funkeln and the three quieter new designs move automatically,
+            # even when global UI animations are turned off.
             settings.set('motion', 'off')
             for style in backdrops.ANIMATED_PRESETS:
                 settings.set('background_style', style)
@@ -71,11 +75,10 @@ def run():
                 later = scene.sharp_backdrop().toImage()
                 assert first != later, 'Background frozen: ' + style
 
-            # The same vivid/light wallpaper stays light under Glass; neither
-            # scene composition nor card sampling may paint the entire
-            # wallpaper dark merely because the UI mode is dark.
+            # Existing light wallpapers are still light under Glass; neither
+            # scene composition nor cards should tint the canvas dark.
             theme.set_mode('glass')
-            for style in ('light', 'pearl', 'animated_light'):
+            for style in ('light', 'pearl', 'ice'):
                 settings.set('background_style', style)
                 scene.sync_background()
                 pixel = scene.sharp_backdrop().toImage().pixelColor(320, 190)
@@ -85,6 +88,20 @@ def run():
             scene.sync_background()
             pixel = scene.sharp_backdrop().toImage().pixelColor(320, 190)
             assert pixel.red() + pixel.green() + pixel.blue() < 420
+
+            # The three replacements share a dark Glass-level mood. Distinct
+            # blue/petrol/violet palettes remain visible without neon highlights.
+            for style in ('animated_aurora', 'animated_waves', 'animated_mist'):
+                settings.set('background_style', style)
+                scene.sync_background()
+                frame = scene.sharp_backdrop().toImage()
+                samples = [frame.pixelColor(x, y) for x, y in (
+                    (80, 80), (320, 190), (560, 320), (420, 70), (175, 270))]
+                luminance = [int(.2126*c.red() + .7152*c.green() + .0722*c.blue())
+                             for c in samples]
+                assert 8 < sum(luminance)/len(luminance) < 104, (
+                    style, luminance)
+                assert max(luminance) < 150, (style, luminance)
 
             settings.set('background_style', 'adaptive')
             theme.set_accent('#4f8cff')
@@ -109,7 +126,7 @@ def run():
         finally:
             settings.PATH = previous
     example.close()
-    print('Wallpaper palettes, four automatic animations, static presets and adaptive hue: PASS')
+    print('Darker four-animation collection, removed presets, static themes and adaptive hue: PASS')
 
 
 if __name__ == '__main__':

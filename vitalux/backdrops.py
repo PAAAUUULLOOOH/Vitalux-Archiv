@@ -3,13 +3,13 @@
 Every preset is a native Qt gradient. The scene and its blurred sampling image
 share a single cache, keeping glass panels in sync with the backdrop.
 """
-from math import sin, cos, pi
+from math import sin, cos
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QBrush, QLinearGradient, QPainter, QPainterPath, QPixmap, QRadialGradient
 
 DEFAULT_THEMES = ('dark', 'light', 'glass', 'black_glass', 'minimal')
 # The five original wallpaper/theme pairs are preserved unchanged.
-# Additional designs replace the discontinued Aurora/Obsidian/Nebula/Arctic/Adaptive set.
+# The original themes and supported static designs remain available.
 PRESETS = (
     ('theme_default', 'Automatisch (Farbschema)'),
     ('dark', 'Dark'),
@@ -20,24 +20,23 @@ PRESETS = (
     ('pearl', 'Hell · Perlmutt'),
     ('daybreak', 'Hell · Morgenlicht'),
     ('ice', 'Hell · Eisblau'),
-    ('pastel_rainbow', 'Regenbogen · Pastell'),
     ('prism', 'Regenbogen · Prisma'),
     ('deep_ocean', 'Dunkel · Tiefsee'),
     ('midnight', 'Dunkel · Mitternacht'),
     ('velvet', 'Dunkel · Samt'),
     ('graphite', 'Dunkel · Graphit'),
-    ('animated_rainbow', 'Animiert · Regenbogen'),
-    ('animated_fade', 'Animiert · Fade Bunt'),
     ('animated_sparkle', 'Animiert · Funkeln'),
-    ('animated_light', 'Animiert · Hell'),
+    ('animated_aurora', 'Animiert · Nordlicht'),
+    ('animated_waves', 'Animiert · Nachtwellen'),
+    ('animated_mist', 'Animiert · Violetter Nebel'),
     ('adaptive', 'Adaptiv · Akzentfarbe'),
 )
 KEYS = tuple(key for key, _title in PRESETS)
-ANIMATED_PRESETS = frozenset(('animated_rainbow', 'animated_fade',
-                               'animated_sparkle', 'animated_light'))
-LIGHT_PRESETS = frozenset(('light', 'pearl', 'daybreak', 'ice', 'pastel_rainbow',
-                           'animated_rainbow', 'animated_fade', 'animated_light'))
-RAINBOW_PRESETS = frozenset(('pastel_rainbow', 'prism'))
+ANIMATED_PRESETS = frozenset((
+    'animated_sparkle', 'animated_aurora', 'animated_waves', 'animated_mist',
+))
+LIGHT_PRESETS = frozenset(('light', 'pearl', 'daybreak', 'ice'))
+RAINBOW_PRESETS = frozenset(('prism',))
 
 
 def resolve(style, theme_mode):
@@ -56,16 +55,16 @@ _PALETTES = {
     'pearl': ('#f6f4f4', '#efe0e8', '#dbe9f1', '#eee2d7'),
     'daybreak': ('#fff7ef', '#ffcfb8', '#f1b6d2', '#b5d5ef'),
     'ice': ('#f2faff', '#b3e3ee', '#c5d7f6', '#b8e4e0'),
-    'pastel_rainbow': ('#f9f4fd', '#f4bed3', '#b8d3fc', '#b9ebd9'),
     'prism': ('#171a34', '#ef659b', '#638ef4', '#4fd3bd'),
     'deep_ocean': ('#071b2a', '#166886', '#21437e', '#1f8883'),
     'midnight': ('#0b1123', '#34417f', '#4d3686', '#273b60'),
     'velvet': ('#200f23', '#75345c', '#493778', '#a24f65'),
     'graphite': ('#101318', '#343d4c', '#526176', '#414b60'),
-    'animated_rainbow': ('#f7f4ff', '#ff76a4', '#67b0ff', '#77e7c1'),
-    'animated_fade': ('#f9f3fc', '#ffa9c8', '#8ac9ef', '#f9d18e'),
     'animated_sparkle': ('#11162f', '#5855bd', '#934fa8', '#298aa6'),
-    'animated_light': ('#fcf9f1', '#ffe3a8', '#bfdcfa', '#f5c6d8'),
+    # Low-key palettes sampled against the original Glass brightness.
+    'animated_aurora': ('#091a2a', '#1f5668', '#385575', '#1c6672'),
+    'animated_waves': ('#09182a', '#1b4163', '#275272', '#16475b'),
+    'animated_mist': ('#151326', '#47365f', '#334b6c', '#574362'),
 }
 
 
@@ -122,39 +121,10 @@ def minimal_color():
 
 
 def paint_animated_layer(p, width, height, style, phase):
-    """Four intrinsically animated native Qt wallpapers, no global toggle."""
-    if style == 'animated_rainbow':
-        colors = ('#ff5c86', '#ffaa53', '#f5e569', '#63d9a5',
-                  '#5aa5ff', '#a079fa', '#ff76d2')
-        # Continuous spectral ribbons slide across the full bright canvas.
-        for i, value in enumerate(colors):
-            x = width * ((i + .5) / len(colors) + .14 * sin(phase + i * .48))
-            y = height * (.36 + .24 * cos(phase * .72 + i*.64))
-            g = QRadialGradient(x, y, max(width * .37, height * .8))
-            color = QColor(value)
-            color.setAlphaF(.51)
-            edge = QColor(color); edge.setAlpha(0)
-            g.setColorAt(0, color)
-            g.setColorAt(.32, QColor(color))
-            g.setColorAt(1, edge)
-            p.fillRect(0, 0, width, height, QBrush(g))
-    elif style == 'animated_fade':
-        colors = ('#f59acc', '#77c9f4', '#9fe5d3', '#f8cc87', '#bb9df4')
-        for i, value in enumerate(colors):
-            x = width * (.48 + .46 * sin(phase * .69 + i * 1.31))
-            y = height * (.44 + .47 * cos(phase * .59 + i * 1.52))
-            g = QRadialGradient(x, y, max(width * .47, height * 1.06))
-            center = QColor(value)
-            center.setAlphaF(.60)
-            transparent = QColor(center); transparent.setAlpha(0)
-            g.setColorAt(0, center)
-            g.setColorAt(.35, QColor(center))
-            g.setColorAt(1, transparent)
-            p.fillRect(0, 0, width, height, QBrush(g))
-    elif style == 'animated_sparkle':
+    """Four purpose-built animated wallpapers in restrained Glass-level hues."""
+    if style == 'animated_sparkle':
+        # Retain the established sparkle design exactly as before.
         p.setPen(Qt.NoPen)
-        # Deterministically placed stars (not random each frame) shimmer with
-        # individual phases and tiny radii, while the gradient beneath drifts.
         for i in range(82):
             x = (i * 0.61803398875 % 1) * width
             y = (i * 0.75487766625 % 1) * height
@@ -168,17 +138,79 @@ def paint_animated_layer(p, width, height, style, phase):
             p.drawEllipse(QPointF(x, y), radius * 3.1, radius * 3.1)
             p.setBrush(c)
             p.drawEllipse(QPointF(x, y), radius, radius)
-    elif style == 'animated_light':
-        for i, value in enumerate(('#ffffff', '#ffe0b1', '#b2ddfb')):
-            x = width * (.15 + i * .32 + .2 * sin(phase * .85 + i))
-            y = height * (.26 + .21 * cos(phase + i * 1.37))
-            glow = QRadialGradient(x, y, max(width * .56, height * 1.1))
-            c = QColor(value); c.setAlphaF(.67)
-            end = QColor(c); end.setAlpha(0)
-            glow.setColorAt(0, c)
-            glow.setColorAt(1, end)
-            p.fillRect(0, 0, width, height, QBrush(glow))
 
+    elif style == 'animated_aurora':
+        # Broad, translucent northern lights: dark teal / subdued blue-purple.
+        for i, code in enumerate(('#399b94', '#4778a6', '#7664a0')):
+            x = width * (.18 + .32*i + .17*sin(phase*.66+i*1.7))
+            y = height * (.32 + .13*cos(phase*.51+i*.9))
+            radius = max(width*.48, height*1.05)
+            glow = QRadialGradient(x, y, radius)
+            center = QColor(code); center.setAlpha(80 if i == 0 else 57)
+            edge = QColor(center); edge.setAlpha(0)
+            glow.setColorAt(0, center)
+            glow.setColorAt(.38, QColor(center))
+            glow.setColorAt(1, edge)
+            p.fillRect(0, 0, width, height, QBrush(glow))
+        for i, code in enumerate(('#3eaa9a', '#607cbb')):
+            x = width * (.19 + i*.41 + .15*sin(phase*.72+i*2.1))
+            curve = QPainterPath()
+            curve.moveTo(x-width*.23, -height*.12)
+            curve.cubicTo(x+width*.13, height*.28,
+                          x-width*.19, height*.59,
+                          x+width*.10, height*1.12)
+            curve.lineTo(x+width*.39, height*1.12)
+            curve.cubicTo(x+width*.11, height*.61,
+                          x+width*.39, height*.28,
+                          x+width*.03, -height*.12)
+            curve.closeSubpath()
+            wash = QLinearGradient(x-width*.26, 0, x+width*.40, 0)
+            hue = QColor(code)
+            hue.setAlpha(0); wash.setColorAt(0, hue)
+            hue.setAlpha(40); wash.setColorAt(.48, hue)
+            hue.setAlpha(0); wash.setColorAt(1, hue)
+            p.fillPath(curve, QBrush(wash))
+
+    elif style == 'animated_waves':
+        # Long slow ocean waves, cool but not electric-blue.
+        for i, color in enumerate(('#23678a', '#326a83', '#36628d')):
+            baseline = height * (.37 + i*.19)
+            offset = height * .075 * sin(phase*.68 + i*1.9)
+            ridge = QPainterPath()
+            ridge.moveTo(-width*.12, baseline+offset)
+            ridge.cubicTo(width*.22, baseline-height*.11+offset,
+                          width*.47, baseline+height*.12-offset,
+                          width*.72, baseline-height*.06+offset)
+            ridge.cubicTo(width*.90, baseline-height*.12-offset,
+                          width*1.05, baseline+offset,
+                          width*1.12, baseline-height*.08+offset)
+            ridge.lineTo(width*1.12, height*1.2)
+            ridge.lineTo(-width*.12, height*1.2)
+            ridge.closeSubpath()
+            wave = QLinearGradient(0, baseline-height*.2, 0, height*1.1)
+            c = QColor(color); c.setAlpha(0)
+            wave.setColorAt(0, c)
+            c.setAlpha(54 if i == 0 else 39)
+            wave.setColorAt(.38, c)
+            c.setAlpha(5)
+            wave.setColorAt(1, c)
+            p.fillPath(ridge, QBrush(wave))
+
+    elif style == 'animated_mist':
+        # A cluster of diffused lavender/indigo clouds, no bright hot-spots.
+        for i, color in enumerate(('#735f92', '#4c7794', '#895f8d', '#456784')):
+            x = width * (.19 + (i % 3)*.3 + .16*sin(phase*.57+i*1.2))
+            y = height * (.26 + (i % 2)*.4 + .15*cos(phase*.49+i*1.7))
+            spread = max(width*.48, height*.92)
+            cloud = QRadialGradient(x, y, spread)
+            center = QColor(color)
+            center.setAlpha(90 if i < 2 else 64)
+            middle = QColor(center); middle.setAlpha(round(center.alpha()*.42))
+            edge = QColor(center); edge.setAlpha(0)
+            cloud.setColorAt(0, center)
+            cloud.setColorAt(.49, middle)
+            cloud.setColorAt(1, edge)
+            p.fillRect(0, 0, width, height, QBrush(cloud))
 
 def render(size, style='glass', accent='#4f8cff', light=False, phase=0.0):
     """Return sharp/soft QPixmaps for the same geometric gradient layout."""

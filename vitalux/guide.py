@@ -76,7 +76,7 @@ SLIDES = [
     (
         "Darstellung und Einstellungen",
         "Standardmäßig startet Vitalux mit Glass und Vitalux Blau. Gespeicherte persönliche Einstellungen bleiben erhalten.",
-        "Die ursprünglichen Hintergründe bleiben erhalten. Neu sind vier automatisch animierte Varianten: Regenbogen, Fade Bunt, Funkeln und Hell.",
+        "Die ursprünglichen Hintergründe bleiben erhalten, außer Regenbogen Pastell. Animiert sind Funkeln sowie die drei ruhigeren Designs Nordlicht, Nachtwellen und Violetter Nebel.",
         "Eigene Akzentfarben lassen sich mit „Bearbeiten“ ändern oder mit „Löschen“ entfernen.",
         "Statische Hintergrundfarben bleiben unverändert; Adaptiv folgt deiner Akzentfarbe. Gelb und Rot ergänzen die Akzentfarben und färben auch App- und Tray-Symbole.",
         "settings",

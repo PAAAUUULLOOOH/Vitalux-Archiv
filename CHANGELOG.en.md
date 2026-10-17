@@ -4,6 +4,13 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.68] - 2026-10-17
+- Removed Rainbow Pastel and the animated Rainbow, Color Fade and Light backgrounds, along with their obsolete palettes and render effects.
+- Preserved the existing animated Sparkle design.
+- Added three subtle, automatically animated wallpapers around the original Glass brightness: Northern Lights (deep teal/blue/violet), Night Waves (muted ocean blue) and Violet Mist (dark blue-violet).
+- Removed outdated selections from the dropdown and translations; saved references to deleted styles fall back to the active theme's default background.
+- Updated regressions for available styles, animation, low-luminance palette checks, README and the bilingual built-in guide.
+
 ## [v0.9.3.67] - 2026-10-17
 - Removed the global “Gently animate background” option and its rendering/settings implementation; static backgrounds stay static.
 - Added four intrinsically animated wallpapers: Rainbow, Color Fade, Sparkle and Light. Light palettes retain their intended brightness regardless of UI scheme, and Adaptive Accent Color returns.
