@@ -20,6 +20,9 @@ def test_launcher():
         here = Path(temporary)
         (here / 'runtime' / 'bin').mkdir(parents=True)
         (here / 'run.sh').write_bytes((ROOT/'run.sh').read_bytes())
+        (here / 'vitalux').mkdir()
+        (here / 'vitalux' / '__init__.py').write_text(
+            '__version__ = "0.9.3.70"\n', encoding='utf-8')
         fake = here / 'runtime' / 'bin' / 'python3.12'
         fake.write_text(
             '#!/usr/bin/env bash\n'
@@ -44,9 +47,38 @@ def test_launcher():
         lines = [line for line in logfile.read_text().splitlines() if line]
         assert len(lines) >= 5, lines
         assert all(TIME.match(line) for line in lines), lines
+        assert all('[Vitalux v0.9.3.70]' in line for line in lines), lines
         assert any('malloc(): unaligned tcache chunk detected' in x for x in lines)
         assert any('exit code 134' in x for x in lines)
         assert any('automatische Wiederherstellung' in x for x in lines)
+        errorlog = here/'state'/'vitalux'/'errors.log'
+        assert errorlog.exists()
+        assert re.search(r'\[Vitalux v0\.9\.3\.70\].*exit code 134', errorlog.read_text())
+
+
+def test_installer_log():
+    # The AppImage installer and first-run helper must have the same timestamp
+    # and failing version format as the main application and restart watcher.
+    with tempfile.TemporaryDirectory(prefix='vitalux-installer-logging-') as temporary:
+        root = Path(temporary)
+        (root/'packaging').mkdir()
+        (root/'vitalux').mkdir()
+        (root/'vitalux'/'__init__.py').write_text(
+            '__version__ = "0.9.3.70"\n', encoding='utf-8')
+        (root/'packaging'/'AppRun').write_bytes(
+            (ROOT/'packaging'/'AppRun').read_bytes())
+        helper = root/'packaging'/'appimage-integration.sh'
+        helper.write_text('#!/bin/bash\necho "installation completed"\n', encoding='utf-8')
+        env = os.environ.copy()
+        env['APPDIR'] = str(root)
+        env['XDG_STATE_HOME'] = str(root/'state')
+        proc = subprocess.run(['bash', str(root/'packaging'/'AppRun'), '--install'],
+                              env=env, capture_output=True, text=True, timeout=15)
+        assert proc.returncode == 0, proc
+        data = (root/'state'/'vitalux'/'installation.log').read_text().splitlines()
+        assert any('installation completed' in line for line in data), data
+        assert all(TIME.match(line) and '[Vitalux v0.9.3.70]' in line
+                   for line in data), data
 
 
 def test_native_trace_start():
@@ -70,5 +102,6 @@ def test_native_trace_start():
 
 if __name__ == '__main__':
     test_launcher()
+    test_installer_log()
     test_native_trace_start()
-    print('Crash logger: each native stderr line, exit 134 and errors.log start have timestamps: PASS')
+    print('Vitalux logs: all timestamps, version markers and native exit code 134: PASS')

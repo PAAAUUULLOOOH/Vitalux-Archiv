@@ -45,8 +45,14 @@ def log_exception(kind, value, tb=None):
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with LOG_PATH.open('a', encoding='utf-8') as log:
-            log.write(f'\n=== Vitalux {__version__} {datetime.now().astimezone().isoformat()} ===\n')
-            log.write(''.join(traceback.format_exception(kind, value, tb)))
+            # Always include date, timezone and failing version on *every*
+            # Python exception line. Native faulthandler frames are surrounded
+            # by the timestamped startup marker and the shell's crash footer.
+            at = datetime.now().astimezone().isoformat()
+            log.write(f'[{at}] [Vitalux v{__version__}] Python exception\n')
+            for line in ''.join(traceback.format_exception(kind, value, tb)).splitlines():
+                log.write(f'[{at}] [Vitalux v{__version__}] {line}\n')
+            log.flush()
     except OSError:
         pass
 

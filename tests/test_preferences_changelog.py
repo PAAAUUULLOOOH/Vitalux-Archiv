@@ -87,17 +87,17 @@ def check_preferences(app):
 
             # Backdrop controls persist independently of the color scheme and
             # preserve the readable dropdown styles.
-            assert page.background_combo.count() == 19
+            assert page.background_combo.count() == 14
             assert page.background_combo.findData('aurora') == -1
             assert page.background_combo.findData('obsidian') == -1
             assert page.background_combo.findData('nebula') == -1
             assert page.background_combo.findData('arctic') == -1
             assert page.background_combo.findData('adaptive') >= 0
-            for name in ('animated_sparkle', 'animated_aurora',
-                         'animated_waves', 'animated_mist'):
-                assert page.background_combo.findData(name) >= 0
+            assert page.background_combo.findData('animated_sparkle') >= 0
             for name in ('pastel_rainbow', 'animated_rainbow',
-                         'animated_fade', 'animated_light'):
+                         'animated_fade', 'animated_light',
+                         'animated_aurora', 'animated_waves',
+                         'animated_mist', 'pearl', 'ice'):
                 assert page.background_combo.findData(name) == -1
             assert page.accent_combo.findData('#facc15') >= 0
             assert page.accent_combo.findData('#ef4444') >= 0
@@ -108,12 +108,11 @@ def check_preferences(app):
                     'Dark', 'Light', 'Glass', 'Black Glass', 'Minimalistisch']
             assert not hasattr(page, 'background_sliders')
             assert not hasattr(page, 'background_values')
-            for name in ('animated_aurora', 'animated_waves',
-                         'animated_sparkle', 'animated_mist', 'adaptive'):
+            for name in ('animated_sparkle', 'adaptive'):
                 assert page.background_combo.findData(name) >= 0
             page.background_combo.setCurrentIndex(
-                page.background_combo.findData('animated_aurora'))
-            assert settings.get('background_style') == 'animated_aurora'
+                page.background_combo.findData('animated_sparkle'))
+            assert settings.get('background_style') == 'animated_sparkle'
 
             # Previous themed drop-down styling is restored: a separate darker
             # control area on the right, with a readable closed label.
@@ -270,7 +269,6 @@ def check_changelog(app):
     versions = changelog.entries()
     assert versions and versions[0][0] == __version__, (versions, __version__)
     assert len(changelog.version_notes(__version__)) >= 3
-    # The latest release tests log timestamps, not background features.
     assert "Zeitstempel" in " ".join(changelog.version_notes(__version__, lang="de"))
     assert "timestamp" in " ".join(changelog.version_notes(__version__, lang="en"))
 

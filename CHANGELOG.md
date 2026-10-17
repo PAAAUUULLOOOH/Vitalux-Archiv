@@ -5,6 +5,13 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.70] - 2026-10-17
+- Protokolle vereinheitlicht: `vitalux.log`, `errors.log`, `installation.log` und `restart.log` erhalten lokale ISO-Zeitstempel einschließlich Zeitzone und Kennzeichnungen der Vitalux-Version. Native Crashframes werden mit einem zeitgestempelten Startmarker und Absturzabschluss eingerahmt.
+- Alte animierte Hintergrundeffekte „Nordlicht“, „Nachtwellen“ und „Violetter Nebel“ sowie deren Farbpaletten und Renderlogik vollständig entfernt. Nur „Funkeln“ bleibt animiert.
+- Statische Hintergründe „Perlmutt“ und „Eisblau“ samt Farbpaletten entfernt. Frühere Einstellungen dieser Designs fallen auf den Standardhintergrund des aktiven Farbschemas zurück.
+- README und integrierte deutsch/englische Anleitung aktualisiert und verfügbare Kombinationen dokumentiert: 5 Farbschemas × 14 Hintergrundauswahlen × 9 Akzentoptionen = **630 Auswahlkombinationen**, davon 560 mit festen Akzentfarben; zusätzliche eigene Farben möglich.
+- Regressionstests für Hintergrundauswahl, Logzeitstempel, Versionen und Wiederherstellung aktualisiert.
+
 ## [v0.9.3.69] - 2026-10-17
 - Absturzdiagnose verbessert: `vitalux.log` versieht ab jetzt jede Programm-, Python- und Qt-Konsolenmeldung mit lokalem ISO-8601-Zeitstempel samt Zeitzone. Auch Programmstart (einschließlich Version) und Exit-Code werden protokolliert; der wirkliche Prozess-Exit-Code bleibt trotz Log-Pipeline erhalten.
 - `errors.log` markiert jeden Programmstart vor Aktivierung des nativen Python-Absturzhandlers mit Zeitstempel und Vitalux-Version. So lassen sich ältere Fehler klar von neuen Abstürzen unterscheiden.

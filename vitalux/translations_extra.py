@@ -529,9 +529,7 @@ EN_MORE.update({
 
 # Redesigned backgrounds and update identity (v0.9.3.65).
 EN_MORE.update({
-    "Hell · Perlmutt": "Light · Pearl",
     "Hell · Morgenlicht": "Light · Daybreak",
-    "Hell · Eisblau": "Light · Ice Blue",
     "Regenbogen · Prisma": "Rainbow · Prism",
     "Dunkel · Tiefsee": "Dark · Deep Ocean",
     "Dunkel · Mitternacht": "Dark · Midnight",
@@ -564,9 +562,13 @@ EN_MORE.update({
 
 # v0.9.3.68: Glass-brightness muted motion with three curated replacements.
 EN_MORE.update({
-    "Animiert · Nordlicht": "Animated · Northern Lights",
-    "Animiert · Nachtwellen": "Animated · Night Waves",
-    "Animiert · Violetter Nebel": "Animated · Violet Mist",
     "Statische Hintergründe bleiben unverändert. Animiert: Funkeln, Nordlicht, Nachtwellen und Violetter Nebel. Alle drei neuen Designs sind so dunkel und ruhig abgestimmt wie Glass. Adaptiv folgt der Akzentfarbe.": "Static wallpapers remain still. Animated: Sparkle, Northern Lights, Night Waves and Violet Mist. The three new designs are as dark and subtle as Glass. Adaptive follows your accent color.",
     "Die ursprünglichen Hintergründe bleiben erhalten, außer Regenbogen Pastell. Animiert sind Funkeln sowie die drei ruhigeren Designs Nordlicht, Nachtwellen und Violetter Nebel.": "The original wallpapers remain, except Rainbow Pastel. Animated options are Sparkle and three subtler styles: Northern Lights, Night Waves and Violet Mist.",
+})
+
+# v0.9.3.70: only Sparkle remains animated; current preset counts in guide.
+EN_MORE.update({
+    "Nur Funkeln ist animiert. Die anderen Hintergründe sind statisch; Adaptiv folgt der ausgewählten Akzentfarbe.": "Only Sparkle is animated. Other wallpapers are static; Adaptive follows your selected accent color.",
+    "Du kannst 14 Hintergrundeinstellungen wählen. Funkeln ist der einzige animierte Hintergrund; Perlmutt, Eisblau und die übrigen animierten Designs wurden entfernt.": "There are 14 background selections. Sparkle is the only animated wallpaper; Pearl, Ice Blue and the other animated styles were removed.",
+    "Du kannst 5 Farbschemas, 14 Hintergrundeinstellungen und 9 Akzentoptionen kombinieren: 5 × 14 × 9 = 630 Auswahlkombinationen, davon 560 mit festen Akzentfarben. Eigene Farben bieten weitere Möglichkeiten.": "Combine 5 themes, 14 wallpaper selections and 9 accent options: 5 × 14 × 9 = 630 selection combinations, including 560 using preset accent colors. Custom colors provide more possibilities.",
 })

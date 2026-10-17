@@ -29,14 +29,14 @@ def run():
             settings.set('theme', 'glass')
             theme.set_mode('glass')
             theme.set_accent('#4f8cff')
-            assert len(backdrops.PRESETS) == 19
+            assert len(backdrops.PRESETS) == 14
             assert backdrops.resolve('legacy', 'glass') == 'glass'
             assert backdrops.resolve('theme_default', 'light') == 'light'
-            assert backdrops.ANIMATED_PRESETS == frozenset((
-                'animated_sparkle', 'animated_aurora',
-                'animated_waves', 'animated_mist'))
+            assert backdrops.ANIMATED_PRESETS == frozenset(('animated_sparkle',))
             for removed in ('pastel_rainbow', 'animated_rainbow',
-                            'animated_fade', 'animated_light'):
+                            'animated_fade', 'animated_light',
+                            'animated_aurora', 'animated_waves',
+                            'animated_mist', 'pearl', 'ice'):
                 assert removed not in backdrops.KEYS
                 assert backdrops.resolve(removed, 'glass') == 'glass'
             assert 'adaptive' in backdrops.KEYS
@@ -56,14 +56,13 @@ def run():
                 assert not scene.grab().isNull(), key
 
             # Fixed presets never schedule a wallpaper timer.
-            for style in ('theme_default', 'glass', 'pearl', 'prism',
+            for style in ('theme_default', 'glass', 'daybreak', 'prism',
                           'deep_ocean', 'minimal', 'adaptive'):
                 settings.set('background_style', style)
                 scene.sync_background()
                 assert not scene._wallpaper_timer.isActive(), style
 
-            # Funkeln and the three quieter new designs move automatically,
-            # even when global UI animations are turned off.
+            # Funkeln is now the only automatically animated style.
             settings.set('motion', 'off')
             for style in backdrops.ANIMATED_PRESETS:
                 settings.set('background_style', style)
@@ -78,7 +77,7 @@ def run():
             # Existing light wallpapers are still light under Glass; neither
             # scene composition nor cards should tint the canvas dark.
             theme.set_mode('glass')
-            for style in ('light', 'pearl', 'ice'):
+            for style in ('light', 'daybreak'):
                 settings.set('background_style', style)
                 scene.sync_background()
                 pixel = scene.sharp_backdrop().toImage().pixelColor(320, 190)
@@ -88,20 +87,6 @@ def run():
             scene.sync_background()
             pixel = scene.sharp_backdrop().toImage().pixelColor(320, 190)
             assert pixel.red() + pixel.green() + pixel.blue() < 420
-
-            # The three replacements share a dark Glass-level mood. Distinct
-            # blue/petrol/violet palettes remain visible without neon highlights.
-            for style in ('animated_aurora', 'animated_waves', 'animated_mist'):
-                settings.set('background_style', style)
-                scene.sync_background()
-                frame = scene.sharp_backdrop().toImage()
-                samples = [frame.pixelColor(x, y) for x, y in (
-                    (80, 80), (320, 190), (560, 320), (420, 70), (175, 270))]
-                luminance = [int(.2126*c.red() + .7152*c.green() + .0722*c.blue())
-                             for c in samples]
-                assert 8 < sum(luminance)/len(luminance) < 104, (
-                    style, luminance)
-                assert max(luminance) < 150, (style, luminance)
 
             settings.set('background_style', 'adaptive')
             theme.set_accent('#4f8cff')
@@ -126,7 +111,7 @@ def run():
         finally:
             settings.PATH = previous
     example.close()
-    print('Darker four-animation collection, removed presets, static themes and adaptive hue: PASS')
+    print('Single Sparkle animation; Perlmutt, Eisblau and obsolete motion removed: PASS')
 
 
 if __name__ == '__main__':

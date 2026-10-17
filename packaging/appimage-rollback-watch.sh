@@ -10,13 +10,23 @@ PREVIOUS="${TARGET}.previous"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/vitalux"
 mkdir -p -- "$STATE"
 LOG="$STATE/restart.log"
+# The running mount identifies the exact version that failed.
+VERSION="$(sed -n 's/^__version__ = "\\([^"]*\\)".*/\\1/p' "$BASE/vitalux/__init__.py" 2>/dev/null)"
+log_line() {
+  printf '[%s] [Vitalux v%s] %s\n' "$(date -Is)" "${VERSION:-unknown}" "$*" >> "$LOG"
+}
+log_child() {
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    log_line "$line"
+  done
+}
 
 # Never trust or follow an unrelated/symlinked rollback file.
 if [[ ! -f "$PREVIOUS" || -L "$PREVIOUS" || ! -f "$TARGET" || -L "$TARGET" ]]; then
   exec bash "$BASE/run.sh" "$@"
 fi
 
-echo "[$(date -Is)] Starting updated Vitalux with previous version retained." >> "$LOG"
+log_line "Starting updated Vitalux with previous version retained."
 # Our normal launcher captures Python and Qt diagnostics in vitalux.log.
 # Wait for the real application, not the AppImage mount/launcher alone.
 VITALUX_GUARDED=1 bash "$BASE/run.sh" "$@"
@@ -29,26 +39,26 @@ case "$status" in
     ;;
 esac
 
-echo "[$(date -Is)] Vitalux exited unexpectedly (status $status). Attempting rollback." >> "$LOG"
+log_line "Vitalux exited unexpectedly (status $status). Attempting rollback."
 if [[ ! -f "$PREVIOUS" || -L "$PREVIOUS" || ! -f "$TARGET" || -L "$TARGET" ]]; then
-  echo "[$(date -Is)] Rollback skipped: valid previous AppImage no longer present." >> "$LOG"
+  log_line "Rollback skipped: valid previous AppImage no longer present."
   exit "$status"
 fi
 TMP="$(mktemp "${TARGET}.rollback-XXXXXXXX")" || exit "$status"
 trap 'rm -f -- "$TMP"' EXIT
 if ! cp -p -- "$PREVIOUS" "$TMP"; then
-  echo "[$(date -Is)] Rollback copy failed." >> "$LOG"
+  log_line "Rollback copy failed."
   exit "$status"
 fi
 chmod u+x "$TMP" || exit "$status"
 if ! mv -f -- "$TMP" "$TARGET"; then
-  echo "[$(date -Is)] Rollback swap failed." >> "$LOG"
+  log_line "Rollback swap failed."
   exit "$status"
 fi
 trap - EXIT
 rm -f -- "$PREVIOUS"
-echo "[$(date -Is)] Recovered previous Vitalux version. Restarting it." >> "$LOG"
+log_line "Recovered previous Vitalux version. Restarting it."
 # Launch the restored version once, without inheriting the failed AppImage mount.
 unset APPDIR APPIMAGE LD_LIBRARY_PATH LD_PRELOAD PYTHONHOME PYTHONPATH PYTHONUSERBASE
-"$TARGET" --launch "$@" >> "$LOG" 2>&1 &
+( "$TARGET" --launch "$@" 2>&1 | log_child ) &
 exit 0

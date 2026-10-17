@@ -198,6 +198,11 @@ target={q(target)}
 staged={q(staged)}
 backup={q(target + '.previous')}
 state_dir={q(os.path.join(os.environ.get('XDG_STATE_HOME') or os.path.expanduser('~/.local/state'), 'vitalux'))}
+version={q(__version__)}
+mkdir -p "$state_dir"
+stamp() {{
+  printf '[%s] [Vitalux v%s] %s\\n' "$(date -Is)" "$version" "$*" >> "$state_dir/restart.log"
+}}
 for i in $(seq 1 150); do
   if ! kill -0 "$oldpid" 2>/dev/null; then break; fi
   sleep 0.2
@@ -208,10 +213,11 @@ cp -p -- "$target" "${{backup}}.tmp"
 mv -f -- "${{backup}}.tmp" "$backup"
 mv -f -- "$staged" "$target"
 unset APPDIR APPIMAGE LD_LIBRARY_PATH LD_PRELOAD PYTHONHOME PYTHONPATH PYTHONUSERBASE
-mkdir -p "$state_dir"
-printf '\\n=== Vitalux update restart: %s ===\\n' "$(date -Is)" >> "$state_dir/restart.log"
-# Bypass first-run dialog; the user has already chosen how to run Vitalux.
-"$target" --launch >> "$state_dir/restart.log" 2>&1 &
+stamp "Vitalux update activation: old version v$version, launching newly installed AppImage."
+# Record even early loader failures in restart.log, with date and source version.
+( "$target" --launch 2>&1 | while IFS= read -r line || [ -n "$line" ]; do
+    stamp "$line"
+  done ) &
 """
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as f:

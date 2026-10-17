@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Vitalux – KDE/Wayland/X11 Portable-Starter (kein Terminal notwendig).
 # Alle gebündelten Programmkomponenten bleiben im Vitalux-Verzeichnis.
-set -u
+set -uo pipefail
 if ! cd -- "$(dirname -- "${BASH_SOURCE[0]}")"; then
   printf 'Vitalux: Programmverzeichnis nicht erreichbar.\n' >&2
   exit 1
@@ -13,7 +13,7 @@ LOG="$STATE_DIR/vitalux.log"
 # Every launcher, Python and Qt diagnostic line carries a local ISO-8601 time
 # and timezone, even when a native malloc/Qt abort bypasses Python handlers.
 log_line() {
-  printf '[%s] %s\n' "$(date -Is)" "$*" >>"$LOG"
+  printf '[%s] [Vitalux v%s] %s\n' "$(date -Is)" "${VERSION:-unknown}" "$*" >>"$LOG"
 }
 VERSION="$(sed -n 's/^__version__ = "\([^"]*\)".*/\1/p' "$HERE/vitalux/__init__.py" 2>/dev/null)"
 log_line "=== Vitalux ${VERSION:-unknown} start (launcher PID $BASHPID) ==="
@@ -73,6 +73,11 @@ done
 STATUS=${PIPESTATUS[0]}
 log_line "=== Vitalux ended (exit code $STATUS) ==="
 if [ "$STATUS" -ne 0 ]; then
+  # Python's fatal handler writes raw native frames to errors.log before
+  # exiting. A post-crash footer gives that frame block the crash *time*
+  # and exact version, even if no Python exception could be raised.
+  printf '[%s] [Vitalux v%s] Process crashed (exit code %s; see vitalux.log)\n' \
+    "$(date -Is)" "${VERSION:-unknown}" "$STATUS" >>"$STATE_DIR/errors.log"
   # ZIP installations keep precisely the last update's .backup. Restore this
   # working version if the new program exits abnormally; never roll back for
   # normal termination, terminal interruptions or session shutdown.
@@ -86,7 +91,9 @@ import os, shutil
 from vitalux import updater
 updater.restore_previous()
 shutil.rmtree(os.path.join(updater.app_root(), ".backup"))
-' >> "$LOG" 2>&1; then
+' 2>&1 | while IFS= read -r line || [[ -n "$line" ]]; do
+          log_line "$line"
+        done; then
           log_line 'Vitalux: vorherige Version wiederhergestellt; automatischer Neustart.'
           if command -v notify-send >/dev/null 2>&1; then
             notify-send 'Vitalux – Wiederherstellung' 'Die vorherige Version wurde nach einem Absturz automatisch wiederhergestellt.' >/dev/null 2>&1 || true

@@ -2,8 +2,22 @@
 set -euo pipefail
 BASE="${APPDIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
 INTEGRATOR="$BASE/packaging/appimage-integration.sh"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/vitalux"
+VERSION="$(sed -n 's/^__version__ = "\([^"]*\)".*/\1/p' "$BASE/vitalux/__init__.py" 2>/dev/null)"
+stamp_install() {
+  mkdir -p -- "$STATE"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    printf '[%s] [Vitalux v%s] %s\n' "$(date -Is)" "${VERSION:-unknown}" "$line" >>"$STATE/installation.log"
+  done
+}
 case "${1:-}" in
-  --install|--uninstall) exec bash "$INTEGRATOR" "$1" ;;
+  --install|--uninstall)
+    printf '%s\n' "User requested ${1:-}." | stamp_install
+    set +e
+    bash "$INTEGRATOR" "$1" 2>&1 | stamp_install
+    code=${PIPESTATUS[0]}
+    exit "$code"
+    ;;
   --portable|--launch)
     shift
     # Guard all launches while the single rollback copy exists. Crashes restore
@@ -26,11 +40,11 @@ integrated() {
   [[ -s "$TARGET" && -x "$TARGET" && -s "$DESKTOP" && -x "$LAUNCHER" ]] && grep -Fq "$LAUNCHER" "$DESKTOP"
 }
 if [[ -n "${APPIMAGE:-}" && -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]] && ! integrated; then
-  STATE="${XDG_STATE_HOME:-$HOME/.local/state}/vitalux"
   mkdir -p "$STATE"
+  printf '%s\n' "First-run desktop installation dialog started." | stamp_install
   set +e
-  LD_LIBRARY_PATH="$BASE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$BASE/runtime/bin/python3.12" "$BASE/packaging/appimage-first-run.py" 2>>"$STATE/installation.log"
-  CHOICE=$?
+  LD_LIBRARY_PATH="$BASE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$BASE/runtime/bin/python3.12" "$BASE/packaging/appimage-first-run.py" 2>&1 | stamp_install
+  CHOICE=${PIPESTATUS[0]}
   set -e
   if [[ "$CHOICE" == 80 ]]; then
     if command -v kdialog >/dev/null 2>&1; then
@@ -42,7 +56,8 @@ if [[ -n "${APPIMAGE:-}" && -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]] && ! integr
     fi
   fi
   if [[ "$CHOICE" == 0 ]]; then
-    if bash "$INTEGRATOR" --install >>"$STATE/installation.log" 2>&1 && integrated; then
+    printf '%s\n' "Installing Vitalux into local application menu." | stamp_install
+    if bash "$INTEGRATOR" --install 2>&1 | stamp_install && integrated; then
       exec "$TARGET" --launch "$@"
     fi
     echo "Vitalux: Desktop-Installation fehlgeschlagen; Log: $STATE/installation.log" >&2

@@ -47,10 +47,12 @@
 ### Design & Hintergründe
 
 - **Farbschemas:** Standardmäßig **Glass mit Vitalux Blau**. Auch Dark, Light, Black Glass und Minimalistisch stehen zur Verfügung. Bereits gespeicherte Einstellungen bleiben unverändert.
-- **Hintergründe:** Originale **Dark, Light, Glass, Black Glass und Minimalistisch**, dazu **Hell** (Perlmutt, Morgenlicht, Eisblau), **Regenbogen** (Prisma), **Dunkel** (Tiefsee, Mitternacht, Samt, Graphit) und **Adaptiv · Akzentfarbe**. **Regenbogen Pastell** ist entfernt. Bei den animierten Designs bleibt **Funkeln** erhalten; neu dazu kommen **Nordlicht, Nachtwellen und Violetter Nebel**. Die drei neuen Designs sind bewusst dunkel und gedämpft, etwa auf Helligkeitsniveau des Glass-Hintergrunds.
+- **Hintergründe:** Insgesamt **14 Auswahlmöglichkeiten**: Automatisch (Farbschema), die Originale **Dark, Light, Glass, Black Glass, Minimalistisch**, **Morgenlicht**, **Prisma**, **Tiefsee**, **Mitternacht**, **Samt**, **Graphit**, **Adaptiv · Akzentfarbe** und **Funkeln**. **Nur Funkeln ist animiert**. Perlmutt, Eisblau, Nordlicht, Nachtwellen und Violetter Nebel wurden vollständig entfernt.
 - **Anpassung:** Jeder Hintergrund besitzt fest abgestimmte Farben und Weichheit. Die globalen Regler für Farbintensität und Hintergrundweichheit sowie der Schalter „Hintergrund sanft animieren“ wurden entfernt. Helle Wallpaper behalten ihre Helligkeit unabhängig vom gewählten Farbschema.
 - **Akzentfarben & Symbole:** **Vitalux Blau, Cyan, Violett, Grün, Orange, Gelb, Rot und Rosa** besitzen eigene Logo-Varianten für Fenster, Taskleiste und Tray. Eine Benutzerinstallation verwendet pro Farbe einen eigenen Icon-Dateinamen, damit KDE den Wechsel besser erkennt. Bei einem verfügbaren Update leuchten die Logos in der ausgewählten Akzentfarbe.
 - **Bedienung:** Die Seitenleiste bleibt wie ursprünglich **fest links**; der Ziehgriff und die Rechtspositionierung wurden vollständig entfernt. Der Pfeil für die Dashboard-Layoutbearbeitung verliert nach dem Schließen seine Markierung. Hover-Texthinweise bleiben deaktiviert.
+
+**Farbkombinationen:** 5 Farbschemas × 14 Hintergrund-Auswahlmöglichkeiten × 9 Akzentoptionen (8 feste Farben + 1 Distributionsfarbe) = **630 auswählbare Kombinationen**. Davon sind **560 Kombinationen mit festen Akzentfarben** möglich (5 × 14 × 8). Die 70 zusätzlichen Einstellungen mit der Distributionsfarbe hängen von deiner Distribution ab. „Automatisch (Farbschema)“ verwendet den zum Schema gehörenden Hintergrund, sodass einige Auswahlen optisch identisch sein können. Benutzerdefinierte Akzentfarben schaffen weitere, nicht fest begrenzte Möglichkeiten.
 
 **Abgestimmtes Design:** Die fest links angeordnete Seitenleiste ist farblich auf die Kacheln abgestimmt. Der Dashboard-Pfeil und das Glühen bei Updates behalten ihre vertraute Position; die Benachrichtigungsanimation nutzt die jeweils ausgewählte Symbolfarbe.
 
@@ -131,7 +133,7 @@ Prüfe die Ausführungsberechtigung in Dolphin. Zum Testen kannst du `./Vitalux-
 <details>
 <summary><strong>Installation oder Update schlägt fehl</strong></summary>
 
-Installationsprotokoll: `~/.local/state/vitalux/installation.log`. **Absturzdiagnose:** `~/.local/state/vitalux/vitalux.log` enthält ab v0.9.3.69 lokale Zeitstempel (einschließlich Zeitzone) vor allen Konsolen-/Qt-Meldungen sowie beim Start und Exit; `errors.log` nennt bei jedem Programmstart ebenfalls Version und Zeitpunkt, um spätere native Crash-Traces zuzuordnen. Für den AppImage-Rollback ist `restart.log` zuständig. Diese Dateien bleiben lokal und werden nicht automatisch hochgeladen. Bei GitHub-Fehlern Internetverbindung, DNS, Systemzeit und CA-Zertifikate prüfen.
+**Alle vier Vitalux-Protokolle** unter `~/.local/state/vitalux/` enthalten ab v0.9.3.70 Zeitstempel mit lokaler Zeitzone und Versionsangaben: `vitalux.log` (Programm/Qt), `errors.log` (Python-Fehler und native Crash-Traces mit Zeit-/Versions-Kennzeichnung am Start und beim Absturz), `installation.log` (Installationsvorgänge) und `restart.log` (Updates/Wiederherstellung). Die native Fehlerausgabe kann weiterhin unformatierte Stackframes enthalten, die von Zeit-/Versionsmarkierungen eingerahmt werden. Die Dateien werden nicht automatisch hochgeladen. Bei GitHub-Fehlern Internetverbindung, DNS, Systemzeit und CA-Zertifikate prüfen.
 </details>
 
 <details>

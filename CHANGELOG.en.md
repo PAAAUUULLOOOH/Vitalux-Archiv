@@ -4,6 +4,13 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.70] - 2026-10-17
+- Unified four log files: `vitalux.log`, `errors.log`, `installation.log` and `restart.log` now include local ISO timestamps with timezone and the relevant Vitalux version. Native crash frames have timestamped start and crash-end markers.
+- Removed the Northern Lights, Night Waves and Violet Mist animations, palettes and rendering branches. Sparkle is the only remaining animated wallpaper.
+- Removed Pearl and Ice Blue static wallpapers and palettes. Previously saved removed backgrounds fall back to the active theme's default.
+- Updated GitHub README and bilingual in-app help with 5 themes × 14 wallpaper choices × 9 accent options = **630 selection combinations** (560 with fixed color presets); custom accents are additional.
+- Updated regression tests for selections, logging, versions and rollback.
+
 ## [v0.9.3.69] - 2026-10-17
 - Improved crash diagnostics: each application, Python and Qt console line in `vitalux.log` now carries local ISO-8601 time and timezone. Startup includes the version and launch process ID; exit includes the actual process status, preserved across the logging pipe.
 - `errors.log` writes a timestamped version and start marker before enabling native fatal stack traces, making it easier to distinguish historical errors from new crashes.

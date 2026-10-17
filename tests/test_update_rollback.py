@@ -14,6 +14,8 @@ def setup(temp, code, backup=True):
     temp = Path(temp)
     appdir = temp / "mounted"
     (appdir / "packaging").mkdir(parents=True, exist_ok=True)
+    (appdir / "vitalux").mkdir()
+    (appdir / "vitalux" / "__init__.py").write_text('__version__ = "0.9.3.70"\n')
     (appdir / "run.sh").write_text(
         "#!/bin/bash\n"
         f"exit {code}\n", encoding="utf-8")
@@ -66,6 +68,8 @@ def assert_abnormal_crash_restores_previous():
         assert "recovered" in target.read_text(), "Previous version not restored"
         log = Path(td)/"state"/"vitalux"/"restart.log"
         assert "Recovered previous Vitalux version" in log.read_text()
+        assert all("[Vitalux v0.9.3.70]" in line
+                   for line in log.read_text().splitlines() if line), log.read_text()
 
 
 def assert_legacy_first_restart_is_guarded():
