@@ -9,6 +9,7 @@ on:
       - "CHANGELOG.en.md"
       - "scripts/release_notes.py"
       - "scripts/bundle-opengl-runtime.py"
+      - "scripts/bundle-quick-runtime.py"
       - "scripts/versioning.py"
       - "assets/**"
       - "run.sh"
