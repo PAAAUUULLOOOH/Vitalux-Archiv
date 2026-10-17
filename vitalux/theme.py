@@ -95,9 +95,6 @@ def combo_surface():
 
 
 _QSS = Template(r"""
-QTabWidget#accentTabs::pane { border: 1px solid $BORDER; background: $CARD; border-radius: 12px; }
-QTabWidget#accentTabs QTabBar::tab { color: $TEXT; background: $INPUT_BG; padding: 10px 16px; border: 1px solid $BORDER; border-bottom: none; border-top-left-radius: 9px; border-top-right-radius: 9px; margin-right: 5px; }
-QTabWidget#accentTabs QTabBar::tab:selected { color: $ACCENT; background: $CARD; border-color: $ACCENT; font-weight: 700; }
 QWidget { background: transparent; color: $TEXT; font-family: "Inter", "Noto Sans", "Cantarell", "DejaVu Sans", sans-serif; font-size: 13px; }
 QMainWindow { background: $BG; }
 #root, QFrame#sidebar { background: transparent; border: none; }
