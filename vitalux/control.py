@@ -101,7 +101,6 @@ class AlertThresholdField(QFrame):
         self.number.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.number.setMinimumWidth(26)
         self.number.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.number.setToolTip("Grenzwert eingeben; Pfeiltasten ändern den Wert.")
 
         self.unit_label = QLabel(unit, self)
         self.unit_label.setObjectName("alertThresholdUnit")
