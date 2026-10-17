@@ -11,7 +11,12 @@ from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer
 from PySide6.QtGui import (QBrush, QColor, QLinearGradient, QPainter,
                            QPainterPath, QPen, QPixmap, QRadialGradient)
 from PySide6.QtWidgets import QFrame, QWidget
-from . import theme, settings, backdrops, user_background
+try:
+    from PySide6.QtOpenGLWidgets import QOpenGLWidget
+except (ImportError, RuntimeError):
+    QOpenGLWidget = None
+
+from . import theme, settings, backdrops, user_background, renderer
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 
@@ -26,8 +31,8 @@ def rounded(rect, radius):
     return path
 
 
-class AmbientScene(QWidget):
-    """Single stable image under every translucent Qt widget, cached on resize."""
+class _AmbientSceneCore:
+    """Shared cached-background implementation for raster and OpenGL hosts."""
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName('root')
@@ -223,7 +228,7 @@ class AmbientScene(QWidget):
         self._ensure_composed()
         return self._composed_sharp
 
-    def paintEvent(self, event):
+    def _paint_background(self):
         p = QPainter(self)
         p.fillRect(self.rect(), QColor(theme.BG))
         style = backdrops.resolve(settings.get('background_style', 'theme_default'),
@@ -238,10 +243,47 @@ class AmbientScene(QWidget):
         p.end()
 
 
+class AmbientScene(_AmbientSceneCore, QWidget):
+    """Established Qt raster renderer. Always available and the default."""
+    def paintEvent(self, event):
+        self._paint_background()
+
+
+if QOpenGLWidget is not None:
+    class AcceleratedAmbientScene(_AmbientSceneCore, QOpenGLWidget):
+        """Experimental GL-backed background with OpenGL compositing.
+
+        Standard Qt child widgets continue using software QPainter.
+        """
+        def paintEvent(self, event):
+            QOpenGLWidget.paintEvent(self, event)
+
+        def paintGL(self):
+            self._paint_background()
+else:
+    AcceleratedAmbientScene = None
+
+
+def create_ambient_scene():
+    """Select one backend at startup; never hot-swap a GL surface."""
+    if renderer.desired() == renderer.OPENGL:
+        if AcceleratedAmbientScene is not None and renderer.gpu_available():
+            try:
+                scene = AcceleratedAmbientScene()
+                scene.render_backend = renderer.OPENGL
+                return scene
+            except (RuntimeError, OSError):
+                pass
+        renderer.fallback()
+    scene = AmbientScene()
+    scene.render_backend = renderer.SOFTWARE
+    return scene
+
+
 def scene_for(widget):
     current = widget.parentWidget()
     while current is not None:
-        if isinstance(current, AmbientScene):
+        if isinstance(current, _AmbientSceneCore):
             return current
         current = current.parentWidget()
     return None
