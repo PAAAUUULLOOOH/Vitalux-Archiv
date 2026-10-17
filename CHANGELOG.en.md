@@ -4,6 +4,14 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.56] - 2026-10-17
+- Saved custom accent colors now support editing both the name and color value through a new Edit button, without creating duplicate entries.
+- A separate Delete button appears alongside Edit only when a saved custom color is selected.
+- All drop-down selectors now match Dark, Light, Glass, Black Glass and Minimalist themes, including the SMART drive selector, with a very small width reduction.
+- Temperature and usage alert input fields now follow their labels on the right, retaining compact centered values.
+- The update changelog displays only the selected UI language, either German or English.
+- Updated the integrated tutorial and GitHub README to cover the improved controls.
+
 ## [v0.9.3.55] - 2026-10-17
 - Redesigned the drop-down menus with consistent themed popup backgrounds, removing unwanted dark bands at their top and bottom.
 - Moved the compact, center-aligned temperature and usage alert fields to the left of their labels, without changing the card size.
