@@ -5,11 +5,6 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
-## [v0.9.3.71] - 2026-10-17
-- GitHub-README im Abschnitt „Design & Hintergründe“ deutlich gestrafft und übersichtlicher strukturiert; Kernfunktionen, 14 Hintergrundoptionen und 630 mögliche Auswahlkombinationen bleiben dokumentiert.
-- Verbindliche Versionsfolge eingeführt: Die vierte Versionskomponente zählt von 1 bis 99. Auf v0.9.3.99 folgt unmittelbar v0.9.4.1; die Version v0.9.3.100 entfällt.
-- Die GitHub-Veröffentlichung prüft künftig automatisch, ob jede neue Version genau auf den letzten Release folgt. Neue Tests sichern sowohl normale Versionsschritte als auch den Übergang .99 → nächster Patch .1 ab.
-
 ## [v0.9.3.70] - 2026-10-17
 - Protokolle vereinheitlicht: `vitalux.log`, `errors.log`, `installation.log` und `restart.log` erhalten lokale ISO-Zeitstempel einschließlich Zeitzone und Kennzeichnungen der Vitalux-Version. Native Crashframes werden mit einem zeitgestempelten Startmarker und Absturzabschluss eingerahmt.
 - Alte animierte Hintergrundeffekte „Nordlicht“, „Nachtwellen“ und „Violetter Nebel“ sowie deren Farbpaletten und Renderlogik vollständig entfernt. Nur „Funkeln“ bleibt animiert.
