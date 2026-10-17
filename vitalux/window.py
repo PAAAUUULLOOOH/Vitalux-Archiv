@@ -15,6 +15,7 @@ from .widgets import NavButton, SidebarToggle, ChartPanel, Gauge, label
 from .glass import AmbientScene, GlassSidebar, GlassSurface
 from .sidebar_transition import SidebarTransition, SidebarFreeze
 from .alerts import AlertMonitor, readings_from_sample
+from .tray_preview import TrayPreview, tray_tooltip
 
 
 class Sampler(QThread):
@@ -71,14 +72,18 @@ class MainWindow(QMainWindow):
         # after Vitalux. Qt automatically registers a visible icon when a host
         # becomes available. Checking isSystemTrayAvailable() here loses that.
         self._tray = QSystemTrayIcon(app_icon(), self)
-        self._tray.setToolTip('')
+        self._tray.setToolTip(tray_tooltip(None))
         self._tray_glow = TrayPulse(self._tray, self)
         self._tray_menu = QMenu(self)
         self._tray_open_action = QAction(tr('Vitalux öffnen'), self._tray_menu)
+        self._tray_preview = TrayPreview()
+        self._tray_preview_action = QAction(tr('Live-Vorschau anzeigen'), self._tray_menu)
+        self._tray_preview_action.triggered.connect(self.show_tray_preview)
         self._tray_quit_action = QAction(tr('Beenden'), self._tray_menu)
         self._tray_open_action.triggered.connect(self.show_from_tray)
         self._tray_quit_action.triggered.connect(self.quit_from_tray)
         self._tray_menu.addAction(self._tray_open_action)
+        self._tray_menu.addAction(self._tray_preview_action)
         self._tray_update_action = QAction('', self._tray_menu)
         self._tray_update_action.setVisible(False)
         self._tray_update_action.triggered.connect(self._open_updates_from_tray)
@@ -274,6 +279,9 @@ class MainWindow(QMainWindow):
         settings.set('lang',code)
         self._tray_open_action.setText(tr('Vitalux öffnen'))
         self._tray_quit_action.setText(tr('Beenden'))
+        self._tray_preview_action.setText(tr('Live-Vorschau anzeigen'))
+        self._tray_preview.retheme()
+        self._tray.setToolTip(tray_tooltip(self.last_sample))
         retranslate_widgets(self.centralWidget())
         glyph = {"Übersicht":"◈", "Prozessor":"◉", "Grafik":"▣", "Arbeitsspeicher":"▤",
                  "Netzwerk":"◎", "Laufwerke":"▱", "Sensoren":"♨", "System":"⚙",
@@ -601,6 +609,7 @@ class MainWindow(QMainWindow):
         if not self._tray_glow.active:
             self._tray.setIcon(current_icon)
         self._tray_glow.refresh()
+        self._tray_preview.retheme()
         sync_installed_icon()
         minimal = theme.mode() == 'minimal'
         self.centralWidget().set_low_power(minimal)
@@ -658,9 +667,9 @@ class MainWindow(QMainWindow):
         self.last_sample = d
         self._check_alerts(d)
         if self._tray is not None:
-            gpu = d['gpus'][0] if d.get('gpus') else {}
-            gpu_s = f"GPU {gpu['usage']:.0f}%" if gpu.get('usage') is not None else 'GPU –'
-            # Tray icon remains visible; no on-hover measurement tooltip.
+            self._tray.setToolTip(tray_tooltip(d))
+            if self._tray_preview.isVisible():
+                self._tray_preview.update_sample(d)
         # Native, lightweight branding animation driven by the real CPU sample.
         cpu_pct = d.get("cpu", {}).get("usage", 0.0)
         self.pulse_core.set_cpu_load(cpu_pct)
@@ -689,6 +698,23 @@ class MainWindow(QMainWindow):
             self._tray_click_timer.stop()
             self.show_from_tray()
         # Context is handled by QSystemTrayIcon's persistent QMenu itself.
+
+    def show_tray_preview(self):
+        popup = self._tray_preview
+        popup.update_sample(self.last_sample)
+        popup.retheme()
+        area = self._tray.geometry()
+        screen = QApplication.screenAt(area.center()) if not area.isNull() else QApplication.primaryScreen()
+        if screen is None:
+            screen = QApplication.primaryScreen()
+        if screen is not None:
+            bounds = screen.availableGeometry()
+            x = area.center().x() - popup.width() // 2 if not area.isNull() else bounds.right() - popup.width() - 14
+            y = area.top() - popup.sizeHint().height() - 12 if not area.isNull() else bounds.bottom() - popup.sizeHint().height() - 14
+            popup.move(max(bounds.left()+8, min(x, bounds.right()-popup.width()-8)),
+                       max(bounds.top()+8, min(y, bounds.bottom()-popup.sizeHint().height()-8)))
+        popup.show()
+        popup.raise_()
 
     def _toggle_tray_window(self):
         if self.isVisible() and not self.isMinimized():
@@ -756,6 +782,7 @@ class MainWindow(QMainWindow):
         self.sampler.wait(7000)
         self._tray_click_timer.stop()
         self._tray_glow.stop()
+        self._tray_preview.close()
         if self._tray is not None:
             self._tray.hide()
         self.manager.shutdown()
