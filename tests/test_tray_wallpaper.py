@@ -1,7 +1,9 @@
 """Regression checks for tray values and personal wallpapers."""
 import os
+import sys
 import tempfile
 from pathlib import Path
+sys.path.insert(0, os.getcwd())
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
