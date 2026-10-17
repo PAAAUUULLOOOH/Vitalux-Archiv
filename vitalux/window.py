@@ -63,6 +63,8 @@ class MainWindow(QMainWindow):
         self._alerts = AlertMonitor()
         self._force_quit = False
         self._tray_announce = False
+        self._update_notice_queued = False
+        self._notified_update_version = str(settings.get('last_notified_update_version', ''))
         self._tray_was_maximized = False
         self.last_render_ms = None
         # Create the tray icon even when Plasma's StatusNotifier host comes up
@@ -77,6 +79,10 @@ class MainWindow(QMainWindow):
         self._tray_open_action.triggered.connect(self.show_from_tray)
         self._tray_quit_action.triggered.connect(self.quit_from_tray)
         self._tray_menu.addAction(self._tray_open_action)
+        self._tray_update_action = QAction('', self._tray_menu)
+        self._tray_update_action.setVisible(False)
+        self._tray_update_action.triggered.connect(self._open_updates_from_tray)
+        self._tray_menu.addAction(self._tray_update_action)
         self._tray_menu.addSeparator()
         self._tray_menu.addAction(self._tray_quit_action)
         self._tray.setContextMenu(self._tray_menu)
@@ -283,12 +289,50 @@ class MainWindow(QMainWindow):
                                     for scroll,value in scrolls])
 
     def _sync_glow(self):
+        on = self.manager.available and bool(self.manager.latest)
+        version = self.manager.latest if on else ''
         if self.update_btn is not None:
-            on = self.manager.available
             self.update_btn.set_glow(on)
-            caption = tr("Updates")
-            self.update_btn.setToolTip(
-                caption + " · " + tr("Neue Version verfügbar!") if on else caption)
+            self.update_btn.set_update_version('v' + version if on else '')
+            # No hover hints: the version is directly visible in the sidebar.
+            self.update_btn.setToolTip('')
+        if hasattr(self, 'pulse_core'):
+            self.pulse_core.set_update_available(on)
+        if self._tray is not None:
+            self._tray_update_action.setVisible(on)
+            if on:
+                self._tray_update_action.setText(
+                    tr('Update verfügbar:') + ' v' + version)
+        if (on and version != self._notified_update_version
+                and not self._update_notice_queued):
+            self._update_notice_queued = True
+            QTimer.singleShot(1300, self._announce_update)
+
+    def _announce_update(self):
+        self._update_notice_queued = False
+        if not self.manager.available or not self.manager.latest:
+            return
+        version = self.manager.latest
+        if version == self._notified_update_version:
+            return
+        if not (self._tray and self._tray.isVisible()
+                and QSystemTrayIcon.isSystemTrayAvailable()
+                and QSystemTrayIcon.supportsMessages()):
+            return
+        self._tray.showMessage(
+            APP_NAME + ' · ' + tr('Update verfügbar'),
+            tr('Version {} ist verfügbar. Im Reiter Updates ansehen.').format(version),
+            QSystemTrayIcon.Information, 7000)
+        self._notified_update_version = version
+        settings.set('last_notified_update_version', version)
+
+    def _open_updates_from_tray(self):
+        self.show_from_tray()
+        for index, (name, _page) in enumerate(self.pages):
+            if name == 'Updates':
+                self.nav_buttons[index].setChecked(True)
+                self._switch_page(index)
+                return
 
     def set_interval(self, val):
         val = max(1, min(5, int(val)))

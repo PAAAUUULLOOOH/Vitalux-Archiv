@@ -46,9 +46,9 @@
 
 ### Design & Hintergründe
 
-- **Farbschemas:** Dark, Light, Glass, Black Glass und Minimalistisch. Glass zeichnet weichgezeichnete Panels direkt in Qt; Minimalistisch verzichtet bewusst auf atmosphärische Effekte.
-- **Hintergründe:** Klassisch (bisheriger Stil), Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost und **Adaptiv** (richtet sich nach der gewählten Akzentfarbe). Die Auswahl funktioniert unabhängig vom Farbschema; Minimalistisch bleibt einfarbig.
-- **Anpassung:** Farbintensität (0–100 %), Hintergrundweichheit (0–100 %) und optionale sanfte Hintergrundanimation. Die Animation ist standardmäßig **aus** und berücksichtigt die Animationseinstellung.
+- **Farbschemas:** Dark, Light, Glass, Black Glass und Minimalistisch. Die Seitenleiste bleibt farblich auf den jeweiligen Hintergrund abgestimmt; Glass und Black Glass behalten die ursprüngliche Glasoptik.
+- **Hintergründe:** **Automatisch (Farbschema)** nutzt den passenden Originalhintergrund. Die fünf ursprünglichen Designs sind außerdem einzeln als **Dark, Light, Glass, Black Glass und Minimalistisch** verfügbar. Zusätzlich: **Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost und Adaptiv** (folgt deiner Akzentfarbe). Farbschema und Hintergrund sind separat wählbar; das Farbschema Minimalistisch bleibt einfarbig.
+- **Anpassung:** Feinere, farblich abgestimmte Slider für **Farbintensität** und **Hintergrundweichheit** (0–100 %); optionale sanfte Hintergrundanimation (standardmäßig **aus**). Die zusätzlichen Hintergründe bieten weichere Lichtverläufe und dezente Satinstrukturen.
 - **Akzentfarben:** Vorgaben oder benannte eigene Farben; **Bearbeiten → Löschen → Eigene Farbe …** sind die passenden Aktionen.
 - **Bedienung:** Keine aufschwebenden Hover-Texthinweise mehr innerhalb von Vitalux; sichtbare Hervorhebungen beim Überfahren bleiben. Dropdowns sind an das Farbschema angepasst und zeigen lange Bezeichnungen in geöffneten Listen.
 
@@ -65,7 +65,7 @@ SMART-Daten liest Vitalux **auf Anforderung**. Benchmarks mit `fio` messen MB/s,
 
 ### Sprachen & Anleitung
 
-Zwischen **Deutsch und Englisch** wechselst du unten in der Seitenleiste mit **DE / EN**, ohne Neustart. Unter **Info → Anleitung öffnen** erläutert eine integrierte neunteilige Führung Navigation, Hardwaredaten, Benchmarks, Design, Hintergründe und Updates. Sie ist auch nach dem ersten Start verfügbar.
+Zwischen **Deutsch und Englisch** wechselst du unten in der Seitenleiste mit **DE / EN**, ohne Neustart. Unter **Info → Anleitung öffnen** erläutert eine integrierte neunteilige Führung Navigation, Hardwaredaten, Benchmarks, Hintergrundgestaltung sowie Update-Hinweise im Tray. Sie ist auch nach dem ersten Start verfügbar.
 
 ## Download
 
@@ -114,7 +114,7 @@ XDG-Konfigurationen können die Pfade beeinflussen.
 
 ## Updates
 
-Vitalux prüft **beim Start und ungefähr alle sechs Stunden** GitHub Releases. Neue Versionen werden im Updates-Reiter hervorgehoben; **installiert wird nur nach deiner Bestätigung**. Dort stehen auch die Neuerungen vorab und der **offline verfügbare, deutsch/englisch umschaltbare Changelog**. Downloads werden per SHA-256 geprüft; bei AppImage-Updates bleibt eine vorherige Version als Sicherung erhalten.
+Vitalux prüft **beim Start und ungefähr alle sechs Stunden** GitHub Releases. Eine verfügbare Version wird durch ein sanftes Pulsieren des **Updates-Reiters und Vitalux-Logos** sichtbar. Zusätzlich erscheint **einmal pro Version** eine Tray-Benachrichtigung und ein Eintrag im Tray-Menü, sofern Benachrichtigungen unterstützt werden. **Installiert wird ausschließlich nach deiner Bestätigung**. Dort stehen auch die Neuerungen vorab und der **offline verfügbare, deutsch/englisch umschaltbare Changelog**. Downloads werden per SHA-256 geprüft; bei AppImage-Updates bleibt eine vorherige Version als Sicherung erhalten.
 
 GitHub Actions veröffentlicht je Version **AppImage, Vollversion, passendes Differenzupdate und Prüfsummen**. Die vollständige Aktualisierung samt Neustart kann sich je nach Distribution unterscheiden.
 

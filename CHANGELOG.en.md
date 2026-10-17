@@ -4,6 +4,14 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.63] - 2026-10-17
+- Restored the original background designs with the same names as their schemes: Dark, Light, Glass, Black Glass and Minimal. Automatic (color scheme) follows the active scheme.
+- Harmonized the sidebar with additional backgrounds without altering the familiar original glass appearance. Refined Aurora Glass, Obsidian Black, Nebula Purple and Arctic Frost using softer color washes and understated satin ribbons.
+- Refined background sliders with accent gradients, subtle handles, consistently aligned percentage values and more legible hover states.
+- Available updates now trigger a gentle pulse in the Updates navigation row and Vitalux logo. The available version is visible in the sidebar. A single tray notification per version and a tray-menu shortcut open Updates.
+- The app still checks automatically at startup and roughly every six hours. Installing updates always requires confirmation.
+- Updated README, bilingual translations, built-in guide and regression tests.
+
 ## [v0.9.3.62] - 2026-10-17
 - Removed transient mouse-hover text popups across Vitalux while preserving normal hover highlights, including the sidebar.
 - Added native Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost, Adaptive and Classic background styles independently of the selected color scheme; Minimal stays flat.

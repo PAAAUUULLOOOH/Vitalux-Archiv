@@ -147,7 +147,7 @@ class AlertThresholdField(QFrame):
 class PreferencesPage(Page):
     DEFAULTS = {
         'theme': 'glass', 'accent': 'auto', 'motion': 'smooth',
-        'background_style': 'adaptive', 'background_intensity': 60,
+        'background_style': 'theme_default', 'background_intensity': 60,
         'background_softness': 65, 'background_animate': False,
         'interval': 1, 'close_to_tray': True, 'alerts_enabled': False,
         'cpu_temp': 90, 'gpu_temp': 90, 'ram_usage': 90, 'disk_usage': 95,
@@ -231,7 +231,9 @@ class PreferencesPage(Page):
         self.background_combo = QComboBox()
         for key, title in backdrops.PRESETS:
             self.background_combo.addItem(title, key)
-        saved_bg = settings.get('background_style', 'adaptive')
+        saved_bg = settings.get('background_style', 'theme_default')
+        if saved_bg == 'legacy':
+            saved_bg = 'theme_default'
         self.background_combo.setCurrentIndex(max(0, self.background_combo.findData(saved_bg)))
         self.background_combo.currentIndexChanged.connect(self.change_background)
         bg_row.addWidget(self.background_combo)
@@ -248,10 +250,16 @@ class PreferencesPage(Page):
             slider = QSlider(Qt.Horizontal)
             slider.setRange(0, 100)
             slider.setTracking(False)
-            slider.setFixedWidth(180)
+            slider.setObjectName('backgroundSlider')
+            slider.setFixedWidth(196)
+            slider.setFixedHeight(34)
+            slider.setPageStep(10)
+            slider.setSingleStep(1)
             slider.setValue(backdrops.bounded(settings.get(key, default), default))
             value_label = label(f'{slider.value()} %', 'muted')
-            value_label.setMinimumWidth(45)
+            value_label.setObjectName('backgroundSliderValue')
+            value_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            value_label.setFixedWidth(51)
             slider.valueChanged.connect(lambda v, k=key, out=value_label:
                                         self.change_background_level(k, v, out))
             bg_row.addWidget(slider)
@@ -265,7 +273,7 @@ class PreferencesPage(Page):
         self.background_animate.toggled.connect(
             lambda v: self.change_background_option('background_animate', bool(v)))
         look.body.addWidget(self.background_animate)
-        look.body.addWidget(label('Die Hintergründe werden direkt in Vitalux gezeichnet. Minimalistisch bleibt bewusst einfarbig und ohne Animation.', 'muted', wrap=True))
+        look.body.addWidget(label('Originalhintergründe heißen wie ihre Farbschemas. Zusätzliche Designs sind unabhängig auswählbar; Minimalistisch bleibt einfarbig.', 'muted', wrap=True))
         # A presentation preference, not a global reduction of monitoring speed.
         # Runtime widgets read the profile on their next interaction.
         r_motion = QHBoxLayout()
@@ -390,7 +398,7 @@ class PreferencesPage(Page):
         self.motion_combo.setCurrentIndex(self.motion_combo.findData('smooth'))
         self.motion_combo.blockSignals(False)
         self.background_combo.blockSignals(True)
-        self.background_combo.setCurrentIndex(self.background_combo.findData('adaptive'))
+        self.background_combo.setCurrentIndex(self.background_combo.findData('theme_default'))
         self.background_combo.blockSignals(False)
         for key, slider in self.background_sliders.items():
             slider.blockSignals(True)

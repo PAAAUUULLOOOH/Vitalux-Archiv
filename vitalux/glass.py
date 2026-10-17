@@ -52,7 +52,8 @@ class AmbientScene(QWidget):
         self._asset_mode = None
         self._cache_size = None
         active = (settings.get('background_animate', False) and
-                  settings.get('background_style', 'adaptive') != 'legacy' and
+                  backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                    theme.mode()) not in backdrops.DEFAULT_THEMES and
                   theme.mode() != 'minimal' and motion.enabled())
         if active:
             self._motion_timer.start()
@@ -67,9 +68,10 @@ class AmbientScene(QWidget):
         self._render_key = None
         self.update()
         # Keep live glass sampling aligned to the painted moving backdrop.
-        for card in self.findChildren(GlassSurface):
-            if card.isVisible():
-                card.update()
+        for kind in (GlassSurface, GlassSidebar):
+            for card in self.findChildren(kind):
+                if card.isVisible():
+                    card.update()
 
     def set_low_power(self, enabled):
         """Free the atmospheric pixmaps in Minimalistisch; reload only if needed."""
@@ -90,10 +92,10 @@ class AmbientScene(QWidget):
         # atmosphere is an *internal* backdrop sampled under glass widgets.
         if theme.mode() == 'minimal':
             return
-        style = settings.get('background_style', 'adaptive')
-        if style not in backdrops.KEYS:
-            style = 'adaptive'
-        if style != 'legacy':
+        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                  theme.mode())
+        if style not in ('glass', 'black_glass'):
+            # Each preset is cached independently and sampled by glass panels.
             key = (theme.mode(), style, theme.accent(),
                    backdrops.bounded(settings.get('background_intensity', 60), 60),
                    backdrops.bounded(settings.get('background_softness', 65), 65),
@@ -103,12 +105,16 @@ class AmbientScene(QWidget):
                     self.size(), style, theme.accent(), key[3], key[4],
                     light=(theme.mode() == 'light'), phase=self._phase)
                 self._render_key = key
-                self._asset_mode = theme.mode()
+                self._asset_mode = None
                 self._cache_size = self.size()
             return
+
+        # These are the exact original bundled Glass/Black Glass wallpapers.
+        # Reset cache identity when switching from generated backgrounds.
+        if self._render_key is not None:
+            self._asset_mode = None
         self._render_key = None
-        # Switching Glass/Black Glass must never reuse the other theme's cached image.
-        material = theme.mode() if theme.mode() == 'black_glass' else 'glass'
+        material = style
         if material != self._asset_mode:
             prefix = 'black-glass' if material == 'black_glass' else 'glass'
             self._wallpaper = QPixmap(str(ASSETS / (prefix + '-atmosphere.jpg')))
@@ -151,18 +157,13 @@ class AmbientScene(QWidget):
             return
         p.setRenderHint(QPainter.SmoothPixmapTransform)
         p.fillRect(self.rect(), QColor(theme.BG))
-        style = settings.get('background_style', 'adaptive')
-        if style in backdrops.KEYS and style != 'legacy':
-            self._ensure_cache()
-            if not self._sharp_cache.isNull():
-                p.drawPixmap(0, 0, self._sharp_cache)
-            if theme.mode() in ('glass', 'black_glass'):
-                veil = QColor(0, 0, 0, 50 if theme.mode() == 'black_glass' else 27)
-                p.fillRect(self.rect(), veil)
-        elif theme.mode() in ('glass', 'black_glass'):
-            self._ensure_cache()
-            if not self._sharp_cache.isNull():
-                p.drawPixmap(0, 0, self._sharp_cache)
+        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                  theme.mode())
+        self._ensure_cache()
+        if not self._sharp_cache.isNull():
+            p.drawPixmap(0, 0, self._sharp_cache)
+        if style == theme.mode() and theme.mode() in ('glass', 'black_glass'):
+            # Original subtle atmosphere for each built-in theme.
             tint = QLinearGradient(0, 0, self.width(), self.height())
             if theme.mode() == 'black_glass':
                 tint.setColorAt(0, rgba(0, 0, 0, 125))
@@ -171,16 +172,14 @@ class AmbientScene(QWidget):
                 tint.setColorAt(0, rgba(4, 9, 19, 48))
                 tint.setColorAt(1, rgba(5, 9, 25, 35))
             p.fillRect(self.rect(), QBrush(tint))
-        elif theme.mode() == "dark":
-            g = QLinearGradient(0, 0, self.width(), self.height())
-            g.setColorAt(0, QColor('#0b1321'))
-            g.setColorAt(1, QColor('#090d16'))
-            p.fillRect(self.rect(), QBrush(g))
-        else:
-            g = QLinearGradient(0, 0, self.width(), self.height())
-            g.setColorAt(0, QColor('#f6f9fe'))
-            g.setColorAt(1, QColor('#eaf1f9'))
-            p.fillRect(self.rect(), QBrush(g))
+        elif style != theme.mode():
+            # Non-matching combinations still preserve readable text.
+            if theme.mode() == 'light' and style != 'light':
+                p.fillRect(self.rect(), rgba(248, 251, 255, 180))
+            elif theme.mode() != 'light' and style == 'light':
+                p.fillRect(self.rect(), rgba(4, 8, 17, 205))
+            elif theme.mode() in ('glass', 'black_glass'):
+                p.fillRect(self.rect(), rgba(2, 7, 16, 24))
         p.end()
 
 
@@ -386,18 +385,27 @@ class GlassSidebar(QFrame):
             return
         p.setRenderHint(QPainter.Antialiasing)
         rect = QRectF(self.rect())
+        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                  theme.mode())
+        matching = style == theme.mode()
         if theme.mode() in ('glass', 'black_glass'):
             draw_frosted_backdrop(p, self, rect, 1.0)
             shade = QLinearGradient(0, 0, self.width(), 0)
             if theme.mode() == 'black_glass':
-                shade.setColorAt(0, rgba(2, 2, 3, 215))
-                shade.setColorAt(1, rgba(13, 13, 16, 179))
+                # Keep the familiar original when Black Glass is selected.
+                opacity = (215, 179) if matching else (125, 110)
+                shade.setColorAt(0, rgba(2, 2, 3, opacity[0]))
+                shade.setColorAt(1, rgba(13, 13, 16, opacity[1]))
             else:
-                shade.setColorAt(0, rgba(7, 15, 30, 175))
-                shade.setColorAt(1, rgba(15, 28, 47, 133))
+                opacity = (175, 133) if matching else (100, 83)
+                shade.setColorAt(0, rgba(7, 15, 30, opacity[0]))
+                shade.setColorAt(1, rgba(15, 28, 47, opacity[1]))
             p.fillRect(rect, QBrush(shade))
         else:
-            p.fillRect(rect, QColor(theme.SIDEBAR))
+            color = QColor(theme.SIDEBAR)
+            if not matching:
+                color.setAlpha(175 if theme.mode() == 'dark' else 215)
+            p.fillRect(rect, color)
         side = QLinearGradient(0, 0, 0, max(1, self.height()))
         a = theme.accent_qcolor(130 if theme.mode() in ('glass', 'black_glass') else 82)
         side.setColorAt(0, QColor(theme.BORDER))

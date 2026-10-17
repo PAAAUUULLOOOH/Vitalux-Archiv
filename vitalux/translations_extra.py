@@ -504,3 +504,16 @@ EN_MORE.update({
     "Passe Vitalux mit Farbschemas, Hintergründen, Farbstärke und optionalen Animationen an.": "Customize Vitalux with color schemes, backgrounds, color intensity, and optional animations.",
     "Die Seitenleiste lässt sich ein- und ausklappen; störende Tooltip-Fenster beim Überfahren erscheinen nicht.": "You can collapse and expand the sidebar without distracting mouse-hover tooltips.",
 })
+
+# Harmonized original wallpapers, elegant controls and unobtrusive update alerts.
+EN_MORE.update({
+    "Automatisch (Farbschema)": "Automatic (color scheme)",
+    "Originalhintergründe heißen wie ihre Farbschemas. Zusätzliche Designs sind unabhängig auswählbar; Minimalistisch bleibt einfarbig.": "Original backgrounds share their color scheme names. Additional designs are selectable independently; Minimal remains solid-colored.",
+    "Update verfügbar": "Update available",
+    "Update verfügbar:": "Update available:",
+    "Version {} ist verfügbar. Im Reiter Updates ansehen.": "Version {} is available. View it in Updates.",
+    "Die fünf Originalhintergründe heißen Dark, Light, Glass, Black Glass und Minimalistisch.": "The five original backgrounds are named Dark, Light, Glass, Black Glass and Minimal.",
+    "Neue Designhintergründe und elegantere Regler ermöglichen weitere Anpassungen.": "Additional designer backgrounds and elegant sliders offer more customization.",
+    "Vitalux prüft automatisch beim Start und etwa alle sechs Stunden auf Updates.": "Vitalux automatically checks for updates at startup and approximately every six hours.",
+    "Bei einem Update pulsieren die Kategorie und das Logo dezent; eine Tray-Nachricht nennt die Version.": "When an update is available, the category and logo pulse subtly; a tray notification shows the version.",
+})

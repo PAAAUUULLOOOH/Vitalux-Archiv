@@ -174,13 +174,37 @@ QToolButton#customAccentRemove:hover { color: $ACCENT; border-color: $ACCENT; ba
 QCheckBox { spacing: 8px; }
 QCheckBox::indicator { width: 16px; height: 16px; }
 QCheckBox::indicator:checked { background: $ACCENT; border: 1px solid $ACCENT; border-radius: 4px; }
-QSlider::groove:horizontal { height: 6px; border-radius: 3px; background: $TRACK; }
-QSlider::sub-page:horizontal { background: $ACCENT; border-radius: 3px; }
-QSlider::handle:horizontal { background: $ACCENT; border: 2px solid $CARD;
-    width: 15px; height: 15px; margin: -6px 0; border-radius: 8px; }
-QSlider::handle:horizontal:hover { background: $ACCENT_HOVER; }
-QSlider:disabled::groove:horizontal { background: $TRACK; }
-QSlider:disabled::handle:horizontal { background: $MUTED; }
+/* Fine, tactile controls: low-profile satin tracks and floating handles. */
+QSlider#backgroundSlider { background: transparent; min-height: 30px; }
+QSlider#backgroundSlider::groove:horizontal {
+    height: 5px; border: 1px solid $BORDER; border-radius: 3px;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 $TRACK, stop:1 $INPUT_BG);
+}
+QSlider#backgroundSlider::sub-page:horizontal {
+    border: none; border-radius: 3px;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 $SECONDARY, stop:1 $ACCENT);
+}
+QSlider#backgroundSlider::handle:horizontal {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 $HANDLE_TOP, stop:1 $ACCENT);
+    border: 2px solid $CARD; border-radius: 9px;
+    width: 17px; height: 17px; margin: -7px 0;
+}
+QSlider#backgroundSlider::handle:horizontal:hover {
+    background: $HANDLE_TOP; border: 2px solid $ACCENT_HOVER;
+}
+QSlider#backgroundSlider::handle:horizontal:focus {
+    border: 2px solid $ACCENT_HOVER;
+}
+QSlider#backgroundSlider::handle:horizontal:disabled {
+    background: $MUTED; border-color: $BORDER;
+}
+QLabel#backgroundSliderValue {
+    font-size: 12px; font-weight: 750; color: $ACCENT;
+    background: transparent; border: none; padding: 0px;
+}
 QToolTip { background: $CARD; border: 1px solid $BORDER; color: $TEXT; }
 QToolButton#tileMoveHint, QToolButton#tileRemoveHint {
     background: transparent; border: none; border-radius: 0px;
@@ -223,7 +247,7 @@ def stylesheet():
     return _QSS.substitute(
         BG=BG, TEXT=TEXT, MUTED=MUTED, CARD=CARD, BORDER=BORDER, TRACK=TRACK,
         ACCENT=base, ACCENT_HOVER=QColor(base).lighter(115).name() if light else QColor(base).lighter(128).name(),
-        SECONDARY=secondary_accent(), BUTTON_TEXT="#07111b" if not light else "#ffffff",
+        SECONDARY=secondary_accent(), HANDLE_TOP=QColor(base).lighter(144).name(), BUTTON_TEXT="#07111b" if not light else "#ffffff",
         INPUT_BG=blend(base, pal['card'], .035 if light else .045),
         COMBO_BG=combo_surface(),
         BUTTON_BG=blend(base, pal['card'], .07 if light else .10),

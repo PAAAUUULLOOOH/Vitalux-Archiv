@@ -36,7 +36,13 @@ def run():
             scene.resize(640, 400)
             scene.show()
             app.processEvents()
-            assert len(backdrops.PRESETS) == 6
+            assert len(backdrops.PRESETS) == 11
+            assert [key for key in backdrops.DEFAULT_THEMES] == [
+                'dark', 'light', 'glass', 'black_glass', 'minimal']
+            for scheme in backdrops.DEFAULT_THEMES:
+                assert backdrops.resolve('theme_default', scheme) == scheme
+                assert backdrops.resolve('legacy', scheme) == scheme
+            assert backdrops.resolve('aurora', 'glass') == 'aurora'
             for name in backdrops.KEYS:
                 settings.set('background_style', name)
                 scene.sync_background()
@@ -48,6 +54,14 @@ def run():
                 assert soft.size() == scene.size(), name
                 assert not scene.grab().isNull(), name
 
+            # The five matching originals stay available and keep their names.
+            for key in backdrops.DEFAULT_THEMES:
+                settings.set('background_style', key)
+                scene.sync_background()
+                assert not scene.sharp_backdrop().isNull(), key
+            settings.set('background_style', 'theme_default')
+            scene.sync_background()
+            assert scene._asset_mode == 'glass', "Automatic should use original Glass"
             # The user accent must change the adaptive background without
             # requiring restart, even if window dimensions do not change.
             settings.set('background_style', 'adaptive')

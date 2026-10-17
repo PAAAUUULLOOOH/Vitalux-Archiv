@@ -102,10 +102,17 @@ class PulseCore(QWidget):
         self._cpu = 0.0
         self._display_cpu = 0.0
         self._phase = 0.0
+        self._update_available = False
         self.setToolTip("Vitalux · Live CPU activity")
         self._timer = QTimer(self)
         self._timer.setInterval(90)  # ~11 fps, negligible UI overhead
         self._timer.timeout.connect(self._advance)
+
+    def set_update_available(self, available):
+        status = bool(available)
+        if status != self._update_available:
+            self._update_available = status
+            self.update()
 
     def set_cpu_load(self, value):
         try:
@@ -177,6 +184,17 @@ class PulseCore(QWidget):
         painter.setBrush(QBrush(aura))
         painter.drawEllipse(rect)
         _renderer(_brand_asset(icon=True)).render(painter, rect)
+
+        if self._update_available:
+            # A restrained heartbeat around the main Vitalux mark.
+            beat = .5 + .5 * math.sin(math.radians(self._phase * 1.1))
+            halo = QColor(theme.accent())
+            halo.setAlpha(int(65 + 105 * beat))
+            painter.setPen(QPen(halo, 1.3 + beat * 1.2))
+            painter.setBrush(Qt.NoBrush)
+            span = size * (.887 + beat * .019)
+            painter.drawEllipse(QRectF(rect.center().x()-span/2,
+                                       rect.center().y()-span/2, span, span))
 
         # A single slowly travelling highlight on the outer broken circuit.
         painter.save()

@@ -666,6 +666,7 @@ class NavButton(_SoftHover, QPushButton):
     def __init__(self, text):
         super().__init__(text)
         self.glow = False
+        self._update_version = ''
         self._compact = False
         self._caption_opacity = 1.0
         self._phase = 0.0
@@ -675,7 +676,7 @@ class NavButton(_SoftHover, QPushButton):
         self.setAutoFillBackground(False)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self._timer = QTimer(self)
-        self._timer.setInterval(70)
+        self._timer.setInterval(90)
         self._timer.timeout.connect(self._tick)
 
     def sizeHint(self):
@@ -698,12 +699,18 @@ class NavButton(_SoftHover, QPushButton):
             self.setMaximumWidth(16777215)
         caption = self.text().split('    ', 1)[-1]
         self.setAccessibleName(caption)
-        self.setToolTip(caption)
+        self.setToolTip('')
         self.updateGeometry()
         self.update()
 
     def set_caption_opacity(self, opacity):
         self._caption_opacity = max(0.0,min(1.0,float(opacity)))
+        self.update()
+
+    def set_update_version(self, version):
+        self._update_version = str(version or '')
+        self.setMinimumHeight(47 if self._update_version else 39)
+        self.updateGeometry()
         self.update()
 
     def set_glow(self, on):
@@ -716,7 +723,7 @@ class NavButton(_SoftHover, QPushButton):
         self.update()
 
     def _tick(self):
-        self._phase += .17
+        self._phase += .105
         self.update()
 
     def _paint_minimal_nav(self):
@@ -726,12 +733,10 @@ class NavButton(_SoftHover, QPushButton):
             p.fillRect(self.rect(), QColor(theme.CARD))
         if self.glow:
             intensity = 0.5 + 0.5 * math.sin(self._phase)
-            background = QColor("#ffb454")
-            background.setAlpha(int(8 + 48 * intensity))
+            background = theme.accent_qcolor(int(8 + 23 * intensity))
             p.fillRect(self.rect().adjusted(2, 2, -2, -2), background)
-            left = QColor("#ffb454")
-            left.setAlpha(int(90 + 165 * intensity))
-            p.fillRect(QRectF(2, 4, 3, max(1, self.height()-8)), left)
+            left = theme.accent_qcolor(int(95 + 135 * intensity))
+            p.fillRect(QRectF(2, 5, 3, max(1, self.height()-10)), left)
         text = self.text()
         glyph, caption = text.split('    ', 1) if '    ' in text else ('◈', text)
         color = QColor(theme.accent() if self.isChecked() else theme.TEXT)
@@ -743,7 +748,16 @@ class NavButton(_SoftHover, QPushButton):
         if not self._compact:
             font.setPixelSize(13)
             p.setFont(font)
-            p.drawText(QRectF(52, 0, max(1, self.width()-54), self.height()), Qt.AlignVCenter | Qt.AlignLeft, caption)
+            ypos = 7 if self._update_version and self.glow else 0
+            height = self.height()-19 if ypos else self.height()
+            p.drawText(QRectF(52, ypos, max(1, self.width()-54), height), Qt.AlignVCenter | Qt.AlignLeft, caption)
+            if self._update_version and self.glow:
+                font.setPixelSize(10)
+                font.setBold(True)
+                p.setFont(font)
+                p.setPen(theme.accent_qcolor())
+                p.drawText(QRectF(52, self.height()-20, max(1, self.width()-54), 16),
+                           Qt.AlignVCenter | Qt.AlignLeft, self._update_version)
         p.end()
 
     def paintEvent(self, event):
@@ -772,15 +786,13 @@ class NavButton(_SoftHover, QPushButton):
                 p.drawRoundedRect(r, 11, 11)
 
         if self.glow:
-            # Clearly visible full-row pulse, also in collapsed navigation.
+            # Breathing theme-accent halo instead of a bright orange alarm.
             intensity = 0.5 + 0.5 * math.sin(self._phase)
-            glow = QColor("#ffb454")
-            glow.setAlpha(int(6 + 57 * intensity))
+            glow = theme.accent_qcolor(int(9 + 27 * intensity))
             p.setPen(Qt.NoPen)
             p.setBrush(glow)
             p.drawRoundedRect(r, 11, 11)
-            rail_glow = QColor("#ffb454")
-            rail_glow.setAlpha(int(65 + 170 * intensity))
+            rail_glow = theme.accent_qcolor(int(90 + 125 * intensity))
             p.setBrush(rail_glow)
             p.drawRoundedRect(QRectF(r.left()+.3, r.top()+5, 3, r.height()-10), 1.5, 1.5)
 
@@ -812,6 +824,13 @@ class NavButton(_SoftHover, QPushButton):
         p.setPen(Qt.NoPen)
         p.setBrush(aura)
         p.drawRoundedRect(QRectF(cx-12, cy-12, 24, 24), 7, 7)
+        if self.glow:
+            intensity = 0.5 + 0.5 * math.sin(self._phase)
+            ring = theme.accent_qcolor(int(75 + 105 * intensity))
+            p.setPen(QPen(ring, 1.1 + intensity * 1.0))
+            p.setBrush(Qt.NoBrush)
+            p.drawEllipse(QRectF(cx - 13 - intensity*2, cy - 13 - intensity*2,
+                                 26 + intensity*4, 26 + intensity*4))
         # Distinct category symbols stay recognizable in both wide and compact nav.
         icon_font = QFont(self.font())
         icon_font.setPixelSize(16)
@@ -828,8 +847,19 @@ class NavButton(_SoftHover, QPushButton):
         ink.setAlphaF(self._caption_opacity)
         p.setPen(ink)
         if not self._compact:
-            p.drawText(QRectF(r.left()+45, r.top(), r.width()-54, r.height()),
-                       Qt.AlignVCenter | Qt.AlignLeft, caption)
+            if self.glow and self._update_version:
+                p.drawText(QRectF(r.left()+45, r.top()+4, r.width()-54, r.height()-23),
+                           Qt.AlignVCenter | Qt.AlignLeft, caption)
+                p.setPen(theme.accent_qcolor())
+                small = QFont(self.font())
+                small.setPixelSize(10)
+                small.setBold(True)
+                p.setFont(small)
+                p.drawText(QRectF(r.left()+45, r.bottom()-20, r.width()-54, 15),
+                           Qt.AlignVCenter | Qt.AlignLeft, self._update_version)
+            else:
+                p.drawText(QRectF(r.left()+45, r.top(), r.width()-54, r.height()),
+                           Qt.AlignVCenter | Qt.AlignLeft, caption)
 
         if self.glow:
             intensity = (0.5 + 0.5 * math.sin(self._phase))

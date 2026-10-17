@@ -5,6 +5,14 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.63] - 2026-10-17
+- Originale Hintergrund-Designs wiederhergestellt und einzeln nach ihrem Farbschema benannt: Dark, Light, Glass, Black Glass und Minimalistisch. Mit „Automatisch (Farbschema)“ wird der passende Standardhintergrund gewählt.
+- Die Seitenleiste bei zusätzlichen Hintergrunddesigns farblich harmonisiert; die vertraute Glasoptik der Originaldesigns bleibt unverändert. Zusätzliche Farbverläufe und zurückhaltende Satinstrukturen verbessern Aurora Glass, Obsidian Black, Nebula Purple und Arctic Frost.
+- Hintergrund-Slider eleganter gestaltet: feine Akzentfarbverläufe, dezente Griffe, einheitliche Prozentanzeigen und besser sichtbare Hover-Zustände.
+- Neue Updates werden durch ein dezentes Pulsieren des Updates-Reiters und des Vitalux-Logos angezeigt. Im Reiter steht die neue Versionsnummer direkt sichtbar. Eine einmalige Benachrichtigung je Version erscheint im Tray; das Tray-Menü öffnet den Updates-Reiter.
+- Automatische Updateprüfung beim Programmstart und regelmäßig etwa alle sechs Stunden beibehalten. Keine ungefragte Installation.
+- README, deutsche/englische Übersetzungen, integrierte Anleitung und Regressionstests aktualisiert.
+
 ## [v0.9.3.62] - 2026-10-17
 - Systemweite Hover-Textfenster innerhalb der Anwendung abgeschaltet; farbliche Hover-Effekte bleiben erhalten, auch in der Seitenleiste.
 - Native Hintergrundstile Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost, Adaptiv und Klassisch hinzugefügt. Farbschema und Hintergrund lassen sich unabhängig auswählen; minimalistische Darstellung bleibt einfarbig.
