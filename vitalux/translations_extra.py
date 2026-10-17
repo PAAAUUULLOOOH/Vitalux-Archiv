@@ -1,5 +1,15 @@
 """Extra English translations for dashboard, settings, sensors and disk tests."""
 EN_MORE = {
+    'Manuelle Farbakzente': 'Manual accent colors',
+    'Passend zum Hintergrund': 'Match background',
+    'Vitalux erkennt passende Farbtöne aus deinem gewählten Hintergrund. Die Akzentfarbe passt sich beim Hintergrundwechsel automatisch an.': 'Vitalux finds matching colors in the selected background. The accent color adjusts automatically when you change wallpapers.',
+    'Automatisch anpassen': 'Match automatically',
+    'Alternativ einen der erkannten Farbtöne wählen:': 'Or select one of the detected colors:',
+    'Hintergrundfarbe': 'Wallpaper color',
+    'Erkannte Farbe': 'Detected color',
+    'Aktuelle Akzentfarbe': 'Current accent color',
+    'Aktiviere den automatischen Modus oder wähle eine Bildfarbe.': 'Enable automatic matching or select a wallpaper color.',
+    'Unter Einstellungen → Farbakzente kannst du eigene Farben bearbeiten oder Farben automatisch aus dem gewählten Hintergrund ableiten.': 'Under Settings → Accent colors, you can edit your own colors or automatically derive matching colors from the selected background.',
     'Wähle einen von 14 integrierten Hintergründen oder importiere eigene Bilder mit Füllen, Einpassen, Strecken, Zentrieren oder Kacheln. Nur Funkeln ist animiert.': 'Choose from 14 built-in backgrounds or import your own images with fill, fit, stretch, center or tile layout. Only Sparkle is animated.',
     'Live-Übersicht': 'Live overview',
     'Live-Vorschau anzeigen': 'Show live preview',
