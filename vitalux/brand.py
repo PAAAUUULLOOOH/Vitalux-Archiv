@@ -45,10 +45,64 @@ def icon_pixmap(size=96):
     return _pixmap("vitalux-pulse.svg", size, size)
 
 
+def _recolor_brand(pixmap, scheme, accent, *, wordmark=False):
+    """Retint original SVG pixels, preserving their contours and highlights.
+
+    This applies only to the in-app identity, not the desktop icon. All themes
+    and user accents are handled without generating/replacing image assets.
+    """
+    from . import theme
+    p = QPainter(pixmap)
+    p.setCompositionMode(QPainter.CompositionMode_SourceAtop)
+    if scheme == "minimal":
+        # Clean, single-color identity in the no-animation theme.
+        p.setCompositionMode(QPainter.CompositionMode_SourceIn)
+        p.fillRect(pixmap.rect(), QColor(theme.TEXT))
+    else:
+        if scheme == "black_glass":
+            silver = QColor("#d5dde7")
+            silver.setAlpha(77 if wordmark else 42)
+            p.fillRect(pixmap.rect(), silver)
+        elif scheme == "light" and not wordmark:
+            frosted = QColor("#ebf4ff")
+            frosted.setAlpha(55)
+            p.fillRect(pixmap.rect(), frosted)
+        tint = QColor(accent)
+        tint.setAlpha({
+            "dark": 77, "light": 85, "glass": 104,
+            "black_glass": 78,
+        }.get(scheme, 76) if wordmark else {
+            "dark": 69, "light": 82, "glass": 103,
+            "black_glass": 73,
+        }.get(scheme, 70))
+        p.fillRect(pixmap.rect(), tint)
+    p.end()
+    return pixmap
+
+
+@lru_cache(maxsize=64)
+def _themed_icon(size, scheme, accent):
+    return _recolor_brand(
+        _pixmap("vitalux-pulse.svg", size, size, ratio=2.0),
+        scheme, accent)
+
+
+def themed_icon_pixmap(size=152):
+    from . import theme
+    return _themed_icon(int(size), theme.mode(), theme.accent())
+
+
+@lru_cache(maxsize=64)
+def _themed_wordmark(width, height, scheme, accent):
+    filename = "vitalux-wordmark-light.svg" if scheme == "light" else "vitalux-wordmark.svg"
+    return _recolor_brand(
+        _pixmap(filename, width, height, ratio=2.0),
+        scheme, accent, wordmark=True)
+
+
 def wordmark_pixmap(width=205, height=44):
     from . import theme
-    filename = "vitalux-wordmark-light.svg" if theme.mode() == "light" else "vitalux-wordmark.svg"
-    return _pixmap(filename, width, height, ratio=2.0)
+    return _themed_wordmark(int(width), int(height), theme.mode(), theme.accent())
 
 
 def app_icon():
@@ -118,7 +172,8 @@ class PulseCore(QWidget):
         painter = QPainter(self)
         if self._low_power():
             # Retain the recognizable logo; skip the moving halo and orbit.
-            _renderer("vitalux-pulse.svg").render(painter, QRectF(self.rect()))
+            themed = themed_icon_pixmap(size)
+            painter.drawPixmap(QRectF(self.rect()), themed, QRectF(themed.rect()))
             painter.end()
             return
         painter.setRenderHint(QPainter.Antialiasing)
@@ -130,15 +185,22 @@ class PulseCore(QWidget):
         # Light reacts to actual load; static artwork stays recognizable.
         strength = min(1.0, self._display_cpu / 100.0)
         aura = QRadialGradient(rect.center(), size * 0.51)
-        inner = QColor(70, 213, 255, int(12 + 40 * strength))
-        edge = QColor(84, 98, 242, 0)
+        from . import theme
+        tint = QColor(theme.accent())
+        inner = QColor(tint)
+        inner.setAlpha(int(12 + 40 * strength))
+        edge = QColor(theme.secondary_accent())
+        edge.setAlpha(0)
         aura.setColorAt(0.0, inner)
-        aura.setColorAt(0.65, QColor(66, 153, 250, int(4 + 18 * strength)))
+        middle = QColor(tint)
+        middle.setAlpha(int(4 + 18 * strength))
+        aura.setColorAt(0.65, middle)
         aura.setColorAt(1.0, edge)
         painter.setPen(Qt.NoPen)
         painter.setBrush(QBrush(aura))
         painter.drawEllipse(rect)
-        _renderer("vitalux-pulse.svg").render(painter, rect)
+        themed = themed_icon_pixmap(size)
+        painter.drawPixmap(rect, themed, QRectF(themed.rect()))
 
         # A single slowly travelling highlight on the outer broken circuit.
         painter.save()
@@ -146,7 +208,8 @@ class PulseCore(QWidget):
         painter.rotate(self._phase)
         diameter = size * 0.836
         orbit = QRectF(-diameter / 2, -diameter / 2, diameter, diameter)
-        highlight = QColor(215, 250, 255, int(45 + 90 * strength))
+        highlight = QColor(theme.accent())
+        highlight.setAlpha(int(45 + 90 * strength))
         painter.setPen(QPen(highlight, max(1.5, size * 0.016), Qt.SolidLine, Qt.RoundCap))
         painter.setBrush(Qt.NoBrush)
         painter.drawArc(orbit, -14 * 16, 23 * 16)
@@ -154,7 +217,8 @@ class PulseCore(QWidget):
 
         # A tiny heartbeat at the bottom of the central waveform.
         t = 0.5 + 0.5 * math.sin(math.radians(self._phase * 3.2))
-        highlight = QColor(204, 250, 255, int(15 + (30 + 55 * strength) * t))
+        highlight = QColor(theme.secondary_accent())
+        highlight.setAlpha(int(15 + (30 + 55 * strength) * t))
         painter.setPen(Qt.NoPen)
         painter.setBrush(highlight)
         radius = size * (0.027 + 0.014 * strength) * (0.9 + 0.1 * t)
