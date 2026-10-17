@@ -1,5 +1,9 @@
 name: Vitalux AppImage Release
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release.yml'
   release:
     types: [published]
   workflow_dispatch:
