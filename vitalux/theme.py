@@ -155,8 +155,16 @@ QComboBox QAbstractItemView { background: $INPUT_BG; color: $TEXT;
 QComboBox QAbstractItemView::item { background: transparent; color: $TEXT;
     border: none; padding: 7px 8px; min-height: 22px; }
 QComboBox QAbstractItemView::item:selected { background: $ACTIVE_BG; color: $TEXT; }
-/* Hardware-Warnwerte: Platz für Zahlen samt Einheiten trotz schmaler Felder. */
-QSpinBox#alertThresholdSpin { padding: 4px 2px; color: $TEXT; background: $INPUT_BG; font-size: 12px; font-weight: 650; }
+/* Separate native line editor and unit: unlike QSpinBox the text never clips
+   to a one-pixel strip when KDE/Qt uses a stylesheet without spin buttons. */
+QFrame#alertThresholdField { background: $INPUT_BG; border: 1px solid $BORDER; border-radius: 9px; padding: 0px; }
+QLineEdit#alertThresholdNumber, QLineEdit#alertThresholdNumber:focus {
+    background: transparent; border: none; border-radius: 0px;
+    margin: 0px; padding: 0px; min-width: 0px;
+    color: $TEXT; font-size: 12px; font-weight: 650;
+}
+QLabel#alertThresholdUnit { background: transparent; border: none;
+    padding: 0px; color: $TEXT; font-size: 12px; font-weight: 650; }
 QListWidget::item { background: $INPUT_BG; color: $TEXT; }
 QListWidget::item:selected { background: $ACTIVE_BG; color: $TEXT; }
 QToolButton#customAccentRemove { background: $BUTTON_BG; border: 1px solid $BORDER;

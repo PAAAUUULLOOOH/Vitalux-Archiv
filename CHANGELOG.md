@@ -5,6 +5,11 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.60] - 2026-10-17
+- Hardware-Warnwerte vollständig korrigiert: Statt des unter KDE/Wayland abgeschnittenen QSpinBox-Innenfelds werden Zahl und Einheit jetzt getrennt und zuverlässig lesbar dargestellt.
+- Werte bleiben direkt editierbar; Pfeiltasten, Mausrad, Grenzbereiche und Speichern der Einstellungen funktionieren weiterhin.
+- Einheitliche Ausrichtung und kompakte Feldbreite beibehalten; automatisierte Tests um Werteingabe und Sichtbarkeit ergänzt.
+
 ## [v0.9.3.59] - 2026-10-17
 - Die zuletzt problematischen Dropdown-Änderungen zurückgenommen und die frühere Darstellung mit dunklem rechten Auswahlbereich wiederhergestellt.
 - Dropdown-Text und vollständige Versionsnummern im Changelog wieder lesbar.

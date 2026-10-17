@@ -2,9 +2,9 @@
 import json
 from datetime import datetime
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QColorDialog, QGridLayout, QHBoxLayout, QInputDialog, QListWidget, QVBoxLayout, QWidget, QSpinBox, QAbstractSpinBox)
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor, QIntValidator
+from PySide6.QtWidgets import (QColorDialog, QFrame, QGridLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QSizePolicy, QVBoxLayout, QWidget)
 from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
 
 from . import __version__, settings, theme, motion
@@ -52,6 +52,97 @@ class SensorsPage(Page):
             self.cards[ident].setVisible(bool(entries))
         self.message.setText(tr('Keine zusätzlichen Sensoren verfügbar.') if not count else
             tr('Nicht jeder Sensor ist von jedem Mainboard/Grafiktreiber verfügbar; fehlende Werte werden nicht erfunden.'))
+
+
+
+class _ThresholdNumberEdit(QLineEdit):
+    """A normal Qt text editor, without QSpinBox's clipped internal layout."""
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Up, Qt.Key_Down):
+            self.parentWidget().stepBy(1 if event.key() == Qt.Key_Up else -1)
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    def wheelEvent(self, event):
+        steps = int(event.angleDelta().y() / 120)
+        if steps:
+            self.parentWidget().stepBy(steps)
+            event.accept()
+        else:
+            super().wheelEvent(event)
+
+    def focusOutEvent(self, event):
+        self.parentWidget().commit()
+        super().focusOutEvent(event)
+
+
+class AlertThresholdField(QFrame):
+    """Warning threshold: readable value and unit in a compact themed control.
+
+    In Qt/KDE stylesheet combinations the embedded QSpinBox line editor can
+    end up nearly zero pixels wide when spin buttons are hidden. Keep the
+    numeric QLineEdit and its unit independently laid out instead.
+    """
+    valueChanged = Signal(int)
+
+    def __init__(self, minimum, maximum, unit, value, parent=None):
+        super().__init__(parent)
+        self._minimum, self._maximum = int(minimum), int(maximum)
+        self._value = min(self._maximum, max(self._minimum, int(value)))
+        self.setObjectName("alertThresholdField")
+        self.setFixedSize(84, 34)
+
+        self.number = _ThresholdNumberEdit(str(self._value), self)
+        self.number.setObjectName("alertThresholdNumber")
+        self.number.setValidator(QIntValidator(self._minimum, self._maximum, self.number))
+        self.number.setMaxLength(3)
+        self.number.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.number.setMinimumWidth(26)
+        self.number.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.number.setToolTip("Grenzwert eingeben; Pfeiltasten ändern den Wert.")
+
+        self.unit_label = QLabel(unit, self)
+        self.unit_label.setObjectName("alertThresholdUnit")
+        self.unit_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.unit_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+
+        row = QHBoxLayout(self)
+        row.setContentsMargins(7, 2, 7, 2)
+        row.setSpacing(3)
+        row.addWidget(self.number, 1)
+        row.addWidget(self.unit_label, 0)
+        self.number.textChanged.connect(self._on_text_changed)
+        self.number.editingFinished.connect(self.commit)
+
+    def _on_text_changed(self, text):
+        if text.isdecimal() and self._minimum <= int(text) <= self._maximum:
+            self.setValue(int(text), update_editor=False)
+
+    def setValue(self, value, update_editor=True):
+        bounded = min(self._maximum, max(self._minimum, int(value)))
+        changed = bounded != self._value
+        self._value = bounded
+        if update_editor and self.number.text() != str(bounded):
+            was_blocked = self.number.blockSignals(True)
+            self.number.setText(str(bounded))
+            self.number.blockSignals(was_blocked)
+        if changed:
+            self.valueChanged.emit(bounded)
+
+    def value(self):
+        return self._value
+
+    def stepBy(self, steps):
+        self.setValue(self._value + int(steps))
+
+    def commit(self):
+        text = self.number.text().strip()
+        if text.isdecimal() and self._minimum <= int(text) <= self._maximum:
+            self.setValue(int(text))
+        else:
+            self.setValue(self._value)
 
 
 class PreferencesPage(Page):
@@ -191,14 +282,7 @@ class PreferencesPage(Page):
             ('ram_usage', 'RAM-Auslastung', 90, 50, 100, '%'),
             ('disk_usage', 'Systemlaufwerk', 95, 50, 100, '%'),
         )):
-            value = QSpinBox()
-            value.setObjectName('alertThresholdSpin')
-            value.setFixedWidth(84)
-            value.setButtonSymbols(QAbstractSpinBox.NoButtons)
-            value.setAlignment(Qt.AlignCenter)
-            value.setRange(lo, hi)
-            value.setSuffix(' ' + unit)
-            value.setValue(int(settings.get(key, default)))
+            value = AlertThresholdField(lo, hi, unit, settings.get(key, default))
             value.valueChanged.connect(lambda v, k=key: self._set_preference(k, v))
             text = label(title, 'strong')
             threshold_grid.addWidget(text, row_index, 0, Qt.AlignLeft | Qt.AlignVCenter)

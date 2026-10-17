@@ -9,10 +9,10 @@ sys.path.insert(0, os.getcwd())
 
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QColor, QPalette
-from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame, QMessageBox, QAbstractSpinBox
+from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame, QMessageBox
 
 from vitalux import __version__, changelog, i18n, settings, theme
-from vitalux.control import PreferencesPage
+from vitalux.control import PreferencesPage, AlertThresholdField
 from vitalux.pages_extra import UpdatePage
 from vitalux.update_manager import UpdateManager
 from vitalux.widgets import ChartSeriesCheckBox
@@ -52,10 +52,14 @@ def check_preferences(app):
             warning_gaps = []
             for name, spin in page.alert_boxes.items():
                 assert spin.width() == 84, (name, spin.width())
-                assert spin.buttonSymbols() == QAbstractSpinBox.NoButtons, name
-                assert spin.alignment() & Qt.AlignHCenter, name
-                assert spin.alignment() & Qt.AlignVCenter, name
+                assert isinstance(spin, AlertThresholdField), name
                 assert spin.value() > 0
+                assert spin.number.text() == str(spin.value()), name
+                assert spin.number.isVisible(), name
+                assert spin.number.width() >= 26, (name, spin.number.width())
+                assert spin.unit_label.text() == ('°C' if 'temp' in name else '%')
+                assert spin.unit_label.isVisible(), name
+                assert not spin.number.grab().isNull(), name
                 label_widget = page.alert_labels[name]
                 x = spin.mapTo(page, QPoint(0, 0)).x()
                 warning_x.add(x)
@@ -64,6 +68,21 @@ def check_preferences(app):
             assert len(warning_x) == 1, f"Unaligned warning fields: {warning_x}"
             assert min(warning_gaps) >= 8, warning_gaps
             assert max(warning_gaps) <= 42, warning_gaps
+
+            # Regression: all numbers remain editable and are not a clipped
+            # QSpinBox editor; persisted preferences follow valid edits only.
+            threshold = page.alert_boxes["cpu_temp"]
+            threshold.number.setText("97")
+            assert threshold.value() == 97
+            assert settings.get("cpu_temp") == 97
+            threshold.number.setText("9")
+            threshold.commit()
+            assert threshold.value() == 97
+            assert threshold.number.text() == "97"
+            threshold.stepBy(1)
+            assert threshold.value() == 98
+            threshold.setValue(90)
+            assert threshold.number.text() == "90"
 
             # Previous themed drop-down styling is restored: a separate darker
             # control area on the right, with a readable closed label.

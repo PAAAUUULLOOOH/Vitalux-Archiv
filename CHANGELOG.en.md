@@ -4,6 +4,11 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.60] - 2026-10-17
+- Fixed invisible hardware warning thresholds: the clipped native QSpinBox editor is replaced by a separately laid out number input and visible unit for reliable rendering on KDE/Wayland.
+- Thresholds stay editable with arrow keys, mouse wheel, range validation, and persisted settings.
+- Preserved compact widths and column alignment and expanded visual and editing regression tests.
+
 ## [v0.9.3.59] - 2026-10-17
 - Reverted the problematic recent drop-down styling and restored the previous controls with a darker selection area on the right.
 - Restored readable selection text, including full version numbers in the changelog drop-down.
