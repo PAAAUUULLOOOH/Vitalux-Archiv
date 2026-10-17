@@ -87,7 +87,8 @@ def check_preferences(app):
 
             # Backdrop controls persist independently of the color scheme and
             # preserve the readable dropdown styles.
-            assert page.background_combo.count() == 14
+            assert page.background_combo.count() == 15  # 14 presets + imported image option
+            assert page.background_combo.findData('custom_image') >= 0
             assert page.background_combo.findData('aurora') == -1
             assert page.background_combo.findData('obsidian') == -1
             assert page.background_combo.findData('nebula') == -1
