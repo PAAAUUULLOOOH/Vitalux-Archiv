@@ -95,7 +95,7 @@ class TrayPreview(QWidget):
             f'border: 1px solid {theme.BORDER}; border-radius: 14px; }}'
             f'QWidget#vitaluxTrayPreview QLabel {{ color: {theme.TEXT}; border: 0; }}'
             'QLabel#trayHeading { font-size: 16px; font-weight: 800; }'
-            f'QWidget#vitaluxTrayPreview QProgressBar {{ background: {theme.INPUT_BG}; '
+            f'QWidget#vitaluxTrayPreview QProgressBar {{ background: {theme.TRACK}; '
             'border: none; border-radius: 4px; }}'
             f'QWidget#vitaluxTrayPreview QProgressBar::chunk {{ background: {accent}; '
             'border-radius: 4px; }}'
