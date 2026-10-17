@@ -1,5 +1,6 @@
 """Extra English translations for dashboard, settings, sensors and disk tests."""
 EN_MORE = {
+    'Die Akzentfarbe lässt sich wie bisher direkt auswählen; die zusätzliche Option Hintergrundfarbe automatisch folgt deinem gewählten Hintergrund. Unter Grafik-Rendering kannst du zwischen CPU und OpenGL wechseln und über Jetzt neu starten sofort anwenden.': 'As before, select an accent color directly; the additional Automatically match background option follows your selected wallpaper. Under Graphics rendering you can switch CPU/OpenGL and apply it immediately with Restart now.',
     'Grafik-Rendering': 'Graphics rendering',
     'Render-Methode': 'Rendering method',
     'CPU · Standard (stabil)': 'CPU · Standard (stable)',
