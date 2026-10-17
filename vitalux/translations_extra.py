@@ -517,3 +517,12 @@ EN_MORE.update({
     "Vitalux prüft automatisch beim Start und etwa alle sechs Stunden auf Updates.": "Vitalux automatically checks for updates at startup and approximately every six hours.",
     "Bei einem Update pulsieren die Kategorie und das Logo dezent; eine Tray-Nachricht nennt die Version.": "When an update is available, the category and logo pulse subtly; a tray notification shows the version.",
 })
+
+# Visual harmony, standard background intensity and automatic SMART (v0.9.3.64).
+EN_MORE.update({
+    "Die verfügbaren Laufwerke werden direkt angezeigt; beim Öffnen startet die SMART-Prüfung automatisch im Hintergrund. Bei Bedarf kannst du erneut prüfen.": "Available drives are shown immediately; opening the drive page automatically checks SMART data in the background. You can rescan at any time.",
+    "Seitenleiste und Kacheln bleiben farblich einheitlich, auch bei Light. Die eleganten Regler verändern die Farbstärke bei allen Standardhintergründen und die Weichheit des Hintergrunds.": "Sidebar and cards share harmonious backgrounds, including Light. Refined sliders change color intensity even with built-in wallpapers and adjust background softness.",
+    "SMART-Daten werden beim Öffnen der Laufwerke geprüft.": "SMART data is checked when opening Drives.",
+    "SMART-Prüfung wird beim Öffnen automatisch gestartet.": "The SMART check starts automatically when you open Drives.",
+    "Keine SMART-Daten verfügbar.": "No SMART data available.",
+})

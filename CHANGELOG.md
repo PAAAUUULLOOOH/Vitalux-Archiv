@@ -5,6 +5,14 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.64] - 2026-10-17
+- Hintergrund, Seitenleiste und Glas-Kacheln verwenden dieselbe fertig abgestimmte Darstellung. Die dunkle zusätzliche Seitenleisten-Überlagerung entfällt; insbesondere Light bleibt einheitlich.
+- Farbharmonien und optionale gleitende Hintergrundanimationen für Aurora Glass, Nebula Purple, Obsidian Black, Arctic Frost und Adaptiv überarbeitet.
+- Farbintensität ist nun auch bei allen Standardhintergründen wirksam (Dark, Light, Glass, Black Glass und Minimalistisch). Minimalistisch bleibt dabei einfarbig.
+- Farbintensitäts- und Hintergrundweichheitsregler vollständig als elegante Qt-Controls mit sichtbaren Akzentverläufen und eigenen Griffen umgesetzt.
+- Beim Öffnen von „Laufwerke“ startet die SMART-Prüfung wieder automatisch, während die Laufwerksauswahl sofort sichtbar ist. Erneutes Prüfen bleibt möglich.
+- Regressionstests sowie README und integrierte Anleitung entsprechend aktualisiert.
+
 ## [v0.9.3.63] - 2026-10-17
 - Originale Hintergrund-Designs wiederhergestellt und einzeln nach ihrem Farbschema benannt: Dark, Light, Glass, Black Glass und Minimalistisch. Mit „Automatisch (Farbschema)“ wird der passende Standardhintergrund gewählt.
 - Die Seitenleiste bei zusätzlichen Hintergrunddesigns farblich harmonisiert; die vertraute Glasoptik der Originaldesigns bleibt unverändert. Zusätzliche Farbverläufe und zurückhaltende Satinstrukturen verbessern Aurora Glass, Obsidian Black, Nebula Purple und Arctic Frost.

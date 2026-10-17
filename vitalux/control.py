@@ -4,10 +4,11 @@ from datetime import datetime
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QIntValidator
-from PySide6.QtWidgets import (QColorDialog, QFrame, QGridLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QSizePolicy, QSlider, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QColorDialog, QFrame, QGridLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QSizePolicy, QVBoxLayout, QWidget)
 from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
 
 from . import __version__, settings, theme, motion, backdrops
+from .appearance_slider import AppearanceSlider
 from .pages import Page
 from .sensors import fmt_bytes, fmt_rate, system_static
 from .widgets import Card, KeyValue, Meter, label
@@ -247,19 +248,19 @@ class PreferencesPage(Page):
         ):
             bg_row = QHBoxLayout()
             bg_row.addWidget(label(title, 'strong'))
-            slider = QSlider(Qt.Horizontal)
+            slider = AppearanceSlider()
             slider.setRange(0, 100)
             slider.setTracking(False)
             slider.setObjectName('backgroundSlider')
-            slider.setFixedWidth(196)
-            slider.setFixedHeight(34)
+            slider.setFixedWidth(220)
             slider.setPageStep(10)
             slider.setSingleStep(1)
             slider.setValue(backdrops.bounded(settings.get(key, default), default))
             value_label = label(f'{slider.value()} %', 'muted')
             value_label.setObjectName('backgroundSliderValue')
             value_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            value_label.setFixedWidth(51)
+            value_label.setFixedWidth(62)
+            value_label.setMinimumHeight(28)
             slider.valueChanged.connect(lambda v, k=key, out=value_label:
                                         self.change_background_level(k, v, out))
             bg_row.addWidget(slider)

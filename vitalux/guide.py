@@ -54,7 +54,7 @@ SLIDES = [
         "Behalte Datenverkehr und Speichergeräte im Blick.",
         "Netzwerk zeigt Schnittstellen, IP-Adressen und aktuelle Übertragungsraten.",
         "Laufwerke zeigt Datenträger, Partitionen, Belegung und Datenraten.",
-        "SMART-Informationen lassen sich bei unterstützten Laufwerken gezielt auslesen.",
+        "Die verfügbaren Laufwerke werden direkt angezeigt; beim Öffnen startet die SMART-Prüfung automatisch im Hintergrund. Bei Bedarf kannst du erneut prüfen.",
         "drives",
     ),
     (
@@ -78,7 +78,7 @@ SLIDES = [
         "Passe Vitalux mit Farbschemas, Hintergründen, Farbstärke und optionalen Animationen an.",
         "Die fünf Originalhintergründe heißen Dark, Light, Glass, Black Glass und Minimalistisch.",
         "Eigene Akzentfarben lassen sich mit „Bearbeiten“ ändern oder mit „Löschen“ entfernen.",
-        "Neue Designhintergründe und elegantere Regler ermöglichen weitere Anpassungen.",
+        "Seitenleiste und Kacheln bleiben farblich einheitlich, auch bei Light. Die eleganten Regler verändern die Farbstärke bei allen Standardhintergründen und die Weichheit des Hintergrunds.",
         "settings",
     ),
     (

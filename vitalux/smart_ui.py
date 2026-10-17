@@ -34,7 +34,7 @@ class SmartPane(Card):
         row.addWidget(self.selector,1)
         self.button=QPushButton('SMART-Daten prüfen');self.button.setObjectName('ghostBtn')
         row.addWidget(self.button);self.body.addLayout(row)
-        self.status=label('SMART-Daten werden nur auf Anfrage gelesen.','muted',wrap=True)
+        self.status=label('SMART-Daten werden beim Öffnen der Laufwerke geprüft.','muted',wrap=True)
         self.body.addWidget(self.status)
         self.drive_name=label('–','bigName',wrap=True)
         self.drive_name.setMinimumHeight(34);self.body.addWidget(self.drive_name)
@@ -77,6 +77,13 @@ class SmartPane(Card):
         self.notes=label('HDDs melden normalerweise keine verbleibende Lebensdauer in Prozent.','muted',wrap=True)
         self.body.addWidget(self.notes)
         self.refresh_theme()
+
+    def set_devices(self, devices):
+        """Show disk selectors immediately; SMART values arrive asynchronously."""
+        self._drives = list(devices or [])
+        self.set_reports([{'name': d.get('name'), 'model': d.get('model'),
+                           '_pending': True} for d in self._drives
+                          if d.get('name')], self._drives)
 
     def set_reports(self,reports,drives=None):
         previous=self.selector.currentData()
@@ -135,10 +142,12 @@ class SmartPane(Card):
                 if attr.get('failed'):item.setForeground(QColor(theme.CRIT))
                 self.table.setItem(r,col,item)
         self.table.setUpdatesEnabled(True)
-        self.status.setText(data.get('error') or (tr('Ausgelesen mit')+' '+data.get('source','smartctl')
-                              if data else tr('SMART-Daten werden nur auf Anfrage gelesen.')))
-        message=(data.get('error')
-                 if data.get('error') else 'Keine auslesbaren SMART-Attribute für dieses Laufwerk.'
+        self.status.setText(tr('SMART-Daten werden beim Öffnen der Laufwerke geprüft.') if data.get('_pending')
+                            else data.get('error') or (tr('Ausgelesen mit')+' '+data.get('source','smartctl')
+                            if data else tr('Keine SMART-Daten verfügbar.')))
+        message=('SMART-Prüfung wird beim Öffnen automatisch gestartet.' if data.get('_pending')
+                 else data.get('error') if data.get('error') else
+                 'Keine auslesbaren SMART-Attribute für dieses Laufwerk.'
                  if data and not attrs else 'Die Prozentanzeige beschreibt bei SSDs die gemeldete Restlebensdauer, nicht die Ausfallwahrscheinlichkeit. HDDs liefern meist keine Prozentangabe.')
         self.notes.setText(tr(message))
 

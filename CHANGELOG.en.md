@@ -4,6 +4,14 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.64] - 2026-10-17
+- Composed one shared background for the canvas, sidebar and frosted cards, removing the separate dark sidebar tint and harmonizing Light.
+- Refined color palettes and optional, smoothly moving ambient gradients for Aurora Glass, Nebula Purple, Obsidian Black, Arctic Frost and Adaptive.
+- The intensity setting now changes every stock background, including Dark, Light, Glass, Black Glass and the monochrome Minimal.
+- Both background sliders now use fully custom Qt rendering with visible accent gradients and tactile handles.
+- SMART scans start automatically when opening Drives, with drive selection visible immediately and a manual rescan button available.
+- Extended regressions and updated README and built-in instructions.
+
 ## [v0.9.3.63] - 2026-10-17
 - Restored the original background designs with the same names as their schemes: Dark, Light, Glass, Black Glass and Minimal. Automatic (color scheme) follows the active scheme.
 - Harmonized the sidebar with additional backgrounds without altering the familiar original glass appearance. Refined Aurora Glass, Obsidian Black, Nebula Purple and Arctic Frost using softer color washes and understated satin ribbons.

@@ -8,8 +8,9 @@ sys.path.insert(0, os.getcwd())
 from PySide6.QtCore import Qt, QEvent, QPoint
 from PySide6.QtGui import QHelpEvent
 from PySide6.QtWidgets import QApplication, QWidget
+from vitalux.appearance_slider import AppearanceSlider
 from vitalux import backdrops, theme, settings, hover_hints
-from vitalux.glass import AmbientScene
+from vitalux.glass import AmbientScene, GlassSidebar
 
 
 def run():
@@ -37,6 +38,19 @@ def run():
             scene.show()
             app.processEvents()
             assert len(backdrops.PRESETS) == 11
+            slider = AppearanceSlider()
+            slider.resize(230, 42)
+            slider.setRange(0, 100)
+            slider.setValue(15)
+            slider.show()
+            app.processEvents()
+            first_slider = slider.grab().toImage()
+            slider.setValue(85)
+            app.processEvents()
+            second_slider = slider.grab().toImage()
+            assert not first_slider.isNull()
+            assert first_slider != second_slider, "Slider handle/rail is not visibly changing"
+            slider.close()
             assert [key for key in backdrops.DEFAULT_THEMES] == [
                 'dark', 'light', 'glass', 'black_glass', 'minimal']
             for scheme in backdrops.DEFAULT_THEMES:
@@ -63,6 +77,43 @@ def run():
             scene.sync_background()
             assert not scene.sharp_backdrop().isNull()
             assert scene._asset_mode == 'glass', "Automatic should use original Glass"
+            # The sidebar must paint the exact same final background (no
+            # separate dark veil), including the Light wallpaper in Glass.
+            sidebar = GlassSidebar(scene)
+            sidebar.resize(170, 290)
+            sidebar.move(0, 0)
+            sidebar.show()
+            app.processEvents()
+            for chosen in ('glass', 'light', 'black_glass', 'aurora', 'nebula'):
+                settings.set('background_style', chosen)
+                scene.sync_background()
+                app.processEvents()
+                full = scene.sharp_backdrop().toImage()
+                rail = sidebar.grab().toImage()
+                for x, y in ((16, 45), (85, 170), (140, 225)):
+                    bg = full.pixelColor(x, y)
+                    fg = rail.pixelColor(x, y)
+                    delta = max(abs(getattr(bg, k)() - getattr(fg, k)())
+                                for k in ('red', 'green', 'blue'))
+                    assert delta <= 6, (chosen, x, y, delta, bg.name(), fg.name())
+            sidebar.hide()
+            sidebar.close()
+
+            # The intensity slider must affect all five built-in wallpapers,
+            # not only the new gradient presets.
+            for preset in ('dark', 'light', 'glass', 'black_glass', 'minimal'):
+                settings.set('background_style', preset)
+                settings.set('background_intensity', 0)
+                scene.sync_background()
+                before = scene.sharp_backdrop().toImage()
+                settings.set('background_intensity', 100)
+                scene.sync_background()
+                after = scene.sharp_backdrop().toImage()
+                assert not before.isNull() and not after.isNull(), preset
+                assert before != after, ('Intensity ignored for built-in background', preset)
+            settings.set('background_intensity', 60)
+            settings.set('background_style', 'adaptive')
+
             # The user accent must change the adaptive background without
             # requiring restart, even if window dimensions do not change.
             settings.set('background_style', 'adaptive')
@@ -87,6 +138,15 @@ def run():
             # fully restore all caches even if settings stayed unchanged.
             theme.set_mode('minimal')
             scene.set_low_power(True)
+            settings.set('background_intensity', 0)
+            app.processEvents()
+            minimal_dim = scene.grab().toImage()
+            settings.set('background_intensity', 100)
+            scene.sync_background()
+            app.processEvents()
+            minimal_bright = scene.grab().toImage()
+            assert minimal_dim != minimal_bright, 'Minimal intensity ignored'
+            settings.set('background_intensity', 60)
             assert scene._sharp_cache.isNull()
             assert scene._soft_cache.isNull()
             assert not scene._motion_timer.isActive()
@@ -98,6 +158,11 @@ def run():
             settings.set('background_animate', True)
             scene.sync_background()
             assert scene._motion_timer.isActive()
+            before_animation = scene.sharp_backdrop().toImage()
+            for _ in range(9):
+                scene._advance_backdrop()
+            after_animation = scene.sharp_backdrop().toImage()
+            assert before_animation != after_animation, "Animated colors did not move"
             settings.set('motion', 'off')
             scene.sync_background()
             assert not scene._motion_timer.isActive()

@@ -251,8 +251,15 @@ class MainWindow(QMainWindow):
         if index != 0 and hasattr(overview, 'board') and overview.board.editing:
             overview.save_editor()
         self.stack.setCurrentIndex(index)
+        # Start the read-only SMART scan on first entry, after the device
+        # selectors are visible. Subsequent visits keep the last results;
+        # users can still rescan using the button.
+        page_name, page_widget = self.pages[index]
+        if (page_name == 'Laufwerke' and not page_widget._smart_loaded
+                and (page_widget._smart_worker is None or
+                     not page_widget._smart_worker.isRunning())):
+            QTimer.singleShot(0, page_widget.request_smart)
         # Keep sampling while refreshing only the visible page.
-        # SMART queries remain strictly opt-in via their button.
         self._refresh_visible_page()
 
     def set_language(self, code):

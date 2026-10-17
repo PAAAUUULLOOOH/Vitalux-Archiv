@@ -572,6 +572,9 @@ class DiskPage(Page):
         self.content.addWidget(self.smart_card)
         self._smart_worker = None
         self._smart_loaded = False
+        # Disk selectors are already visible while SMART runs in a worker.
+        # Do not delay the user's first access to drive details.
+        self.smart_card.set_devices(drives())
         # Integrierter Laufwerks-Benchmark unter den Laufwerksdaten.
         self.benchmark = BenchmarkPanel()
         self.content.addWidget(self.benchmark)

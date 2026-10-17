@@ -174,36 +174,13 @@ QToolButton#customAccentRemove:hover { color: $ACCENT; border-color: $ACCENT; ba
 QCheckBox { spacing: 8px; }
 QCheckBox::indicator { width: 16px; height: 16px; }
 QCheckBox::indicator:checked { background: $ACCENT; border: 1px solid $ACCENT; border-radius: 4px; }
-/* Fine, tactile controls: low-profile satin tracks and floating handles. */
-QSlider#backgroundSlider { background: transparent; min-height: 30px; }
-QSlider#backgroundSlider::groove:horizontal {
-    height: 5px; border: 1px solid $BORDER; border-radius: 3px;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 $TRACK, stop:1 $INPUT_BG);
-}
-QSlider#backgroundSlider::sub-page:horizontal {
-    border: none; border-radius: 3px;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 $SECONDARY, stop:1 $ACCENT);
-}
-QSlider#backgroundSlider::handle:horizontal {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-        stop:0 $HANDLE_TOP, stop:1 $ACCENT);
-    border: 2px solid $CARD; border-radius: 9px;
-    width: 17px; height: 17px; margin: -7px 0;
-}
-QSlider#backgroundSlider::handle:horizontal:hover {
-    background: $HANDLE_TOP; border: 2px solid $ACCENT_HOVER;
-}
-QSlider#backgroundSlider::handle:horizontal:focus {
-    border: 2px solid $ACCENT_HOVER;
-}
-QSlider#backgroundSlider::handle:horizontal:disabled {
-    background: $MUTED; border-color: $BORDER;
-}
+/* AppearanceSlider paints its own finished rail and thumb, bypassing
+   platform-dependent Qt/Plasma QSlider subcontrols entirely. */
+QSlider#backgroundSlider { background: transparent; border: none; }
 QLabel#backgroundSliderValue {
-    font-size: 12px; font-weight: 750; color: $ACCENT;
-    background: transparent; border: none; padding: 0px;
+    font-size: 12px; font-weight: 750; color: $TEXT;
+    background: $ACTIVE_BG; border: 1px solid $ACCENT_HOVER_BORDER;
+    border-radius: 9px; padding: 2px 7px;
 }
 QToolTip { background: $CARD; border: 1px solid $BORDER; color: $TEXT; }
 QToolButton#tileMoveHint, QToolButton#tileRemoveHint {

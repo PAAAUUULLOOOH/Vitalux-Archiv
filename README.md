@@ -52,13 +52,15 @@
 - **Akzentfarben:** Vorgaben oder benannte eigene Farben; **Bearbeiten → Löschen → Eigene Farbe …** sind die passenden Aktionen.
 - **Bedienung:** Keine aufschwebenden Hover-Texthinweise mehr innerhalb von Vitalux; sichtbare Hervorhebungen beim Überfahren bleiben. Dropdowns sind an das Farbschema angepasst und zeigen lange Bezeichnungen in geöffneten Listen.
 
+**Einheitliches Design:** Seitenleiste, Hintergrund und Glass-Kacheln verwenden dieselbe vorab abgestimmte Darstellung – einschließlich Light. Die Farbstärke lässt sich **auch für Dark, Light, Glass, Black Glass und Minimalistisch** anpassen. Minimalistisch bleibt bewusst einfarbig. Die Slider werden vollständig nativ gezeichnet; die Hintergrundanimation ist optional und abgestimmt auf das jeweilige Design.
+
 Die Hintergrundeffekte sind **lokal gerenderte Qt-Farbverläufe**. Es werden weder ein Browser noch externe Hintergrunddateien benötigt.
 
 ### Monitoring, Warnungen & Benchmarks
 
 In **Einstellungen → Hardware-Warnungen** aktivierst du Grenzwerte für CPU-/GPU-Temperatur, RAM und Systemlaufwerk. Zahlen und Einheiten sind in kompakten, linksbündig ausgerichteten Feldern sichtbar. Warnungen werden erst nach ausreichender Rückkehr unter den Grenzwert erneut ausgelöst; bei mehreren Grafikkarten zählt die höchste verfügbare GPU-Temperatur.
 
-SMART-Daten liest Vitalux **auf Anforderung**. Benchmarks mit `fio` messen MB/s, IOPS und Latenz mit konfigurierbaren Profilen.
+Beim Öffnen von **Laufwerke** werden die SMART-Daten automatisch im Hintergrund geprüft. Die Datenträgerauswahl ist sofort sichtbar; der Button erlaubt jederzeit eine erneute Prüfung. Benchmarks mit `fio` messen MB/s, IOPS und Latenz mit konfigurierbaren Profilen.
 
 > [!CAUTION]
 > Laufwerks-Benchmarks schreiben temporäre Daten und belasten den Datenträger. Prüfe Ziel, freien Speicher und Datensicherung vor dem Start.

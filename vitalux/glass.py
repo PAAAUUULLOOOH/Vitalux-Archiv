@@ -7,6 +7,7 @@ No KWin compositor transparency or blur-behind is required.
 from __future__ import annotations
 
 from pathlib import Path
+from math import sin, cos
 from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer
 from PySide6.QtGui import (QBrush, QColor, QLinearGradient, QPainter,
                            QPainterPath, QPen, QPixmap, QRadialGradient)
@@ -41,9 +42,12 @@ class AmbientScene(QWidget):
         self._soft_cache = QPixmap()
         self._cache_size = None
         self._render_key = None
+        self._composed_key = None
+        self._composed_sharp = QPixmap()
+        self._composed_soft = QPixmap()
         self._phase = 0.0
         self._motion_timer = QTimer(self)
-        self._motion_timer.setInterval(320)
+        self._motion_timer.setInterval(220)
         self._motion_timer.timeout.connect(self._advance_backdrop)
         self.sync_background()
 
@@ -51,10 +55,12 @@ class AmbientScene(QWidget):
         self._render_key = None
         self._asset_mode = None
         self._cache_size = None
-        active = (settings.get('background_animate', False) and
-                  backdrops.resolve(settings.get('background_style', 'theme_default'),
-                                    theme.mode()) not in backdrops.DEFAULT_THEMES and
-                  theme.mode() != 'minimal' and motion.enabled())
+        self._composed_key = None
+        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                  theme.mode())
+        active = (settings.get('background_animate', False)
+                  and style != 'minimal' and theme.mode() != 'minimal'
+                  and motion.enabled())
         if active:
             self._motion_timer.start()
         else:
@@ -64,7 +70,8 @@ class AmbientScene(QWidget):
     def _advance_backdrop(self):
         if not self.isVisible():
             return
-        self._phase = (self._phase + .018) % 6.28318530718
+        self._phase = (self._phase + .065) % 6.28318530718
+        self._composed_key = None
         self._render_key = None
         self.update()
         # Keep live glass sampling aligned to the painted moving backdrop.
@@ -85,6 +92,7 @@ class AmbientScene(QWidget):
             self._soft_cache = QPixmap()
             self._cache_size = None
             self._render_key = None
+            self._composed_key = None
         self.sync_background()
 
     def _ensure_cache(self):
@@ -141,45 +149,115 @@ class AmbientScene(QWidget):
         self._sharp_cache = cover(self._wallpaper)
         self._soft_cache = cover(self._soft_wallpaper)
 
-    def soft_backdrop(self):
+    def _ensure_composed(self):
+        """One final background for the canvas, sidebar and frosted cards.
+
+        In older builds, root tinted the *painted* image while sidebar/cards
+        sampled the un-tinted original. Light wallpapers with Glass therefore
+        gave three incompatible colors. Compose once and share that result.
+        """
+        if theme.mode() == 'minimal':
+            self._composed_sharp = QPixmap()
+            self._composed_soft = QPixmap()
+            self._composed_key = None
+            return
         self._ensure_cache()
-        return self._soft_cache
+        if self._sharp_cache.isNull():
+            return
+        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
+                                  theme.mode())
+        intensity = backdrops.bounded(settings.get('background_intensity', 60), 60)
+        softness = backdrops.bounded(settings.get('background_softness', 65), 65)
+        moving = self._motion_timer.isActive()
+        key = (theme.mode(), style, theme.accent(), self.size(),
+               intensity, softness, round(self._phase, 4) if moving else 0,
+               self._asset_mode, self._render_key)
+        if key == self._composed_key and not self._composed_sharp.isNull():
+            return
+        canvas = self._sharp_cache.copy()
+        painter = QPainter(canvas)
+        painter.setPen(Qt.NoPen)
+        full = QRectF(canvas.rect())
+        # Apply readability correction once, *before* sidebar or cards sample.
+        if theme.mode() == 'light' and style not in ('light', 'arctic'):
+            painter.fillRect(full, rgba(247, 250, 255, 200))
+        elif theme.mode() != 'light' and style == 'light':
+            painter.fillRect(full, rgba(5, 12, 26, 194))
+        elif theme.mode() in ('glass', 'black_glass'):
+            if style == theme.mode():
+                tint = QLinearGradient(0, 0, canvas.width(), canvas.height())
+                if style == 'black_glass':
+                    tint.setColorAt(0, rgba(0, 0, 0, 125))
+                    tint.setColorAt(1, rgba(0, 0, 0, 165))
+                else:
+                    tint.setColorAt(0, rgba(4, 9, 19, 48))
+                    tint.setColorAt(1, rgba(5, 9, 25, 35))
+                painter.fillRect(full, QBrush(tint))
+            else:
+                painter.fillRect(full, rgba(3, 9, 20, 18 if theme.mode() == 'glass' else 36))
+
+        # Stock Glass/Black Glass use fixed artwork. Desaturate/tint their
+        # source gently at low intensity; 100% reveals the original colors.
+        # This correction belongs to the shared canvas so the sidebar and
+        # frosted cards react identically when the user moves the slider.
+        if style in ('glass', 'black_glass'):
+            neutral = rgba(14, 22, 34, round((100 - intensity) * 1.55)) if style == 'glass' \
+                else rgba(21, 22, 28, round((100 - intensity) * 1.55))
+            painter.fillRect(full, neutral)
+
+        # Slow, nuanced ambient breathing that suits each wallpaper's colors.
+        # It works even with the original bundled Glass wallpapers.
+        if moving:
+            glow_colors = backdrops.motion_colors(style, theme.accent(), theme.mode() == 'light')
+            strength = (max(.25, intensity / 100) * .24)
+            width, height = canvas.width(), canvas.height()
+            for i, color in enumerate(glow_colors):
+                x = width * ((.23 if i == 0 else .78) +
+                             .16 * sin(self._phase + i * 2.1))
+                y = height * ((.30 if i == 0 else .68) +
+                              .18 * cos(self._phase * .8 + i * 2.3))
+                radius = max(width * .34, height * .72) * (1 + softness / 300)
+                gradient = QRadialGradient(QPointF(x, y), radius)
+                center = QColor(color)
+                center.setAlphaF(min(.42, strength * (.95 if i == 0 else .60)))
+                end = QColor(center); end.setAlpha(0)
+                gradient.setColorAt(0, center)
+                gradient.setColorAt(.55, QColor(center).lighter(104))
+                gradient.setColorAt(1, end)
+                painter.fillRect(full, QBrush(gradient))
+        painter.end()
+
+        self._composed_sharp = canvas
+        # The sidebar shows the precise same canvas. Cards use a blur derived
+        # from that *same final image*, not from an incompatible raw palette.
+        divisor = 4 + round(softness * .10)
+        tiny = canvas.scaled(max(14, canvas.width() // divisor),
+                             max(14, canvas.height() // divisor),
+                             Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+        self._composed_soft = tiny.scaled(canvas.size(),
+                                         Qt.IgnoreAspectRatio,
+                                         Qt.SmoothTransformation)
+        self._composed_key = key
+
+    def soft_backdrop(self):
+        self._ensure_composed()
+        return self._composed_soft
 
     def sharp_backdrop(self):
-        self._ensure_cache()
-        return self._sharp_cache
+        self._ensure_composed()
+        return self._composed_sharp
 
     def paintEvent(self, event):
         p = QPainter(self)
         if theme.mode() == "minimal":
+            p.fillRect(self.rect(),
+                       backdrops.minimal_color(settings.get('background_intensity', 60)))
+        else:
+            self._ensure_composed()
             p.fillRect(self.rect(), QColor(theme.BG))
-            p.end()
-            return
-        p.setRenderHint(QPainter.SmoothPixmapTransform)
-        p.fillRect(self.rect(), QColor(theme.BG))
-        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
-                                  theme.mode())
-        self._ensure_cache()
-        if not self._sharp_cache.isNull():
-            p.drawPixmap(0, 0, self._sharp_cache)
-        if style == theme.mode() and theme.mode() in ('glass', 'black_glass'):
-            # Original subtle atmosphere for each built-in theme.
-            tint = QLinearGradient(0, 0, self.width(), self.height())
-            if theme.mode() == 'black_glass':
-                tint.setColorAt(0, rgba(0, 0, 0, 125))
-                tint.setColorAt(1, rgba(0, 0, 0, 165))
-            else:
-                tint.setColorAt(0, rgba(4, 9, 19, 48))
-                tint.setColorAt(1, rgba(5, 9, 25, 35))
-            p.fillRect(self.rect(), QBrush(tint))
-        elif style != theme.mode():
-            # Non-matching combinations still preserve readable text.
-            if theme.mode() == 'light' and style != 'light':
-                p.fillRect(self.rect(), rgba(248, 251, 255, 180))
-            elif theme.mode() != 'light' and style == 'light':
-                p.fillRect(self.rect(), rgba(4, 8, 17, 205))
-            elif theme.mode() in ('glass', 'black_glass'):
-                p.fillRect(self.rect(), rgba(2, 7, 16, 24))
+            if not self._composed_sharp.isNull():
+                p.setRenderHint(QPainter.SmoothPixmapTransform)
+                p.drawPixmap(0, 0, self._composed_sharp)
         p.end()
 
 
@@ -192,7 +270,7 @@ def scene_for(widget):
     return None
 
 
-def draw_frosted_backdrop(p, widget, target, opacity=1.0):
+def draw_frosted_backdrop(p, widget, target, opacity=1.0, *, softened=True):
     """Sample a cached blur from the *correct viewport position* on each repaint.
 
     Scroll offsets are handled by Qt's mapTo() on the widget, not by a local
@@ -201,7 +279,7 @@ def draw_frosted_backdrop(p, widget, target, opacity=1.0):
     scene = scene_for(widget)
     if scene is None:
         return
-    image = scene.soft_backdrop()
+    image = scene.soft_backdrop() if softened else scene.sharp_backdrop()
     if image.isNull():
         return
     pos = widget.mapTo(scene, QPoint(0, 0))
@@ -377,41 +455,22 @@ class GlassSidebar(QFrame):
 
     def paintEvent(self, event):
         p = QPainter(self)
-        if theme.mode() == "minimal":
-            p.fillRect(self.rect(), QColor(theme.SIDEBAR))
-            p.setPen(QColor(theme.BORDER))
-            p.drawLine(self.width()-1, 0, self.width()-1, self.height())
-            p.end()
-            return
-        p.setRenderHint(QPainter.Antialiasing)
-        rect = QRectF(self.rect())
-        style = backdrops.resolve(settings.get('background_style', 'theme_default'),
-                                  theme.mode())
-        matching = style == theme.mode()
-        if theme.mode() in ('glass', 'black_glass'):
-            draw_frosted_backdrop(p, self, rect, 1.0)
-            shade = QLinearGradient(0, 0, self.width(), 0)
-            if theme.mode() == 'black_glass':
-                # Keep the familiar original when Black Glass is selected.
-                opacity = (215, 179) if matching else (125, 110)
-                shade.setColorAt(0, rgba(2, 2, 3, opacity[0]))
-                shade.setColorAt(1, rgba(13, 13, 16, opacity[1]))
-            else:
-                opacity = (175, 133) if matching else (100, 83)
-                shade.setColorAt(0, rgba(7, 15, 30, opacity[0]))
-                shade.setColorAt(1, rgba(15, 28, 47, opacity[1]))
-            p.fillRect(rect, QBrush(shade))
+        if theme.mode() == 'minimal':
+            # Match the same monochrome intensity as the central scene.
+            p.fillRect(self.rect(),
+                       backdrops.minimal_color(settings.get('background_intensity', 60)))
         else:
-            color = QColor(theme.SIDEBAR)
-            if not matching:
-                color.setAlpha(175 if theme.mode() == 'dark' else 215)
-            p.fillRect(rect, color)
+            # Use the exact same composed canvas at the actual sidebar origin.
+            # Never add a second opaque tint (the source of the dark strip).
+            draw_frosted_backdrop(p, self, QRectF(self.rect()),
+                                  softened=False)
+        # Only the seam separates navigation from content.
         side = QLinearGradient(0, 0, 0, max(1, self.height()))
-        a = theme.accent_qcolor(130 if theme.mode() in ('glass', 'black_glass') else 82)
+        accent = theme.accent_qcolor(82)
         side.setColorAt(0, QColor(theme.BORDER))
-        side.setColorAt(.5, a)
+        side.setColorAt(.5, accent)
         side.setColorAt(1, QColor(theme.BORDER))
-        p.setPen(QPen(QBrush(side), 1.1))
+        p.setPen(QPen(QBrush(side), 1.0))
         p.drawLine(self.width()-1, 0, self.width()-1, self.height())
         p.end()
 
