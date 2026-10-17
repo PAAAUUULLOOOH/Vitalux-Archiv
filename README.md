@@ -224,15 +224,29 @@ Bei einer erfolgreichen Prüfung wird `OK` angezeigt. Passe den Dateinamen an di
 
 ## Entwicklung und Veröffentlichungen
 
-GitHub Actions übernimmt die Erstellung des AppImages:
+Der komplette Vitalux-Anwendungscode liegt in [`vitalux/`](vitalux/). Bilder und Logos liegen in [`assets/`](assets/). Die große, gebündelte Python-/Qt-/fio-Laufzeit wird **nicht** als Binärdaten ins Git-Repository eingecheckt; der Build verwendet dafür das vorhandene offizielle Basispaket `v0.9.3.46`.
 
-1. Eine neue **ZIP-Vollversion** wird mit einem passenden Versions-Tag als GitHub-Release-Asset bereitgestellt.
-2. Der Workflow [Vitalux AppImage Release](https://github.com/PAAAUUULLOOOH/Vitalux/actions/workflows/release.yml) erstellt daraus das AppImage.
-3. Das AppImage und die passende SHA-256-Datei werden unter **Assets** desselben Releases veröffentlicht.
+### Automatische Veröffentlichung (Standard)
 
-Die Build- und Integrationsskripte liegen unter [`packaging/`](packaging/). Der aktuelle Repository-Inhalt dient vorrangig der **Veröffentlichung und Paketierung**; nicht der gesamte Anwendungscode ist hier bereits separat eingecheckt.
+1. Änderungen am Quellcode vornehmen und die Versionsnummer in [`vitalux/__init__.py`](vitalux/__init__.py) erhöhen.
+2. Änderungen in den `main`-Branch übernehmen. Das startet den Workflow **[Vitalux – Automatische Veröffentlichung](https://github.com/PAAAUUULLOOOH/Vitalux/actions/workflows/publish.yml)**. Alternativ kannst du ihn unter **Actions → Run workflow** von Hand starten.
+3. GitHub erstellt und prüft automatisch ein **AppImage**, eine **ZIP-Vollversion**, eine **ZIP-Aktualisierung für die Basispaketversion** und eine **SHA-256-Prüfsummenliste**.
+4. Erst nach erfolgreichem Build wird der neue Release erstellt und unter [Releases](https://github.com/PAAAUUULLOOOH/Vitalux/releases) veröffentlicht. Bereits bestehende Versionstags werden **nicht automatisch überschrieben**.
 
-Die Versionierung verwendet das Format `vX.Y.Z` beziehungsweise während der Entwicklung `vX.Y.Z.N`.
+**Hinweis zum Differenzupdate:** Solange der Build die Laufzeit aus `v0.9.3.46` nutzt, bezieht sich die automatisch erzeugte ZIP-Differenz auf genau diese Basisversion. Für die integrierte Updatefunktion verwendet Vitalux die vollständige ZIP-Datei beziehungsweise das AppImage.
+
+### Weiterhin manuell veröffentlichen
+
+Ein manueller Upload bleibt ausdrücklich möglich:
+
+1. Öffne **[Releases → Draft a new release](https://github.com/PAAAUUULLOOOH/Vitalux/releases/new)**.
+2. Wähle einen **neuen Versions-Tag**, z. B. `v0.9.3.48`.
+3. Lade deine Release-Dateien unter **Assets** hoch. Zum automatischen AppImage-Bau aus einer ZIP muss sie `Vitalux-v0.9.3.48-linux-x86_64.zip` heißen und vor dem Veröffentlichen hochgeladen sein.
+4. Veröffentliche den Release. Der bisherige **[AppImage-Workflow für manuelle Releases](https://github.com/PAAAUUULLOOOH/Vitalux/actions/workflows/release.yml)** bleibt vorhanden.
+
+Du kannst alternativ ein selbst erstelltes AppImage direkt als Asset hochladen. Ein manueller Release muss dafür nicht über den Quellcode-Workflow laufen.
+
+Die Versionsnummern folgen dem Format `vX.Y.Z` beziehungsweise bei Entwicklungsständen `vX.Y.Z.N`.
 
 ## Verwendete Technologien und Hinweise zu Lizenzen
 
