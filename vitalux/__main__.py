@@ -17,6 +17,8 @@ def main():
     sys.excepthook = diagnostics.exception_hook
     diagnostics.enable_native_crash_trace()
     from .window import MainWindow
+    # Select the scene-graph backend before the first Quick window exists.
+    renderer.prepare_start()
     app = QApplication(sys.argv)
     # Disable transient hover help across the entire application, not just navigation.
     app._vitalux_hover_guard = hover_hints.install(app)
@@ -24,7 +26,6 @@ def main():
     # MainWindow.closeEvent explicitly quits on a genuine Exit command.
     app.setQuitOnLastWindowClosed(False)
     app.setApplicationName(APP_NAME)
-    renderer.prepare_start()
     # Desktop-portal app IDs require an installed .desktop entry; avoid asking
     # the portal to register an unknown ID when using Vitalux portably.
     xdg_data = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
@@ -48,7 +49,7 @@ def main():
     manager = UpdateManager()
     win = MainWindow(info, logo, manager)
     win.show()
-    # A native driver crash while initializing OpenGL leaves the boot marker;
+    # A native driver crash while initializing any GPU backend leaves a marker;
     # next launch automatically selects the known-working CPU renderer.
     QTimer.singleShot(4500, renderer.successful_start)
     if renderer.warning():
