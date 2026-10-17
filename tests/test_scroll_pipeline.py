@@ -7,12 +7,13 @@ from pathlib import Path
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 sys.path.insert(0, os.getcwd())
 
-from PySide6.QtCore import QSize
-from PySide6.QtGui import QColor, QImage
+from PySide6.QtCore import QPoint, QPointF, QSize, Qt
+from PySide6.QtGui import QColor, QImage, QWheelEvent
 from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QWidget
 
 from vitalux import settings, theme, user_background
 from vitalux.window import MainWindow
+from vitalux.smooth_scroll import AdaptiveScrollArea, frame_interval_ms
 from vitalux.widgets import Card
 
 
@@ -60,6 +61,40 @@ def run():
             assert not card.graphicsEffect().isEnabled(), 'Scrolled shadow is still expensive'
             assert standalone.graphicsEffect().isEnabled(), 'Unscrolled card lost its shadow'
             host.close()
+
+            # Mouse-wheel animation follows the actual display mode rather than
+            # imposing a fixed 60 Hz loop. No timer runs while idle.
+            assert frame_interval_ms(60) == 17
+            assert frame_interval_ms(144) == 7
+            assert frame_interval_ms(165) == 6
+            assert frame_interval_ms(240) == 4
+            assert frame_interval_ms(0) == 17
+            assert frame_interval_ms(float('nan')) == 17
+            smooth = AdaptiveScrollArea()
+            smooth.resize(470, 300)
+            tall = QWidget()
+            tall.setMinimumSize(450, 1200)
+            smooth.setWidget(tall)
+            smooth.show()
+            app.processEvents()
+            assert smooth.verticalScrollBar().maximum() > 0
+            assert not smooth._frame_timer.isActive()
+            wheel = QWheelEvent(QPointF(20, 20), QPointF(20, 20),
+                                QPoint(), QPoint(0, -120), Qt.NoButton,
+                                Qt.NoModifier, Qt.NoScrollPhase, False)
+            smooth.wheelEvent(wheel)
+            assert wheel.isAccepted()
+            assert smooth._frame_timer.isActive()
+            assert smooth._scroll_targets[smooth.verticalScrollBar()] > 0
+            # A precision touchpad bypasses the smoother and cancels pending
+            # interpolation, so high-resolution gesture input is not delayed.
+            touchpad = QWheelEvent(QPointF(20, 20), QPointF(20, 20),
+                                   QPoint(0, -20), QPoint(), Qt.NoButton,
+                                   Qt.NoModifier, Qt.NoScrollPhase, False)
+            smooth.wheelEvent(touchpad)
+            assert not smooth._frame_timer.isActive()
+            assert not smooth._scroll_targets
+            smooth.close()
 
             # Two distinctly sized windows can reuse decoded images.
             image = QImage(1600, 960, QImage.Format_RGB32)

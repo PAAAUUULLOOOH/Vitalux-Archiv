@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.76] - 2026-10-18
+- Flüssigeres Mausrad-Scrollen mit zeitbasierter Bewegung und dynamischer Anpassung an die aktuell eingestellte Bildwiederholrate des verwendeten Monitors (auch nach Monitorwechsel oder Hz-Änderung). Touchpads scrollen weiterhin ohne künstliche Verzögerung.
+- Schonende Aktualisierung nur während aktiver Scrollbewegungen; reduzierte Animationen und ausgeschaltete Bewegungseffekte werden respektiert. Keine Änderung der KDE-Monitoreinstellung oder FPS-Garantie.
+- Die Danksagung für TimBooH im Info-Reiter ist kürzer, größer und verwendet dieselbe Akzentfarbe wie „Made by PAAAUUULLOOOH“.
+- README und Scroll-Regressionstests aktualisiert.
+
 ## [v0.9.3.75] - 2026-10-18
 - Neuer **Qt Quick · GPU-Test (experimentell)** als dritte Option direkt unter **Einstellungen → Grafik-Rendering**, neben CPU und OpenGL. Wechsel erfolgt wie gehabt über **Jetzt neu starten**.
 - Qt Quick nutzt den GPU-Scene-Graph mit Qt RHI/OpenGL für die Hintergrundtextur, während vorhandene CPU-gerenderte Qt-Widgets, Charts und Glas-Karten erhalten bleiben. Eine Beschleunigung der gesamten Oberfläche wird nicht versprochen.

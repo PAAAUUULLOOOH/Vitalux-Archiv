@@ -14,6 +14,7 @@ from .brand import PulseCore, TrayPulse, app_icon, sync_installed_icon, wordmark
 from .widgets import NavButton, SidebarToggle, ChartPanel, Gauge, label
 from .glass import AmbientScene, GlassSidebar, GlassSurface, create_ambient_scene
 from .sidebar_transition import SidebarTransition, SidebarFreeze
+from .smooth_scroll import AdaptiveScrollArea
 from .alerts import AlertMonitor, readings_from_sample
 from .tray_preview import TrayPreview, tray_tooltip
 from .wallpaper_accents import resolve_accent
@@ -175,7 +176,7 @@ class MainWindow(QMainWindow):
         nav_layout = QVBoxLayout(nav_host)
         nav_layout.setContentsMargins(1, 2, 3, 2)
         nav_layout.setSpacing(5)
-        nav_scroll = QScrollArea()
+        nav_scroll = AdaptiveScrollArea()
         self.nav_scroll = nav_scroll
         nav_scroll.setObjectName('glassScroll')
         nav_scroll.setWidgetResizable(True)
@@ -202,7 +203,7 @@ class MainWindow(QMainWindow):
             nav_layout.addWidget(btn)
             if name == "Updates":
                 self.update_btn = btn
-            scroll = QScrollArea()
+            scroll = AdaptiveScrollArea()
             scroll.setObjectName('glassScroll')
             scroll.setWidgetResizable(True)
             scroll.setAutoFillBackground(False)

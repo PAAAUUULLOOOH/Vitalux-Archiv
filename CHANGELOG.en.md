@@ -4,6 +4,12 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.76] - 2026-10-18
+- Smoother mouse-wheel scrolling with time-based interpolation, automatically following the active monitor's configured refresh rate, including screen and refresh-rate changes. Precision touchpad input remains native and immediate.
+- Frame updates run only while actively scrolling; reduced-motion and motion-off settings are respected. This does not change the display mode or guarantee a particular FPS.
+- Shortened and enlarged the TimBooH acknowledgement in Info, using the same accent color as “Made by PAAAUUULLOOOH”.
+- Updated README and scrolling regression tests.
+
 ## [v0.9.3.75] - 2026-10-18
 - Added **Qt Quick · GPU test (experimental)** as a third option next to CPU and OpenGL under Settings → Graphics rendering. Restart now applies changes.
 - Qt Quick uses the Qt RHI/OpenGL scene graph for the wallpaper texture while CPU-painted widgets, charts and glass cards remain unchanged. This is not a full QML migration or a performance guarantee.

@@ -44,6 +44,8 @@
 | **Einstellungen** | Farbschemas, eigene Akzentfarben, Hintergründe, Animationen und Warnwerte |
 | **Updates & Info** | Bestätigte Aktualisierungen, lokaler Changelog und integrierte Anleitung |
 
+Scrollen passt seine Animation automatisch an die in KDE/Wayland eingestellte Bildwiederholrate des aktiven Monitors an; präzise Touchpad-Eingaben bleiben direkt. Eine garantierte FPS-Zahl oder Änderung des Monitormodus erfolgt nicht.
+
 ### Design & Hintergründe
 
 - **Farbschemas:** Glass mit Vitalux Blau (Standard), Dark, Light, Black Glass und Minimalistisch.

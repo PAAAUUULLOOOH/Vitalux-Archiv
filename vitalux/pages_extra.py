@@ -133,7 +133,7 @@ class InfoPage(Page):
         c.body.addSpacing(10)
         c.body.addWidget(label("Made by PAAAUUULLOOOH", "madeBy", Qt.AlignHCenter, wrap=True))
         c.body.addWidget(label(
-            'Danke an TimBooH für die Unterstützung bei der Integration eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering).',
+            'Danke an TimBooH für die Unterstützung bei Hintergrundbildern und Grafikdarstellung.',
             'supportCredit', Qt.AlignHCenter, wrap=True))
         c.body.addWidget(label(f"{APP_NAME} {__version__}", "muted", Qt.AlignHCenter))
         c.body.addSpacing(10)
