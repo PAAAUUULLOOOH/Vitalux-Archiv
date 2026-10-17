@@ -8,14 +8,15 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.getcwd())
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame
+from PySide6.QtGui import QColor, QPalette
+from PySide6.QtWidgets import QApplication, QColorDialog, QInputDialog, QWidget, QFrame, QMessageBox
 
 from vitalux import __version__, changelog, i18n, settings, theme
 from vitalux.control import PreferencesPage
 from vitalux.pages_extra import UpdatePage
 from vitalux.update_manager import UpdateManager
 from vitalux.widgets import ChartSeriesCheckBox
+from vitalux.smart_ui import SmartPane
 
 
 class FakeWindow(QWidget):
@@ -38,6 +39,7 @@ def check_preferences(app):
         settings.PATH = str(Path(folder) / "settings.json")
         original_color = QColorDialog.getColor
         original_name = QInputDialog.getText
+        original_notice = QMessageBox.information
         try:
             settings.set("accent", "auto")
             window = FakeWindow()
@@ -51,17 +53,33 @@ def check_preferences(app):
                 assert spin.alignment() & Qt.AlignHCenter, name
                 assert spin.alignment() & Qt.AlignVCenter, name
                 assert spin.value() > 0
-                assert spin.x() < page.alert_labels[name].x(), name
+                assert spin.x() > page.alert_labels[name].x(), name
 
-            # Custom popup has no unthemed native top/bottom bands.
-            for dropdown in (page.mode, page.accent_combo, page.interval):
-                assert dropdown.view().frameShape() == QFrame.NoFrame
-                assert dropdown.view().autoFillBackground()
-                assert dropdown.maxVisibleItems() == 10
-                dropdown.showPopup()
-                app.processEvents()
-                assert "background:" in dropdown.view().window().styleSheet()
-                dropdown.hidePopup()
+            # Every dropdown, including the SMART selector, uses the same Qt
+            # popup background and palette in all five Vitalux themes.
+            smart = SmartPane()
+            smart.show()
+            app.processEvents()
+            for scheme in ("dark", "light", "glass", "black_glass", "minimal"):
+                theme.set_mode(scheme)
+                page.setStyleSheet(theme.stylesheet())
+                for dropdown in (page.mode, page.accent_combo, page.interval,
+                                 page.motion_combo, smart.selector):
+                    assert dropdown.view().frameShape() == QFrame.NoFrame
+                    assert dropdown.view().autoFillBackground()
+                    assert dropdown.maxVisibleItems() == 10
+                    assert dropdown.sizeHint().width() >= 88
+                    dropdown.showPopup()
+                    app.processEvents()
+                    popup = dropdown.view().window()
+                    assert "background:" in popup.styleSheet(), scheme
+                    expected = theme.blend(theme.accent(), theme.CARD, .05)
+                    assert popup.palette().color(QPalette.Base).name() == expected, scheme
+                    assert popup.palette().color(QPalette.Text).name() == theme.TEXT, scheme
+                    dropdown.hidePopup()
+            smart.close()
+            theme.set_mode("glass")
+            page.setStyleSheet(theme.stylesheet())
 
             # Normal Qt checkbox semantics remain intact with our painted tick.
             standard = page.alert_toggle
@@ -79,6 +97,7 @@ def check_preferences(app):
             chart.close()
 
             assert not page.remove_custom_accent_button.isVisible()
+            assert not page.edit_custom_accent_button.isVisible()
             QColorDialog.getColor = staticmethod(lambda *a, **k: QColor("#123456"))
             QInputDialog.getText = staticmethod(lambda *a, **k: ("Mein Petrol", True))
             page.custom_accent(page.accent_combo)
@@ -86,6 +105,9 @@ def check_preferences(app):
             assert page.accent_combo.currentText() == "Mein Petrol"
             assert page.accent_combo.currentData() == "#123456"
             assert page.remove_custom_accent_button.isVisible()
+            assert page.edit_custom_accent_button.isVisible()
+            assert page.edit_custom_accent_button.text() == "Bearbeiten"
+            assert page.remove_custom_accent_button.text() == "Löschen"
             assert settings.get("custom_accents") == [{"name": "Mein Petrol", "color": "#123456"}]
             assert settings.get("accent") == "#123456"
 
@@ -98,12 +120,53 @@ def check_preferences(app):
             page.custom_accent(page.accent_combo)
             assert page.accent_combo.count() == count
 
-            page.remove_custom_accent()
+            # Re-edit without creating a new row; the chosen color and its
+            # name should be persisted and immediately applied.
+            QColorDialog.getColor = staticmethod(lambda *a, **k: QColor("#334455"))
+            QInputDialog.getText = staticmethod(lambda *a, **k: ("Mein Smaragd", True))
+            page.edit_custom_accent_button.click()
             app.processEvents()
-            assert page.accent_combo.findData("#123456") == -1
+            assert page.accent_combo.count() == count
+            assert page.accent_combo.currentText() == "Mein Smaragd"
+            assert page.accent_combo.currentData() == "#334455"
+            assert settings.get("custom_accents") == [{"name": "Mein Smaragd", "color": "#334455"}]
+            assert settings.get("accent") == "#334455"
+            assert page.remove_custom_accent_button.isVisible()
+            assert page.edit_custom_accent_button.isVisible()
+
+            # Editing the name alone must leave the color untouched.
+            QColorDialog.getColor = staticmethod(lambda *a, **k: QColor("#334455"))
+            QInputDialog.getText = staticmethod(lambda *a, **k: ("Moos", True))
+            page.edit_custom_accent()
+            assert settings.get("custom_accents") == [{"name": "Moos", "color": "#334455"}]
+            assert page.accent_combo.currentText() == "Moos"
+            # Cancel the color or name dialog: neither may alter the saved row.
+            QColorDialog.getColor = staticmethod(lambda *a, **k: QColor())
+            page.edit_custom_accent()
+            QColorDialog.getColor = staticmethod(lambda *a, **k: QColor("#778899"))
+            QInputDialog.getText = staticmethod(lambda *a, **k: ("Abgebrochen", False))
+            page.edit_custom_accent()
+            assert settings.get("custom_accents") == [{"name": "Moos", "color": "#334455"}]
+            # Reject duplicate preset colors.
+            QColorDialog.getColor = staticmethod(lambda *a, **k: QColor("#52d3ff"))
+            QMessageBox.information = staticmethod(lambda *a, **k: QMessageBox.Ok)
+            page.edit_custom_accent()
+            assert settings.get("custom_accents") == [{"name": "Moos", "color": "#334455"}]
+
+            page.accent_combo.setCurrentIndex(0)
+            app.processEvents()
+            assert not page.edit_custom_accent_button.isVisible()
+            assert not page.remove_custom_accent_button.isVisible()
+            page.accent_combo.setCurrentIndex(page.accent_combo.findData("#334455"))
+            app.processEvents()
+            assert page.edit_custom_accent_button.isVisible()
+            page.remove_custom_accent_button.click()
+            app.processEvents()
+            assert page.accent_combo.findData("#334455") == -1
             assert settings.get("custom_accents") == []
             assert settings.get("accent") == "auto"
             assert not page.remove_custom_accent_button.isVisible()
+            assert not page.edit_custom_accent_button.isVisible()
 
             # Old installations with one unnamed color remain editable.
             settings.set("accent", "#bbaacc")
@@ -113,22 +176,28 @@ def check_preferences(app):
             app.processEvents()
             assert page2.accent_combo.findData("#bbaacc") >= 0
             assert page2.remove_custom_accent_button.isVisible()
+            assert page2.edit_custom_accent_button.isVisible()
             assert page2.accent_combo.currentText() == "Eigene Farbe"
             page2.remove_custom_accent_button.click()
             assert settings.get("accent") == "auto"
 
-            # Changing language preserves item data and stored names.
+            # Changing language localizes both buttons and keeps item values.
             i18n.set_lang("en")
             page2.accent_combo.retranslate()
+            page2.edit_custom_accent_button.retranslate()
+            page2.remove_custom_accent_button.retranslate()
             assert page2.accent_combo.findData("auto") == 0
+            assert page2.edit_custom_accent_button.text() == "Edit"
+            assert page2.remove_custom_accent_button.text() == "Delete"
             i18n.set_lang("de")
             page2.close()
             page.close()
         finally:
             QColorDialog.getColor = original_color
             QInputDialog.getText = original_name
+            QMessageBox.information = original_notice
             settings.PATH = prior
-    print("Custom accent names, deletion, presets, legacy colors, checkboxes and warning fields: PASS")
+    print("Editable named accents, explicit Edit/Delete actions, adaptive dropdown palettes, warning labels and localized buttons: PASS")
 
 
 def check_changelog(app):
