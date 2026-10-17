@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.72] - 2026-10-17
+- Einstellungen → Farbakzente erhält zwei Reiter: „Manuelle Farbakzente“ (alle bisherigen Farben und Bearbeiten/Löschen unverändert) und „Passend zum Hintergrund“ mit fünf aus dem angezeigten Hintergrund ermittelten Farben.
+- Neuer Modus „Automatisch anpassen“: Beim Wechsel eines integrierten Hintergrunds oder eines eigenen Bildes wird die Akzentfarbe neu ermittelt und auf Bedienelemente, Diagramme, Fenster- und Tray-Darstellung angewendet. Manuell ausgewählte Bildfarben folgen ebenfalls dem jeweils aktiven Hintergrund.
+- Farben werden lokal, einmalig und verkleinert aus den Hintergrund-Pixeln bestimmt; die Auswahl bleibt stabil und vermeidet Rückkopplungen mit „Adaptiv · Akzentfarbe“. Keine zusätzlichen Python-Abhängigkeiten.
+- Farb-Reiter und Vorschau berücksichtigen Dark, Light, Glass, Black Glass und Minimalistisch. README und zweisprachige Anleitung aktualisiert. Die 630 Kombinationen fester Standardoptionen bleiben erhalten.
+
 ## [v0.9.3.71] - 2026-10-17
 - Systemleisten-Hover repariert: KDE zeigt wieder CPU-, GPU- und RAM-Auslastung sowie verfügbare CPU-/GPU-Temperaturen aus den laufenden Messdaten an.
 - Kompakte Live-Vorschau im Tray-Kontextmenü ergänzt, mit aktualisierten Prozentbalken und Temperaturen. Unter Wayland wird der native KDE-Tooltip für den Hover verwendet.
