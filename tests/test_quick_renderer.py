@@ -70,8 +70,8 @@ def run():
             credit = info.findChild(QLabel, 'supportCredit')
             author = info.findChild(QLabel, 'madeBy')
             assert credit is not None and author is not None
-            expected = ('Danke an TimBooH für die Unterstützung bei der Integration '
-                        'eigener Hintergrundbilder und der Grafikausgabe (OpenGL/CPU-Rendering).')
+            expected = ('Danke an TimBooH für die Unterstützung bei '
+                        'Hintergrundbildern und Grafikdarstellung.')
             assert credit.text() == expected, credit.text()
             assert credit.font().pixelSize() < author.font().pixelSize(), (
                 credit.font().pixelSize(), author.font().pixelSize())
