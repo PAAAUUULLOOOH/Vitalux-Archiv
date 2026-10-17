@@ -58,6 +58,31 @@ rm -f -- "$QT_CHECK"
 "$PY" -m vitalux >>"$LOG" 2>&1
 STATUS=$?
 if [ "$STATUS" -ne 0 ]; then
+  # ZIP installations keep precisely the last update's .backup. Restore this
+  # working version if the new program exits abnormally; never roll back for
+  # normal termination, terminal interruptions or session shutdown.
+  case "$STATUS" in
+    129|130|143) ;;
+    *)
+      if [ "${VITALUX_ROLLBACK_ACTIVE:-0}" != "1" ] && [ -f "$HERE/.backup/metadata.json" ] && [ -f "$HERE/.backup/vitalux/__main__.py" ]; then
+        printf '\n=== Vitalux: Absturz mit Status %s, vorherige ZIP-Version wird wiederhergestellt ===\n' "$STATUS" >> "$LOG"
+        if "$PY" -c '
+import os, shutil
+from vitalux import updater
+updater.restore_previous()
+shutil.rmtree(os.path.join(updater.app_root(), ".backup"))
+' >> "$LOG" 2>&1; then
+          echo 'Vitalux: vorherige Version wiederhergestellt; automatischer Neustart.' >> "$LOG"
+          if command -v notify-send >/dev/null 2>&1; then
+            notify-send 'Vitalux – Wiederherstellung' 'Die vorherige Version wurde nach einem Absturz automatisch wiederhergestellt.' >/dev/null 2>&1 || true
+          fi
+          export VITALUX_ROLLBACK_ACTIVE=1
+          exec bash "$HERE/run.sh" "$@"
+        fi
+        echo 'Vitalux: automatische Wiederherstellung fehlgeschlagen; Backup nicht gelöscht.' >> "$LOG"
+      fi
+      ;;
+  esac
   notify_error "Vitalux konnte nicht gestartet werden (Fehlercode $STATUS)."
   tail -n 30 "$LOG" >&2 || true
 fi
