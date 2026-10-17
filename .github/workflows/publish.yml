@@ -145,7 +145,15 @@ jobs:
             test -n "$WHEEL"
             python3 scripts/bundle-quick-runtime.py "$WHEEL" "$STAGED"
           fi
-          LD_LIBRARY_PATH="$LIB" "$PY" -c "from PySide6.QtQuickWidgets import QQuickWidget; from PySide6.QtQuick import QQuickImageProvider; print('Qt Quick bindings ready')"
+          echo "Qt Quick shared library dependencies:"
+          ldd "$STAGED/runtime/lib/python3.12/site-packages/PySide6/QtQuick.abi3.so" | grep -E 'not found|Qt6Quick|Qt6Qml|Qt6Network' || true
+          LD_LIBRARY_PATH="$LIB" "$PY" - <<'PY'
+          import importlib
+          for name in ('QtNetwork','QtQml','QtQuick','QtQuickWidgets'):
+              module = importlib.import_module('PySide6.' + name)
+              print('Imported PySide6.' + name, module.__file__)
+          PY
+          echo "Qt Quick bindings ready"
       - name: Changelog-Version prüfen und Release-Notizen erzeugen
         shell: bash
         run: |
