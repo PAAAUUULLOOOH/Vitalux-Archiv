@@ -138,7 +138,9 @@ Die Datei `Portable-pruefen.sh` im Paket kann bei Problemen mit der Laufzeitumge
 
 - Vitalux sucht **bei jedem Start** und anschließend ungefähr **alle sechs Stunden** nach neuen Versionen auf GitHub.
 - Ist ein Update verfügbar, **pulsiert der Updates-Reiter** links.
-- Im Reiter kannst du die neue Version prüfen und mit **„Jetzt aktualisieren“** selbst die Installation starten.
+- Im Reiter kannst du die neue Version und **ihre konkreten Änderungen vor der Installation** prüfen und mit **„Jetzt aktualisieren“** selbst die Installation starten.
+- Der **Changelog** bleibt nach dem Update im Updates-Reiter erhalten – einschließlich der auswählbaren Änderungen früherer installierter Versionen. Er funktioniert auch ohne Internetverbindung und steht zusätzlich als `CHANGELOG.md` im Paket.
+- Jede automatisch veröffentlichte neue Version muss einen Changelog-Eintrag besitzen; genau diese Änderungen erscheinen auch in den GitHub-Release-Notizen.
 - Downloads werden mit **SHA-256** überprüft. Für AppImage-Updates ist ein automatischer Neustart vorgesehen; die vorherige Datei wird als `.previous` aufbewahrt.
 
 **Updates werden nicht ohne deine Bestätigung installiert.** Der vollständige Ablauf einschließlich Neustart ist noch nicht auf jeder Distribution praktisch bestätigt; behalte bei Bedarf eine Kopie der bisherigen Version.
