@@ -11,7 +11,7 @@ STATE="${XDG_STATE_HOME:-$HOME/.local/state}/vitalux"
 mkdir -p -- "$STATE"
 LOG="$STATE/restart.log"
 # The running mount identifies the exact version that failed.
-VERSION="$(sed -n 's/^__version__ = "\\([^"]*\\)".*/\\1/p' "$BASE/vitalux/__init__.py" 2>/dev/null)"
+VERSION="$(sed -n 's/^__version__ = "\([^"]*\)".*/\1/p' "$BASE/vitalux/__init__.py" 2>/dev/null)"
 log_line() {
   printf '[%s] [Vitalux v%s] %s\n' "$(date -Is)" "${VERSION:-unknown}" "$*" >> "$LOG"
 }
