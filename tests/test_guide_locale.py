@@ -85,6 +85,13 @@ def check_gui():
     theme.set_accent("#52d3ff")
     app.setStyleSheet(theme.stylesheet())
 
+    print("CHECK GUI: creating InfoPage first", flush=True)
+    i18n.set_lang("de")
+    page = InfoPage({"name": "TestLinux"})
+    print("CHECK GUI: InfoPage created", flush=True)
+    assert page.guide_button.text() == "Anleitung öffnen"
+    page.close()
+
     for locale in ("de", "en"):
         print("CHECK GUI: locale", locale, flush=True)
         i18n.set_lang(locale)
@@ -115,6 +122,8 @@ def check_gui():
         guide.show_step(8)
         assert guide.next_btn.text() == tr("Fertig")
         guide.close()
+        guide.deleteLater()
+        app.processEvents()
 
     # Switching languages in the live Info page must update the guide button.
     print("CHECK GUI: before InfoPage", flush=True)
