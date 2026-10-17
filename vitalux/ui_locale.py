@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QLabel as _QLabel, QPushButton as _QPushButton,
     QListWidgetItem as _QListWidgetItem, QMessageBox as _QMessageBox,
     QFileDialog as _QFileDialog)
 from .i18n import tr
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtCore import Qt, QRectF, QSize
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 
 
@@ -125,6 +125,12 @@ class QComboBox(_QComboBox):
         view.viewport().setAutoFillBackground(True)
         self.setView(view)
         self.setMaxVisibleItems(10)
+
+    def sizeHint(self):
+        # Trim just a few pixels without forcing a width that would truncate
+        # longer localized dropdown values or user-named accent colors.
+        preferred = super().sizeHint()
+        return QSize(max(88, preferred.width() - 8), preferred.height())
 
     def showPopup(self):
         # The popup is a native Qt window; style its whole frame and viewport
