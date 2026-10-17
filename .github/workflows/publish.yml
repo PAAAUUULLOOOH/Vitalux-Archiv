@@ -117,7 +117,7 @@ jobs:
             VERSION="$(LD_LIBRARY_PATH="$LIB" "$PY" -c 'import PySide6; print(PySide6.__version__)')"
             mkdir -p build/addons
             python3 -m pip download --only-binary=:all: --no-deps \
-              "PySide6_Addons==${VERSION}" -d build/addons
+              "PySide6_Essentials==${VERSION}" -d build/addons
             WHEEL="$(find build/addons -maxdepth 1 -type f -name '*.whl' -print -quit)"
             test -n "$WHEEL"
             python3 scripts/bundle-opengl-runtime.py "$WHEEL" "$STAGED"
