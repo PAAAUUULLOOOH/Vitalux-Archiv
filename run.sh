@@ -83,7 +83,13 @@ shutil.rmtree(os.path.join(updater.app_root(), ".backup"))
       fi
       ;;
   esac
-  notify_error "Vitalux konnte nicht gestartet werden (Fehlercode $STATUS)."
+  if [ "${VITALUX_GUARDED:-0}" = "1" ]; then
+    # The external AppImage watchdog will restore the previous version.
+    # Do not block automatic recovery behind a modal error dialog.
+    echo "Vitalux: Fehlercode $STATUS – automatische Wiederherstellung läuft." >> "$LOG"
+  else
+    notify_error "Vitalux konnte nicht gestartet werden (Fehlercode $STATUS)."
+  fi
   tail -n 30 "$LOG" >&2 || true
 fi
 exit "$STATUS"
