@@ -315,6 +315,7 @@ class PreferencesPage(Page):
         self.render_combo = QComboBox()
         self.render_combo.addItem('CPU · Standard (stabil)', renderer.SOFTWARE)
         self.render_combo.addItem('OpenGL · GPU-Test (experimentell)', renderer.OPENGL)
+        self.render_combo.addItem('Qt Quick · GPU-Test (experimentell)', renderer.QTQUICK)
         selected_renderer = settings.get('render_backend', renderer.SOFTWARE)
         self.render_combo.setCurrentIndex(max(0, self.render_combo.findData(selected_renderer)))
         self.render_combo.currentIndexChanged.connect(self.change_renderer)
@@ -322,12 +323,12 @@ class PreferencesPage(Page):
         render_row.addStretch(1)
         render_card.body.addLayout(render_row)
         render_card.body.addWidget(label(
-            'OpenGL rendert den Hintergrund auf der GPU und setzt das Qt-Fenster per OpenGL zusammen. '
-            'Normale Bedienelemente und Diagramme verwenden weiterhin CPU-Rendering.',
+            'OpenGL nutzt die GPU für den Hintergrund. Qt Quick rendert den Hintergrund über einen echten GPU-Scene-Graph. '
+            'Diagramme und normale Qt-Bedienelemente bleiben vorerst CPU-gerendert.',
             'muted', wrap=True))
         render_card.body.addWidget(label(
-            'Zum Umschalten Vitalux neu starten. Bei Grafikfehlern CPU · Standard auswählen; '
-            'ein fehlgeschlagener OpenGL-Start wird automatisch zurückgesetzt.',
+            'Zum Wechseln Jetzt neu starten klicken. Bei Grafikfehlern CPU · Standard auswählen; '
+            'ein fehlgeschlagener GPU-Start wird automatisch zurückgesetzt.',
             'muted', wrap=True))
         self.render_status = label('', 'muted', wrap=True)
         render_card.body.addWidget(self.render_status)
@@ -423,6 +424,8 @@ class PreferencesPage(Page):
             status = tr('Rendering-Wechsel vorgemerkt – bitte Vitalux neu starten.')
         elif active == renderer.OPENGL:
             status = tr('Aktiv: OpenGL-GPU-Rendering (experimentell)')
+        elif active == renderer.QTQUICK:
+            status = tr('Aktiv: Qt Quick GPU-Scene-Graph (experimentell)')
         else:
             status = tr('Aktiv: CPU-Rendering (Standard)')
         self.render_status.setText(status)
@@ -430,11 +433,11 @@ class PreferencesPage(Page):
 
     def change_renderer(self, *_):
         selected = self.render_combo.currentData()
-        if selected not in (renderer.SOFTWARE, renderer.OPENGL):
+        if selected not in (renderer.SOFTWARE, renderer.OPENGL, renderer.QTQUICK):
             return
         settings.set('render_backend', selected)
-        # Qt changes the backing-store surface type when the first QOpenGLWidget
-        # is created. Hot-swapping a live window here would be unsafe.
+        # The QWidget/OpenGL/QtQuick scene graphics APIs cannot be hot-swapped
+        # safely while the app and background threads are active.
         self._refresh_renderer_status()
         self._refresh_restore_button()
 
