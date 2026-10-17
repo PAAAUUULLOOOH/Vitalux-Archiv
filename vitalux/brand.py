@@ -20,7 +20,7 @@ from PySide6.QtWidgets import QSizePolicy, QWidget
 _ASSETS = Path(__file__).resolve().parent.parent / "assets"
 
 
-@lru_cache(maxsize=4)
+@lru_cache(maxsize=48)
 def _renderer(filename):
     renderer = QSvgRenderer(str(_ASSETS / filename))
     if not renderer.isValid():
@@ -45,64 +45,41 @@ def icon_pixmap(size=96):
     return _pixmap("vitalux-pulse.svg", size, size)
 
 
-def _recolor_brand(pixmap, scheme, accent, *, wordmark=False):
-    """Retint original SVG pixels, preserving their contours and highlights.
+# Only predefined accent choices receive new, *separately authored SVG assets*.
+# 'Distribution' and arbitrary custom colors retain the original artwork.
+ACCENT_VARIANTS = {
+    "#4f8cff": "blue",
+    "#52d3ff": "cyan",
+    "#a78bfa": "violet",
+    "#73ba25": "green",
+    "#f59e0b": "orange",
+    "#f472b6": "pink",
+}
 
-    This applies only to the in-app identity, not the desktop icon. All themes
-    and user accents are handled without generating/replacing image assets.
-    """
+
+def _selected_variant():
+    from . import settings
+    chosen = settings.get("accent", "auto")
+    return ACCENT_VARIANTS.get(str(chosen).lower())
+
+
+def _brand_asset(icon):
     from . import theme
-    p = QPainter(pixmap)
-    p.setCompositionMode(QPainter.CompositionMode_SourceAtop)
-    if scheme == "minimal":
-        # One solid tone (no decorative glow) that still tracks the accent.
-        p.setCompositionMode(QPainter.CompositionMode_SourceIn)
-        p.fillRect(pixmap.rect(), QColor(theme.blend(accent, theme.TEXT, .28)))
-    else:
-        if scheme == "black_glass":
-            silver = QColor("#d5dde7")
-            silver.setAlpha(77 if wordmark else 42)
-            p.fillRect(pixmap.rect(), silver)
-        elif scheme == "light" and not wordmark:
-            frosted = QColor("#ebf4ff")
-            frosted.setAlpha(55)
-            p.fillRect(pixmap.rect(), frosted)
-        tint = QColor(accent)
-        tint.setAlpha({
-            "dark": 77, "light": 85, "glass": 104,
-            "black_glass": 78,
-        }.get(scheme, 76) if wordmark else {
-            "dark": 69, "light": 82, "glass": 103,
-            "black_glass": 73,
-        }.get(scheme, 70))
-        p.fillRect(pixmap.rect(), tint)
-    p.end()
-    return pixmap
-
-
-@lru_cache(maxsize=64)
-def _themed_icon(size, scheme, accent):
-    return _recolor_brand(
-        _pixmap("vitalux-pulse.svg", size, size, ratio=2.0),
-        scheme, accent)
+    variant = _selected_variant()
+    if icon:
+        return f"brand/vitalux-pulse-{variant}.svg" if variant else "vitalux-pulse.svg"
+    if variant:
+        suffix = "-light" if theme.mode() == "light" else ""
+        return f"brand/vitalux-wordmark-{variant}{suffix}.svg"
+    return "vitalux-wordmark-light.svg" if theme.mode() == "light" else "vitalux-wordmark.svg"
 
 
 def themed_icon_pixmap(size=152):
-    from . import theme
-    return _themed_icon(int(size), theme.mode(), theme.accent())
-
-
-@lru_cache(maxsize=64)
-def _themed_wordmark(width, height, scheme, accent):
-    filename = "vitalux-wordmark-light.svg" if scheme == "light" else "vitalux-wordmark.svg"
-    return _recolor_brand(
-        _pixmap(filename, width, height, ratio=2.0),
-        scheme, accent, wordmark=True)
+    return _pixmap(_brand_asset(icon=True), size, size)
 
 
 def wordmark_pixmap(width=205, height=44):
-    from . import theme
-    return _themed_wordmark(int(width), int(height), theme.mode(), theme.accent())
+    return _pixmap(_brand_asset(icon=False), width, height, ratio=2.0)
 
 
 def app_icon():
@@ -173,8 +150,7 @@ class PulseCore(QWidget):
         if self._low_power():
             # Retain the recognizable logo; skip the moving halo and orbit.
             size = min(self.width(), self.height())
-            themed = themed_icon_pixmap(size)
-            painter.drawPixmap(QRectF(self.rect()), themed, QRectF(themed.rect()))
+            _renderer(_brand_asset(icon=True)).render(painter, QRectF(self.rect()))
             painter.end()
             return
         painter.setRenderHint(QPainter.Antialiasing)
@@ -200,8 +176,7 @@ class PulseCore(QWidget):
         painter.setPen(Qt.NoPen)
         painter.setBrush(QBrush(aura))
         painter.drawEllipse(rect)
-        themed = themed_icon_pixmap(size)
-        painter.drawPixmap(rect, themed, QRectF(themed.rect()))
+        _renderer(_brand_asset(icon=True)).render(painter, rect)
 
         # A single slowly travelling highlight on the outer broken circuit.
         painter.save()
