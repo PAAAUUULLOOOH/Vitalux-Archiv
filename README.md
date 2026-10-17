@@ -85,7 +85,7 @@ Die Testparameter sind an etablierte `fio`-basierte Benchmarks angelehnt. **Iden
 | --- | --- |
 | **`Vitalux-vX.Y.Z-x86_64.AppImage`** | **Empfohlen:** Anwendung direkt starten oder ins Anwendungsmenü integrieren |
 | `Vitalux-vX.Y.Z-x86_64.AppImage.sha256` | SHA-256-Prüfsumme des AppImages |
-| `Vitalux-vX.Y.Z-linux-x86_64-Portabel.zip` | Portable Entwicklungs-/Testversion zum Entpacken |
+| `Vitalux-vX.Y.Z-linux-x86_64.zip` | Portable Entwicklungs-/Testversion zum Entpacken |
 
 Für die normale Nutzung empfehlen wir das **AppImage**. Python, Qt und die Benchmark-Engine werden in der bereitgestellten Anwendung gebündelt; eine gesonderte Installation dieser Komponenten ist normalerweise nicht notwendig.
 
@@ -132,7 +132,7 @@ Anschließend kannst du Vitalux aus dem Anwendungsmenü oder über den Befehl `~
 > [!TIP]
 > Das AppImage ist bereits eine ausführbare Anwendung. Die optionale „Installation“ kopiert es an einen festen Ort und legt einen Menüeintrag an. Sie ist nicht zwingend erforderlich, um Vitalux zu benutzen.
 
-### Portable ZIP (Entwicklungs- und Testversion)
+### Vollständiges ZIP-Paket (Entwicklungs- und Testversion)
 
 ZIP entpacken und im extrahierten Vitalux-Ordner `run.sh` ausführen. Die Datei `Portable-pruefen.sh` unterstützt bei der Überprüfung der Laufzeitumgebung. Für die alltägliche Verwendung und Menüintegration ist das AppImage vorgesehen.
 
@@ -226,7 +226,7 @@ Bei einer erfolgreichen Prüfung wird `OK` angezeigt. Passe den Dateinamen an di
 
 GitHub Actions übernimmt die Erstellung des AppImages:
 
-1. Eine neue **portable Vollversion** wird mit einem passenden Versions-Tag als GitHub-Release-Asset bereitgestellt.
+1. Eine neue **ZIP-Vollversion** wird mit einem passenden Versions-Tag als GitHub-Release-Asset bereitgestellt.
 2. Der Workflow [Vitalux AppImage Release](https://github.com/PAAAUUULLOOOH/Vitalux/actions/workflows/release.yml) erstellt daraus das AppImage.
 3. Das AppImage und die passende SHA-256-Datei werden unter **Assets** desselben Releases veröffentlicht.
 
