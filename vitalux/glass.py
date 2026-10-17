@@ -44,6 +44,9 @@ class AmbientScene(QWidget):
     def set_low_power(self, enabled):
         """Free the atmospheric pixmaps in Minimalistisch; reload only if needed."""
         if enabled:
+            # Minimal releases the pixmaps. Reset the asset key as well; otherwise
+            # returning to the same Glass theme skips reloading the cleared images.
+            self._asset_mode = None
             self._wallpaper = QPixmap()
             self._soft_wallpaper = QPixmap()
             self._sharp_cache = QPixmap()
