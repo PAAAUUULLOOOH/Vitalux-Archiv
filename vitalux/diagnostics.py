@@ -28,6 +28,14 @@ def enable_native_crash_trace():
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         _fatal_log = LOG_PATH.open('a', encoding='utf-8')
+        _fatal_log.write(
+            f'\n=== Vitalux {__version__} started '
+            f'{datetime.now().astimezone().isoformat()} '
+            f'(PID {os.getpid()}) ===\n'
+        )
+        # Flush before handing the descriptor to the native crash handler:
+        # a SIGABRT may never return to Python to flush buffered text.
+        _fatal_log.flush()
         faulthandler.enable(file=_fatal_log, all_threads=True)
     except (OSError, RuntimeError, ValueError):
         _fatal_log = None

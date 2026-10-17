@@ -131,7 +131,7 @@ Prüfe die Ausführungsberechtigung in Dolphin. Zum Testen kannst du `./Vitalux-
 <details>
 <summary><strong>Installation oder Update schlägt fehl</strong></summary>
 
-Installationsprotokoll: `~/.local/state/vitalux/installation.log`. Bei GitHub-Fehlern Internetverbindung, DNS, Systemzeit und CA-Zertifikate prüfen; die Updateprüfung im Reiter **Updates** wiederholen.
+Installationsprotokoll: `~/.local/state/vitalux/installation.log`. **Absturzdiagnose:** `~/.local/state/vitalux/vitalux.log` enthält ab v0.9.3.69 lokale Zeitstempel (einschließlich Zeitzone) vor allen Konsolen-/Qt-Meldungen sowie beim Start und Exit; `errors.log` nennt bei jedem Programmstart ebenfalls Version und Zeitpunkt, um spätere native Crash-Traces zuzuordnen. Für den AppImage-Rollback ist `restart.log` zuständig. Diese Dateien bleiben lokal und werden nicht automatisch hochgeladen. Bei GitHub-Fehlern Internetverbindung, DNS, Systemzeit und CA-Zertifikate prüfen.
 </details>
 
 <details>

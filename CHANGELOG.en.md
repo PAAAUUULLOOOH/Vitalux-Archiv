@@ -4,6 +4,12 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.69] - 2026-10-17
+- Improved crash diagnostics: each application, Python and Qt console line in `vitalux.log` now carries local ISO-8601 time and timezone. Startup includes the version and launch process ID; exit includes the actual process status, preserved across the logging pipe.
+- `errors.log` writes a timestamped version and start marker before enabling native fatal stack traces, making it easier to distinguish historical errors from new crashes.
+- Added crash logger regressions covering simulated native malloc errors, exit status 134, recovery notifications and startup markers.
+- The user's historical `json` NameError came from Vitalux 0.9.3.23; current sources already include that import. The separate native heap corruption still requires contemporary crash evidence for root-cause identification.
+
 ## [v0.9.3.68] - 2026-10-17
 - Removed Rainbow Pastel and the animated Rainbow, Color Fade and Light backgrounds, along with their obsolete palettes and render effects.
 - Preserved the existing animated Sparkle design.

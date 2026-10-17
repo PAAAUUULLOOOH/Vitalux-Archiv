@@ -171,6 +171,7 @@ jobs:
           python3 tests/test_update_rollback.py
           python3 tests/test_zip_rollback.py
           python3 tests/test_core_behaviors.py
+          python3 tests/test_log_timestamps.py
       - name: AppImage-Werkzeug bereitstellen
         if: env.RELEASE_EXISTS == 'false'
         shell: bash

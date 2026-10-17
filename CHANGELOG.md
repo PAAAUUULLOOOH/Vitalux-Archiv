@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.69] - 2026-10-17
+- Absturzdiagnose verbessert: `vitalux.log` versieht ab jetzt jede Programm-, Python- und Qt-Konsolenmeldung mit lokalem ISO-8601-Zeitstempel samt Zeitzone. Auch Programmstart (einschließlich Version) und Exit-Code werden protokolliert; der wirkliche Prozess-Exit-Code bleibt trotz Log-Pipeline erhalten.
+- `errors.log` markiert jeden Programmstart vor Aktivierung des nativen Python-Absturzhandlers mit Zeitstempel und Vitalux-Version. So lassen sich ältere Fehler klar von neuen Abstürzen unterscheiden.
+- Automatische Regressionstests für zeitgestempelte `malloc()`-Fehlermeldungen, Fehlercode 134, Wiederherstellungsstatus und `errors.log` ergänzt.
+- Der vom Nutzer hochgeladene `NameError: json is not defined` stammt aus der alten Version 0.9.3.23. Die aktuelle Version enthält den erforderlichen Import bereits; für den nativen Speicherabsturz liegt weiterhin keine eindeutige Ursache vor.
+
 ## [v0.9.3.68] - 2026-10-17
 - Hintergrund „Regenbogen Pastell“ sowie die animierten Hintergründe „Regenbogen“, „Fade Bunt“ und „Hell“ inklusive nicht mehr verwendeter Farbpaletten und Animationseffekte aus dem Programm entfernt.
 - Der animierte Hintergrund „Funkeln“ bleibt unverändert erhalten.
