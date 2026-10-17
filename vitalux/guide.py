@@ -6,7 +6,7 @@ import math
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import (
-    QDialog, QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+    QDialog, QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget, QMessageBox, QSizePolicy
 )
 
 from . import theme
@@ -104,7 +104,7 @@ class GuideIllustration(QWidget):
         super().__init__(parent)
         self.step = 0
         self.setMinimumHeight(270)
-        self.setSizePolicy(self.sizePolicy().horizontalPolicy(), self.sizePolicy().Expanding)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def sizeHint(self):
         return QSize(900, 390)
@@ -363,3 +363,28 @@ class GuideDialog(QDialog):
             self.show_step(self._step-1)
             return
         super().keyPressEvent(event)
+
+
+def offer_first_start_guide(parent):
+    """Ask once (or again when postponed), never force the tutorial on users."""
+    from . import settings
+    if settings.get("guide_intro_choice") in ("completed", "never"):
+        return
+    question = QMessageBox(parent)
+    question.setWindowTitle(tr("Vitalux kennenlernen"))
+    question.setIcon(QMessageBox.Information)
+    question.setText(tr("Möchtest du eine kurze Einführung in Vitalux sehen?"))
+    question.setInformativeText(tr(
+        "Die Anleitung erklärt die Oberfläche mit Pfeilen und Beispielen. "
+        "Du kannst sie später jederzeit unter Info öffnen."))
+    launch = question.addButton(tr("Anleitung öffnen"), QMessageBox.AcceptRole)
+    question.addButton(tr("Später"), QMessageBox.RejectRole)
+    never = question.addButton(tr("Nicht mehr anzeigen"), QMessageBox.DestructiveRole)
+    question.exec()
+    clicked = question.clickedButton()
+    if clicked is launch:
+        settings.set("guide_intro_choice", "completed")
+        GuideDialog(parent).exec()
+    elif clicked is never:
+        settings.set("guide_intro_choice", "never")
+    # 'Later' leaves the preference unset, allowing the question next launch.
