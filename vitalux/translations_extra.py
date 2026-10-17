@@ -1,5 +1,15 @@
 """Extra English translations for dashboard, settings, sensors and disk tests."""
 EN_MORE = {
+    'Grafik-Rendering': 'Graphics rendering',
+    'Render-Methode': 'Rendering method',
+    'CPU · Standard (stabil)': 'CPU · Standard (stable)',
+    'OpenGL · GPU-Test (experimentell)': 'OpenGL · GPU test (experimental)',
+    'OpenGL rendert den Hintergrund auf der GPU und setzt das Qt-Fenster per OpenGL zusammen. Normale Bedienelemente und Diagramme verwenden weiterhin CPU-Rendering.': 'OpenGL renders the background on the GPU and composites the Qt window using OpenGL. Standard controls and charts continue using CPU rendering.',
+    'Zum Umschalten Vitalux neu starten. Bei Grafikfehlern CPU · Standard auswählen; ein fehlgeschlagener OpenGL-Start wird automatisch zurückgesetzt.': 'Restart Vitalux to switch modes. For graphics problems select CPU · Standard; an unsuccessful OpenGL startup is automatically rolled back.',
+    'Rendering-Wechsel vorgemerkt – bitte Vitalux neu starten.': 'Rendering switch queued – please restart Vitalux.',
+    'Aktiv: OpenGL-GPU-Rendering (experimentell)': 'Active: OpenGL GPU rendering (experimental)',
+    'Aktiv: CPU-Rendering (Standard)': 'Active: CPU rendering (standard)',
+    'In den Einstellungen unter Grafik-Rendering kannst du zwischen CPU und einem experimentellen OpenGL-Modus wechseln. Starte Vitalux anschließend neu; die übrigen Widgets bleiben CPU-gerendert.': 'You can choose CPU or an experimental OpenGL mode in Settings under Graphics rendering. Restart Vitalux after switching; other widgets remain CPU-rendered.',
     'Manuelle Farbakzente': 'Manual accent colors',
     'Passend zum Hintergrund': 'Match background',
     'Vitalux erkennt passende Farbtöne aus deinem gewählten Hintergrund. Die Akzentfarbe passt sich beim Hintergrundwechsel automatisch an.': 'Vitalux finds matching colors in the selected background. The accent color adjusts automatically when you change wallpapers.',
