@@ -7,7 +7,7 @@ from PySide6.QtGui import QColor, QIntValidator
 from PySide6.QtWidgets import (QColorDialog, QFrame, QGridLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QSizePolicy, QVBoxLayout, QWidget, QTabWidget)
 from .ui_locale import QCheckBox, QComboBox, QDialog, QFileDialog, QListWidgetItem, QMessageBox, QPushButton
 
-from . import __version__, settings, theme, motion, backdrops, user_background, wallpaper_accents
+from . import __version__, settings, theme, motion, backdrops, user_background, wallpaper_accents, renderer
 from .pages import Page
 from .sensors import fmt_bytes, fmt_rate, system_static
 from .widgets import Card, KeyValue, Meter, label
@@ -148,6 +148,7 @@ class PreferencesPage(Page):
     DEFAULTS = {
         'theme': 'glass', 'accent': '#4f8cff', 'motion': 'smooth',
         'background_style': 'theme_default', 'custom_background_fit': 'cover',
+        'render_backend': renderer.SOFTWARE,
         'interval': 1, 'close_to_tray': True, 'alerts_enabled': False,
         'cpu_temp': 90, 'gpu_temp': 90, 'ram_usage': 90, 'disk_usage': 95,
     }
@@ -339,6 +340,31 @@ class PreferencesPage(Page):
         look.body.addWidget(label('Übergänge anpassen: weich, verkürzt oder ohne Animation.', 'muted', wrap=True))
         self.content.addWidget(look)
 
+        render_card = Card('Grafik-Rendering')
+        render_row = QHBoxLayout()
+        render_row.addWidget(label('Render-Methode', 'strong'))
+        self.render_combo = QComboBox()
+        self.render_combo.addItem('CPU · Standard (stabil)', renderer.SOFTWARE)
+        self.render_combo.addItem('OpenGL · GPU-Test (experimentell)', renderer.OPENGL)
+        selected_renderer = settings.get('render_backend', renderer.SOFTWARE)
+        self.render_combo.setCurrentIndex(max(0, self.render_combo.findData(selected_renderer)))
+        self.render_combo.currentIndexChanged.connect(self.change_renderer)
+        render_row.addWidget(self.render_combo)
+        render_row.addStretch(1)
+        render_card.body.addLayout(render_row)
+        render_card.body.addWidget(label(
+            'OpenGL rendert den Hintergrund auf der GPU und setzt das Qt-Fenster per OpenGL zusammen. '
+            'Normale Bedienelemente und Diagramme verwenden weiterhin CPU-Rendering.',
+            'muted', wrap=True))
+        render_card.body.addWidget(label(
+            'Zum Umschalten Vitalux neu starten. Bei Grafikfehlern CPU · Standard auswählen; '
+            'ein fehlgeschlagener OpenGL-Start wird automatisch zurückgesetzt.',
+            'muted', wrap=True))
+        self.render_status = label('', 'muted', wrap=True)
+        render_card.body.addWidget(self.render_status)
+        self._refresh_renderer_status()
+        self.content.addWidget(render_card)
+
         monitor = Card('Live-Monitoring')
         row = QHBoxLayout()
         row.addWidget(label('Aktualisierungsintervall', 'strong'))
@@ -417,6 +443,27 @@ class PreferencesPage(Page):
         self.content.addLayout(restore_row)
         self._refresh_restore_button()
 
+    def _refresh_renderer_status(self):
+        active = getattr(self.window, 'render_backend_active', renderer.SOFTWARE)
+        selected = self.render_combo.currentData()
+        if selected != active:
+            status = tr('Rendering-Wechsel vorgemerkt – bitte Vitalux neu starten.')
+        elif active == renderer.OPENGL:
+            status = tr('Aktiv: OpenGL-GPU-Rendering (experimentell)')
+        else:
+            status = tr('Aktiv: CPU-Rendering (Standard)')
+        self.render_status.setText(status)
+
+    def change_renderer(self, *_):
+        selected = self.render_combo.currentData()
+        if selected not in (renderer.SOFTWARE, renderer.OPENGL):
+            return
+        settings.set('render_backend', selected)
+        # Qt changes the backing-store surface type when the first QOpenGLWidget
+        # is created. Hot-swapping a live window here would be unsafe.
+        self._refresh_renderer_status()
+        self._refresh_restore_button()
+
     def _set_preference(self, key, value):
         settings.set(key, value)
         self._refresh_restore_button()
@@ -445,6 +492,10 @@ class PreferencesPage(Page):
         self.accent_combo.setCurrentIndex(self.accent_combo.findData('#4f8cff'))
         self.accent_combo.blockSignals(False)
         self.accent_tabs.setCurrentIndex(0)
+        self.render_combo.blockSignals(True)
+        self.render_combo.setCurrentIndex(self.render_combo.findData(renderer.SOFTWARE))
+        self.render_combo.blockSignals(False)
+        self._refresh_renderer_status()
         self.motion_combo.blockSignals(True)
         self.motion_combo.setCurrentIndex(self.motion_combo.findData('smooth'))
         self.motion_combo.blockSignals(False)
@@ -478,6 +529,7 @@ class PreferencesPage(Page):
         self.accent_preview.setStyleSheet(f'background: {theme.accent()}; border-radius: 7px;')
         self.sync_background_controls()
         self.refresh_wallpaper_palette()
+        self._refresh_renderer_status()
         self.accent_tabs.setTabText(0, tr('Manuelle Farbakzente'))
         self.accent_tabs.setTabText(1, tr('Passend zum Hintergrund'))
 
