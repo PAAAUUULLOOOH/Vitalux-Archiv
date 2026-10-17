@@ -42,8 +42,15 @@ class MainWindow(QMainWindow):
         self.setAutoFillBackground(True)
         self.distro, self.logo, self.manager = distro, logo, manager
         self.setWindowTitle(APP_NAME)
-        self.setMinimumSize(1100, 760)
-        self.resize(1380, 900)
+        # Accommodate KDE fractional scaling and smaller logical desktops.
+        self.setMinimumSize(800, 560)
+        screen = QApplication.primaryScreen()
+        if screen is not None:
+            available = screen.availableGeometry().size()
+            self.resize(max(800, min(1380, available.width() - 32)),
+                        max(560, min(900, available.height() - 32)))
+        else:
+            self.resize(1380, 900)
         self.hist = {k: deque(maxlen=900) for k in (
             "cpu", "ram", "gpu", "vram", "net_down", "net_up", "io_read", "io_write")}
         self.last_sample = None
@@ -238,10 +245,9 @@ class MainWindow(QMainWindow):
         if index != 0 and hasattr(overview, 'board') and overview.board.editing:
             overview.save_editor()
         self.stack.setCurrentIndex(index)
-        if self.pages[index][0] == 'Laufwerke':
-            disk = self.pages[index][1]
-            if hasattr(disk, 'request_smart') and not getattr(disk, '_smart_loaded', False):
-                QTimer.singleShot(0, disk.request_smart)
+        # Keep sampling while refreshing only the visible page.
+        # SMART queries remain strictly opt-in via their button.
+        self._refresh_visible_page()
 
     def set_language(self, code):
         """Translate widgets in place; never rebuild a running benchmark/page."""
@@ -608,15 +614,10 @@ class MainWindow(QMainWindow):
         h['io_read'].append(d['io']['read'])
         h['io_write'].append(d['io']['write'])
         interval = int(settings.get('interval', 1) or 1)
-        for _, page in self.pages:
-            for attr in ('graph', 'graph_load', 'graph_net', 'io_graph'):
-                graph = getattr(page, attr, None)
-                if hasattr(graph, 'set_interval'):
-                    graph.set_interval(interval)
-            # Do not repaint expensive live cards underneath the fully opaque
-            # transition surface. History and alerts above still update.
-            if self._sidebar_motion is None:
-                page.refresh(d, h)
+        # History is populated above; repaint only the selected page.
+        # Switching pages immediately uses the latest sample and all history.
+        if self._sidebar_motion is None:
+            self._refresh_visible_page()
         self.last_render_ms = (time.perf_counter() - started) * 1000
 
     def _on_tray_activated(self, reason):

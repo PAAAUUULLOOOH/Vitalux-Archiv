@@ -67,11 +67,11 @@ class _ThresholdNumberEdit(QLineEdit):
 
     def wheelEvent(self, event):
         steps = int(event.angleDelta().y() / 120)
-        if steps:
+        if steps and self.hasFocus():
             self.parentWidget().stepBy(steps)
             event.accept()
         else:
-            super().wheelEvent(event)
+            event.ignore()
 
     def focusOutEvent(self, event):
         self.parentWidget().commit()
@@ -98,7 +98,7 @@ class AlertThresholdField(QFrame):
         self.number.setObjectName("alertThresholdNumber")
         self.number.setValidator(QIntValidator(self._minimum, self._maximum, self.number))
         self.number.setMaxLength(3)
-        self.number.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.number.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.number.setMinimumWidth(26)
         self.number.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 

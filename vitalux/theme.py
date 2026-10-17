@@ -149,6 +149,7 @@ QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top righ
     border-top-right-radius: 8px; border-bottom-right-radius: 8px;
     background: $BUTTON_BG; }
 QComboBox::drop-down:hover { background: $ACTIVE_BG; }
+QComboBox::down-arrow { image: none; width: 0px; height: 0px; }
 QComboBox QAbstractItemView { background: $INPUT_BG; color: $TEXT;
     border: 1px solid $BORDER; outline: none; padding: 0px;
     selection-background-color: $ACTIVE_BG; selection-color: $TEXT; }

@@ -132,6 +132,8 @@ class QComboBox(_QComboBox):
         view.viewport().setAutoFillBackground(True)
         self.setView(view)
         self.setMaxVisibleItems(10)
+        self.setSizeAdjustPolicy(_QComboBox.AdjustToContents)
+        self.currentIndexChanged.connect(self._update_selection_tooltip)
 
     def sizeHint(self):
         # Trim just a few pixels without forcing a width that would truncate
@@ -139,7 +141,19 @@ class QComboBox(_QComboBox):
         preferred = super().sizeHint()
         return QSize(max(88, preferred.width()), preferred.height())
 
+    def _update_selection_tooltip(self, *_):
+        self.setToolTip(self.currentText())
+
     def showPopup(self):
+        # The popup list should fit full translated labels, not just the
+        # width of the closed selector. Narrow displays get item tooltips.
+        from PySide6.QtWidgets import QApplication
+        if self.count():
+            widest = max(self.fontMetrics().horizontalAdvance(self.itemText(i))
+                         for i in range(self.count()))
+            screen = self.screen() or QApplication.primaryScreen()
+            limit = max(self.width(), screen.availableGeometry().width() - 60) if screen else 1024
+            self.view().setMinimumWidth(min(max(self.width(), widest + 52), limit))
         # The popup is a native Qt window; style its whole frame and viewport
         # to avoid unthemed black strips above/below the option rows.
         from . import theme
@@ -180,12 +194,12 @@ class QComboBox(_QComboBox):
             args = (localized(source), *args[1:])
         result = super().addItem(*args, **kwargs)
         self._source_items.append(source)
+        if source is not None:
+            self.setItemData(self.count()-1, localized(source), Qt.ToolTipRole)
+        self._update_selection_tooltip()
         return result
     def addItems(self, items):
         for item in items:self.addItem(item)
-    def clear(self):
-        self._source_items.clear()
-        return super().clear()
     def clear(self):
         self._source_items.clear()
         return super().clear()
@@ -196,13 +210,18 @@ class QComboBox(_QComboBox):
     def setItemText(self, index, text):
         source = original_text(text)
         if index < len(self._source_items):self._source_items[index] = source
-        return super().setItemText(index, localized(source))
+        value = localized(source)
+        self.setItemData(index, value, Qt.ToolTipRole)
+        return super().setItemText(index, value)
     def setPlaceholderText(self, text):
         return super().setPlaceholderText(localized(text))
     def retranslate(self):
         for i,source in enumerate(self._source_items):
             if i < self.count() and source is not None:
-                _QComboBox.setItemText(self,i,localized(source))
+                value = localized(source)
+                _QComboBox.setItemText(self,i,value)
+                self.setItemData(i, value, Qt.ToolTipRole)
+        self._update_selection_tooltip()
 
 class QDialog(_QDialog):
     def setWindowTitle(self, text):

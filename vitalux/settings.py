@@ -1,31 +1,82 @@
+"""Atomic, cached per-user preferences. Reads follow external file changes."""
+import copy
 import json
 import os
+import tempfile
+import warnings
 
 from . import APP_ID
 
 PATH = os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"),
                     APP_ID, "settings.json")
+_cache_identity = None
+_cache_value = None
+
+
+def _identity():
+    try:
+        info = os.stat(PATH)
+        return (PATH, info.st_mtime_ns, info.st_size, info.st_ino)
+    except OSError:
+        return (PATH, None, None, None)
 
 
 def _load():
+    global _cache_identity, _cache_value
+    identity = _identity()
+    if identity == _cache_identity and _cache_value is not None:
+        return copy.deepcopy(_cache_value)
     try:
         with open(PATH, encoding="utf-8") as f:
             data = json.load(f)
-            return data if isinstance(data, dict) else {}
+            data = data if isinstance(data, dict) else {}
     except (OSError, ValueError):
-        return {}
+        data = {}
+    _cache_identity, _cache_value = identity, data
+    return copy.deepcopy(data)
 
 
 def get(key, default=None):
     return _load().get(key, default)
 
 
+def _report_write_error(exc):
+    message = f"Vitalux konnte die Einstellungen nicht speichern: {exc}"
+    warnings.warn(message, RuntimeWarning, stacklevel=2)
+    try:
+        # Error dialogs are allowed on the Qt GUI thread only.
+        from PySide6.QtWidgets import QApplication, QMessageBox
+        from PySide6.QtCore import QThread
+        app = QApplication.instance()
+        if app is not None and QThread.currentThread() == app.thread():
+            QMessageBox.warning(app.activeWindow(), "Vitalux – Einstellungen", message)
+    except (ImportError, RuntimeError):
+        pass
+
+
 def set(key, value):
+    global _cache_identity, _cache_value
     data = _load()
     data[key] = value
+    temporary = None
     try:
-        os.makedirs(os.path.dirname(PATH), exist_ok=True)
-        with open(PATH, "w", encoding="utf-8") as f:
+        parent = os.path.dirname(PATH)
+        os.makedirs(parent, exist_ok=True)
+        fd, temporary = tempfile.mkstemp(prefix=".settings-", suffix=".tmp", dir=parent)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-    except OSError:
-        pass
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temporary, PATH)
+        temporary = None
+        _cache_identity, _cache_value = _identity(), copy.deepcopy(data)
+        return True
+    except OSError as exc:
+        _report_write_error(exc)
+        return False
+    finally:
+        if temporary is not None:
+            try:
+                os.unlink(temporary)
+            except OSError:
+                pass
