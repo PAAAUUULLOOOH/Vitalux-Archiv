@@ -4,6 +4,13 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.71] - 2026-10-17
+- Restored KDE tray hover CPU, GPU, RAM and available temperature metrics using real live readings.
+- Added an optional compact live popup through the tray context menu; the native KDE tooltip serves the Wayland hover.
+- Added import, selection, and removal of PNG/JPEG/WebP/BMP pictures without deleting the originals.
+- Added fill, fit, stretch, center and tile placement with preview.
+- Updated translations and help while preserving 630 built-in combinations.
+
 ## [v0.9.3.70] - 2026-10-17
 - Unified four log files: `vitalux.log`, `errors.log`, `installation.log` and `restart.log` now include local ISO timestamps with timezone and the relevant Vitalux version. Native crash frames have timestamped start and crash-end markers.
 - Removed the Northern Lights, Night Waves and Violet Mist animations, palettes and rendering branches. Sparkle is the only remaining animated wallpaper.
