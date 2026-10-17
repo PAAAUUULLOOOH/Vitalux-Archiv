@@ -137,10 +137,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-util1
+          echo "XCB platform plugin dependency check:"
+          find "build/staged/Vitalux-${TAG}" -type f -name 'libqxcb.so' -exec sh -c 'echo "Plugin: $1"; ldd "$1" | grep -E "not found|xcb|xkb" || true' -- {} \;
           STAGED="$PWD/build/staged/Vitalux-${TAG}"
           cd "$STAGED"
-          QT_QPA_PLATFORM=xcb VITALUX_GL_SMOKE=1 LIBGL_ALWAYS_SOFTWARE=1 \
+          QT_DEBUG_PLUGINS=1 QT_QPA_PLATFORM=xcb VITALUX_GL_SMOKE=1 LIBGL_ALWAYS_SOFTWARE=1 \
             LD_LIBRARY_PATH="$PWD/lib" \
             xvfb-run -a "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_renderer_backends.py"
       - name: Native Anleitung und Übersetzungen testen
