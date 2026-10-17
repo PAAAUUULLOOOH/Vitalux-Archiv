@@ -65,6 +65,18 @@ if ! "$PY" -c 'import PySide6.QtWidgets; import PySide6.QtSvg; import psutil' 2>
   exit 1
 fi
 rm -f -- "$QT_CHECK"
+# GPU-native Qt Quick prototype is an explicit opt-in. It never activates
+# the stable app's automatic rollback or replaces the default startup.
+if [[ "${1:-}" == "--gpu-preview" ]]; then
+  shift
+  log_line "=== Experimental native Qt Quick UI started ==="
+  "$PY" -m vitalux.gpu_ui "$@" 2>&1 | while IFS= read -r line || [[ -n "$line" ]]; do
+    log_line "$line"
+  done
+  STATUS=${PIPESTATUS[0]}
+  log_line "=== Experimental Qt Quick UI ended (exit code $STATUS) ==="
+  exit "$STATUS"
+fi
 # Capture stdout and stderr together to retain the original event ordering.
 # PIPESTATUS[0] is the *app's* exit code, not that of the log writer.
 "$PY" -m vitalux 2>&1 | while IFS= read -r line || [[ -n "$line" ]]; do
