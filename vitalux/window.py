@@ -64,6 +64,7 @@ class MainWindow(QMainWindow):
         self._sidebar_overlay = None
         self._alerts = AlertMonitor()
         self._force_quit = False
+        self.restart_requested = False
         self._tray_announce = False
         self._update_notice_queued = False
         self._notified_update_version = str(settings.get('last_notified_update_version', ''))
@@ -244,6 +245,7 @@ class MainWindow(QMainWindow):
         outer.addWidget(side)
         outer.addWidget(self.stack, 1)
         self.setCentralWidget(root)
+        self._optimize_scroll_surfaces()
         self._apply_sidebar_state()
         self._setup_sidebar_motion()
         self._sync_glow()
@@ -588,6 +590,24 @@ class MainWindow(QMainWindow):
         self.collapse_button.set_collapsed(compact)
         self.sidebar._position_toggle()
 
+    @staticmethod
+    def _is_scrolling_card(widget):
+        """Qt drop shadows require expensive offscreen redraws on each scroll."""
+        parent = widget.parentWidget()
+        while parent is not None:
+            if isinstance(parent, QScrollArea):
+                return True
+            parent = parent.parentWidget()
+        return False
+
+    def _optimize_scroll_surfaces(self):
+        """Keep frosted cards but avoid offscreen effects within scrolling pages."""
+        for card in self.findChildren(GlassSurface):
+            fx = card.graphicsEffect()
+            if isinstance(fx, QGraphicsDropShadowEffect):
+                fx.setEnabled(not self._is_scrolling_card(card)
+                              and theme.mode() != 'minimal')
+
     def _refresh_visible_page(self):
         if self.last_sample is None or not self.pages:
             return
@@ -620,7 +640,7 @@ class MainWindow(QMainWindow):
         for card in self.findChildren(GlassSurface):
             fx = card.graphicsEffect()
             if isinstance(fx, QGraphicsDropShadowEffect):
-                fx.setEnabled(not minimal)
+                fx.setEnabled(not minimal and not self._is_scrolling_card(card))
         for gauge in self.findChildren(Gauge):
             if minimal:
                 gauge._animate.stop()
@@ -741,6 +761,19 @@ class MainWindow(QMainWindow):
             self.showNormal()
         self.raise_()
         self.activateWindow()
+
+    def restart_for_renderer(self):
+        """Close gracefully; the portable launcher restarts after exit status 42."""
+        if self.restart_requested:
+            return True
+        self._tray_click_timer.stop()
+        self._force_quit = True
+        if self.close():
+            self.restart_requested = True
+            return True
+        # An active benchmark may refuse shutdown.
+        self._force_quit = False
+        return False
 
     def quit_from_tray(self):
         self._tray_click_timer.stop()
