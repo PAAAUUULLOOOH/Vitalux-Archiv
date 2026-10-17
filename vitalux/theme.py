@@ -174,6 +174,13 @@ QToolButton#customAccentRemove:hover { color: $ACCENT; border-color: $ACCENT; ba
 QCheckBox { spacing: 8px; }
 QCheckBox::indicator { width: 16px; height: 16px; }
 QCheckBox::indicator:checked { background: $ACCENT; border: 1px solid $ACCENT; border-radius: 4px; }
+QSlider::groove:horizontal { height: 6px; border-radius: 3px; background: $TRACK; }
+QSlider::sub-page:horizontal { background: $ACCENT; border-radius: 3px; }
+QSlider::handle:horizontal { background: $ACCENT; border: 2px solid $CARD;
+    width: 15px; height: 15px; margin: -6px 0; border-radius: 8px; }
+QSlider::handle:horizontal:hover { background: $ACCENT_HOVER; }
+QSlider:disabled::groove:horizontal { background: $TRACK; }
+QSlider:disabled::handle:horizontal { background: $MUTED; }
 QToolTip { background: $CARD; border: 1px solid $BORDER; color: $TEXT; }
 QToolButton#tileMoveHint, QToolButton#tileRemoveHint {
     background: transparent; border: none; border-radius: 0px;

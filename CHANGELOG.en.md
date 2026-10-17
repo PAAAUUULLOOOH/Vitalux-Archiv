@@ -4,6 +4,14 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.62] - 2026-10-17
+- Removed transient mouse-hover text popups across Vitalux while preserving normal hover highlights, including the sidebar.
+- Added native Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost, Adaptive and Classic background styles independently of the selected color scheme; Minimal stays flat.
+- Added background color intensity, softness, and optional subtle animation. Adaptive follows the chosen accent color; animation is disabled by default.
+- Rendered atmospheric graphics locally using cached Qt painting; no browser or downloadable assets required.
+- Updated settings, English translations, the built-in guide, and a shorter, more professional GitHub README.
+- Extended visual regression tests for backdrops, theme switching, Minimal and disabled tooltip popups.
+
 ## [v0.9.3.61] - 2026-10-17
 - Left-aligned hardware warning numbers, preserved readable units, and made wheel changes require input focus.
 - Preserved the dark right-hand drop-down area without an arrow; list width now adapts to full labels and entries have tooltips.

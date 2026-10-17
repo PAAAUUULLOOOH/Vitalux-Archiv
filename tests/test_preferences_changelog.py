@@ -84,6 +84,19 @@ def check_preferences(app):
             threshold.setValue(90)
             assert threshold.number.text() == "90"
 
+            # Backdrop controls persist independently of the color scheme and
+            # preserve the readable dropdown styles.
+            assert page.background_combo.count() == 6
+            page.background_combo.setCurrentIndex(page.background_combo.findData('nebula'))
+            assert settings.get('background_style') == 'nebula'
+            page.background_sliders['background_intensity'].setValue(73)
+            assert settings.get('background_intensity') == 73
+            page.background_sliders['background_softness'].setValue(42)
+            assert settings.get('background_softness') == 42
+            page.background_animate.setChecked(True)
+            assert settings.get('background_animate') is True
+            page.background_animate.setChecked(False)
+
             # Previous themed drop-down styling is restored: a separate darker
             # control area on the right, with a readable closed label.
             smart = SmartPane()
@@ -239,8 +252,8 @@ def check_changelog(app):
     versions = changelog.entries()
     assert versions and versions[0][0] == __version__, (versions, __version__)
     assert len(changelog.version_notes(__version__)) >= 3
-    assert "Warnwerte" in " ".join(changelog.version_notes(__version__, lang="de"))
-    assert "threshold" in " ".join(changelog.version_notes(__version__, lang="en"))
+    assert "Hintergrund" in " ".join(changelog.version_notes(__version__, lang="de"))
+    assert "background" in " ".join(changelog.version_notes(__version__, lang="en"))
 
     manager = UpdateManager()
     page = UpdatePage(manager)
@@ -263,12 +276,12 @@ def check_changelog(app):
     app.processEvents()
     assert "A new feature" in page.notes.text()
     assert "Etwas Neues" not in page.notes.text()
-    assert "threshold" in page.changelog_details.text()
+    assert "background" in page.changelog_details.text()
     assert page.changelog_select.currentData() == __version__
     i18n.set_lang("de")
     page.retranslate()
     assert "Etwas Neues" in page.notes.text()
-    assert "Warnwerte" in page.changelog_details.text()
+    assert "Hintergrund" in page.changelog_details.text()
     manager.status = "uptodate"
     manager.notes = ""
     page.sync()

@@ -5,7 +5,7 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
-from . import APP_NAME, distro, i18n, sensors, settings, theme, diagnostics
+from . import APP_NAME, distro, i18n, sensors, settings, theme, diagnostics, hover_hints
 from .logo import load_logo
 from .brand import app_icon
 from .update_manager import UpdateManager
@@ -16,6 +16,8 @@ def main():
     diagnostics.enable_native_crash_trace()
     from .window import MainWindow
     app = QApplication(sys.argv)
+    # Disable transient hover help across the entire application, not just navigation.
+    app._vitalux_hover_guard = hover_hints.install(app)
     # Hiding the final window must not kill the tray icon and sampler.
     # MainWindow.closeEvent explicitly quits on a genuine Exit command.
     app.setQuitOnLastWindowClosed(False)

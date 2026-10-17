@@ -5,6 +5,14 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.62] - 2026-10-17
+- Systemweite Hover-Textfenster innerhalb der Anwendung abgeschaltet; farbliche Hover-Effekte bleiben erhalten, auch in der Seitenleiste.
+- Native Hintergrundstile Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost, Adaptiv und Klassisch hinzugefügt. Farbschema und Hintergrund lassen sich unabhängig auswählen; minimalistische Darstellung bleibt einfarbig.
+- Hintergrund-Farbintensität, Weichheit und optional sanfte Animationen ergänzt. Adaptiv reagiert auf die gewählte Akzentfarbe; die Animation ist standardmäßig ausgeschaltet.
+- Die Grafiken werden direkt durch Qt gerendert und als Glas-Hintergrund zwischengespeichert, ohne zusätzliche Downloads oder Browser.
+- Einstellungsoberfläche, englische Übersetzungen, integrierte Anleitung und die kompakt überarbeitete GitHub-README aktualisiert.
+- Zusätzliche grafische Regressionstests für Hintergründe, Farbwechsel, Minimal-Modus und Tooltip-Unterdrückung.
+
 ## [v0.9.3.61] - 2026-10-17
 - Hardware-Warnwerte linksbündig ausgerichtet; Zahlen und Einheiten bleiben sichtbar, Mausrad verändert Werte nur bei fokussierter Eingabe.
 - Dropdowns behalten die dunkle rechte Fläche ohne Pfeil, passen ihre geöffneten Listen an lange Texte an und zeigen vollständige Einträge bei Bedarf als Tooltip.

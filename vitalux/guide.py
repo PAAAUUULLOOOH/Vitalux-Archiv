@@ -37,7 +37,7 @@ SLIDES = [
         "Die Navigation links",
         "Über die linke Seitenleiste wechselst du zwischen den Bereichen.",
         "Jeder Reiter öffnet einen anderen Teil der Systemüberwachung.",
-        "Die Seitenleiste lässt sich für mehr Platz ein- und ausklappen.",
+        "Die Seitenleiste lässt sich ein- und ausklappen; störende Tooltip-Fenster beim Überfahren erscheinen nicht.",
         "Unten wechselst du jederzeit zwischen Deutsch und Englisch.",
         "navigation",
     ),
@@ -75,10 +75,10 @@ SLIDES = [
     ),
     (
         "Darstellung und Einstellungen",
-        "Du kannst Vitalux nach deinen Vorlieben gestalten.",
+        "Passe Vitalux mit Farbschemas, Hintergründen, Farbstärke und optionalen Animationen an.",
         "Wähle zwischen Dark, Light, Glass, Black Glass und Minimalistisch.",
         "Eigene Akzentfarben lassen sich mit „Bearbeiten“ ändern oder mit „Löschen“ entfernen.",
-        "Glass zeichnet einen internen, weichgezeichneten Hintergrund – unabhängig von KDE-Transparenz.",
+        "Wähle Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost oder einen Hintergrund, der deiner Akzentfarbe folgt.",
         "settings",
     ),
     (

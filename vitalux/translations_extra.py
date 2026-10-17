@@ -487,3 +487,20 @@ EN_MORE.update({
     "Eigene Farbe bearbeiten": "Edit custom color",
     "Diese Akzentfarbe ist bereits vorhanden.": "This accent color already exists.",
 })
+
+# Atmospheric backgrounds and reduced on-hover UI (v0.9.3.62).
+EN_MORE.update({
+    "Hintergrund": "Background",
+    "Klassisch": "Classic",
+    "Adaptiv · Akzentfarbe": "Adaptive · accent color",
+    "Farbintensität": "Color intensity",
+    "Hintergrundweichheit": "Background softness",
+    "Hintergrund sanft animieren": "Gently animate background",
+    "Die Hintergründe werden direkt in Vitalux gezeichnet. Minimalistisch bleibt bewusst einfarbig und ohne Animation.": "Backgrounds are drawn directly in Vitalux. Minimal remains solid-colored and free of animation.",
+    "Wähle Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost oder einen Hintergrund, der deiner Akzentfarbe folgt.": "Choose Aurora Glass, Obsidian Black, Nebula Purple, Arctic Frost, or a background that follows your accent color.",
+})
+
+EN_MORE.update({
+    "Passe Vitalux mit Farbschemas, Hintergründen, Farbstärke und optionalen Animationen an.": "Customize Vitalux with color schemes, backgrounds, color intensity, and optional animations.",
+    "Die Seitenleiste lässt sich ein- und ausklappen; störende Tooltip-Fenster beim Überfahren erscheinen nicht.": "You can collapse and expand the sidebar without distracting mouse-hover tooltips.",
+})

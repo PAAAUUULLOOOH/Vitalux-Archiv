@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
         # becomes available. Checking isSystemTrayAvailable() here loses that.
         from .brand import app_icon
         self._tray = QSystemTrayIcon(app_icon(), self)
-        self._tray.setToolTip(APP_NAME)
+        self._tray.setToolTip('')
         self._tray_menu = QMenu(self)
         self._tray_open_action = QAction(tr('Vitalux öffnen'), self._tray_menu)
         self._tray_quit_action = QAction(tr('Beenden'), self._tray_menu)
@@ -266,7 +266,7 @@ class MainWindow(QMainWindow):
                  "Einstellungen":"≡", "Updates":"↻", "Info":"ⓘ"}
         for btn, (name, _) in zip(self.nav_buttons,self.pages):
             btn.setText(glyph.get(name,'•') + '    ' + tr(name))
-            btn.setToolTip(tr(name))
+            btn.setToolTip('')
             btn.update()
         for btn in self.lang_host.findChildren(QPushButton):
             btn.setChecked(btn.text().lower() == code)
@@ -599,7 +599,7 @@ class MainWindow(QMainWindow):
         if self._tray is not None:
             gpu = d['gpus'][0] if d.get('gpus') else {}
             gpu_s = f"GPU {gpu['usage']:.0f}%" if gpu.get('usage') is not None else 'GPU –'
-            self._tray.setToolTip(f"Vitalux · CPU {d['cpu']['usage']:.0f}% · {gpu_s} · RAM {d['ram']['percent']:.0f}%")
+            # Tray icon remains visible; no on-hover measurement tooltip.
         # Native, lightweight branding animation driven by the real CPU sample.
         cpu_pct = d.get("cpu", {}).get("usage", 0.0)
         self.pulse_core.set_cpu_load(cpu_pct)

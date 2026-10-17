@@ -7,11 +7,11 @@ No KWin compositor transparency or blur-behind is required.
 from __future__ import annotations
 
 from pathlib import Path
-from PySide6.QtCore import QPoint, QPointF, QRectF, Qt
+from PySide6.QtCore import QPoint, QPointF, QRectF, Qt, QTimer
 from PySide6.QtGui import (QBrush, QColor, QLinearGradient, QPainter,
                            QPainterPath, QPen, QPixmap, QRadialGradient)
 from PySide6.QtWidgets import QFrame, QWidget
-from . import theme
+from . import theme, settings, motion, backdrops
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 
@@ -40,6 +40,36 @@ class AmbientScene(QWidget):
         self._sharp_cache = QPixmap()
         self._soft_cache = QPixmap()
         self._cache_size = None
+        self._render_key = None
+        self._phase = 0.0
+        self._motion_timer = QTimer(self)
+        self._motion_timer.setInterval(320)
+        self._motion_timer.timeout.connect(self._advance_backdrop)
+        self.sync_background()
+
+    def sync_background(self):
+        self._render_key = None
+        self._asset_mode = None
+        self._cache_size = None
+        active = (settings.get('background_animate', False) and
+                  settings.get('background_style', 'adaptive') != 'legacy' and
+                  theme.mode() != 'minimal' and motion.enabled())
+        if active:
+            self._motion_timer.start()
+        else:
+            self._motion_timer.stop()
+        self.update()
+
+    def _advance_backdrop(self):
+        if not self.isVisible():
+            return
+        self._phase = (self._phase + .018) % 6.28318530718
+        self._render_key = None
+        self.update()
+        # Keep live glass sampling aligned to the painted moving backdrop.
+        for card in self.findChildren(GlassSurface):
+            if card.isVisible():
+                card.update()
 
     def set_low_power(self, enabled):
         """Free the atmospheric pixmaps in Minimalistisch; reload only if needed."""
@@ -52,13 +82,31 @@ class AmbientScene(QWidget):
             self._sharp_cache = QPixmap()
             self._soft_cache = QPixmap()
             self._cache_size = None
-        self.update()
+            self._render_key = None
+        self.sync_background()
 
     def _ensure_cache(self):
         # The entire window stays opaque. The softened
         # atmosphere is an *internal* backdrop sampled under glass widgets.
         if theme.mode() == 'minimal':
             return
+        style = settings.get('background_style', 'adaptive')
+        if style not in backdrops.KEYS:
+            style = 'adaptive'
+        if style != 'legacy':
+            key = (theme.mode(), style, theme.accent(),
+                   backdrops.bounded(settings.get('background_intensity', 60), 60),
+                   backdrops.bounded(settings.get('background_softness', 65), 65),
+                   self.size(), round(self._phase, 3))
+            if key != self._render_key:
+                self._sharp_cache, self._soft_cache = backdrops.render(
+                    self.size(), style, theme.accent(), key[3], key[4],
+                    light=(theme.mode() == 'light'), phase=self._phase)
+                self._render_key = key
+                self._asset_mode = theme.mode()
+                self._cache_size = self.size()
+            return
+        self._render_key = None
         # Switching Glass/Black Glass must never reuse the other theme's cached image.
         material = theme.mode() if theme.mode() == 'black_glass' else 'glass'
         if material != self._asset_mode:
@@ -103,7 +151,15 @@ class AmbientScene(QWidget):
             return
         p.setRenderHint(QPainter.SmoothPixmapTransform)
         p.fillRect(self.rect(), QColor(theme.BG))
-        if theme.mode() in ('glass', 'black_glass'):
+        style = settings.get('background_style', 'adaptive')
+        if style in backdrops.KEYS and style != 'legacy':
+            self._ensure_cache()
+            if not self._sharp_cache.isNull():
+                p.drawPixmap(0, 0, self._sharp_cache)
+            if theme.mode() in ('glass', 'black_glass'):
+                veil = QColor(0, 0, 0, 50 if theme.mode() == 'black_glass' else 27)
+                p.fillRect(self.rect(), veil)
+        elif theme.mode() in ('glass', 'black_glass'):
             self._ensure_cache()
             if not self._sharp_cache.isNull():
                 p.drawPixmap(0, 0, self._sharp_cache)
