@@ -118,7 +118,7 @@ class Telemetry(QObject):
             "netUp": f"{_number(net.get('up')) / 1048576:.2f} MiB/s",
             "kernel": os.uname().release,
             "system": self._metrics["system"],
-            "cpuHistory": list(self._cpu_history),
+            "cpuHistory": [0.0] * (56 - len(self._cpu_history)) + list(self._cpu_history),
             "status": "Live · Messung jede Sekunde",
         }
         self.metricsChanged.emit()

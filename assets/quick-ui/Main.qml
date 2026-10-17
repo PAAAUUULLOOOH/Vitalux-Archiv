@@ -215,16 +215,17 @@ Rectangle {
 
                     // These metric cards consist solely of GPU scene-graph
                     // rectangles, gradients and text nodes.
-                    Row {
+                    Grid {
                         id: metricRow
                         visible: root.currentPage === 0
-                        height: visible ? 155 : 0
                         width: contents.width
+                        columns: width < 770 ? 2 : 4
+                        height: visible ? (columns === 2 ? 322 : 155) : 0
                         spacing: 12
                         Repeater {
                             model: 4
                             delegate: Rectangle {
-                                width: (metricRow.width - 36) / 4
+                                width: (metricRow.width - (metricRow.columns - 1) * metricRow.spacing) / metricRow.columns
                                 height: 155
                                 radius: 14
                                 color: root.pal.card
