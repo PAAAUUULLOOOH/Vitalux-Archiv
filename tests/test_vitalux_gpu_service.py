@@ -17,9 +17,9 @@ spec.loader.exec_module(module)
 
 def test_safe_permission_injection():
     out = module.configured_for_user("", "paul")
-    assert out == "daemon:\n  admin_user: paul\n"
+    assert out == "version: 7\ndaemon:\n  log_level: info\n  admin_user: paul\n"
     out = module.configured_for_user("gpus: {}\n", "paul")
-    assert out.endswith("daemon:\n  admin_user: paul\n")
+    assert out.endswith("daemon:\n  log_level: info\n  admin_user: paul\n")
     out = module.configured_for_user("daemon:\n  log_level: info\ngpus: {}\n", "paul")
     assert "daemon:\n  admin_user: paul\n  log_level: info\n" in out
     assert "gpus: {}" in out
