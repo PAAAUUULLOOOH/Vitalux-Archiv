@@ -123,6 +123,7 @@ jobs:
           python3 -m compileall -q vitalux
           python3 -m py_compile packaging/vitalux-gpu-service.py
           python3 tests/test_vitalux_gpu_service.py
+          python3 tests/test_gpu_setup.py
           python3 - <<'PY'
           import pathlib, os
           root = pathlib.Path('build/staged') / ('Vitalux-' + os.environ['TAG'])
