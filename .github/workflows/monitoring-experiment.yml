@@ -37,6 +37,7 @@ jobs:
           .venv/bin/python tests/test_insight_engine.py
           .venv/bin/python tests/test_monitoring_ui.py
           .venv/bin/python tests/test_insight_ui.py
+          .venv/bin/python tests/test_insight_window.py
           .venv/bin/python tests/test_core_behaviors.py
           .venv/bin/python tests/test_guide_locale.py
           .venv/bin/python tests/test_protected_accents.py
@@ -96,6 +97,9 @@ jobs:
             QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
               PYTHONPATH="$PWD" "$PWD/runtime/bin/python3.12" \
               "$ROOT_DIR/tests/test_insight_ui.py"
+            QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
+              PYTHONPATH="$PWD" "$PWD/runtime/bin/python3.12" \
+              "$ROOT_DIR/tests/test_insight_window.py"
           )
           (cd work/stage && zip -q -r -y '../artifacts/Vitalux-Insights-Experiment-Test.zip' 'Vitalux-Insights-Test')
           unzip -tq work/artifacts/Vitalux-Insights-Experiment-Test.zip
