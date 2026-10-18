@@ -5,6 +5,13 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.81] - 2026-10-18
+- **Eigene GPU-Lüfterkurven repariert:** Beim Aktivieren werden jetzt alle vom integrierten GPU-Dienst benötigten Daten mitgesendet, insbesondere Temperaturquelle, Aktualisierungsintervall und vollständige Lüfterkennlinie. Bereits konfigurierte Werte bleiben erhalten.
+- **Aktuelle GPU-Daten sofort sichtbar:** Im Grafik-Reiter erscheinen reale GPU-/VRAM-Taktraten, Spannung, Temperaturen, Leistungsaufnahme, Power-Limit, Auslastung und Lüfterdrehzahl; bei aktivem Dienst werden die Messwerte regelmäßig erneuert.
+- **GPU-Tuning übersichtlicher:** Getrennte, farbschemaabhängige Abschnitte für Live-Werte, Profile, Leistung/Spannung und Lüfter. Ungeeignete Einstellungsfelder werden ausgeblendet, Expertenoptionen sind standardmäßig eingeklappt.
+- **RX 9070 XT / RDNA4:** Unterstützte Takt- und Spannungsbereiche werden vom Grafiktreiber übernommen. Der GPU-Taktoffset kann direkt geändert werden. Felder mit vorhandenen Treiberwerten zeigen diese, ohne ungefragt eine neue Konfiguration zu speichern.
+- Original-Schnittstelle und Bestätigungs-/Rücksetzmechanismus weiterverwendet. Ergänzte Tests für Lüfterkurven, tatsächliche GPU-Messwerte sowie Anwenden, Zurücksetzen und Bestätigen.
+
 ## [v0.9.3.80] - 2026-10-18
 - **GPU-Steuerung im AppImage repariert:** Vitalux stellt die mitgelieferten Einrichtungsdateien vor der Administratorabfrage in einem geschützten temporären Verzeichnis bereit. Damit wird der Zugriff auf den für Root nicht lesbaren AppImage-FUSE-Mount vermieden. Temporäre Dateien werden danach entfernt.
 - **Standard-Akzentfarben geschützt:** Rot und alle anderen acht festen Farben bleiben dauerhaft im Auswahlmenü, können weder bearbeitet noch gelöscht werden und werden nach einem Update wiederhergestellt. Veraltete, fälschlich als eigene Farben gespeicherte Presets werden automatisch bereinigt; nur tatsächlich selbst erstellte Akzentfarben sind veränderbar.
