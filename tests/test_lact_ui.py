@@ -76,7 +76,7 @@ def check_ui():
     assert card.apply_btn.isEnabled()
     assert card.fields["power_cap"].minimum() == 200.0
     assert card.fields["power_cap"].maximum() == 300.0
-    assert card._collect() == fake.config, "Loading settings must not modify original config"
+    assert card._collect() == fake.config, f"Loading unexpectedly changed config: {card._collect()!r} vs {fake.config!r}"
     assert not card.delete_btn.isEnabled(), "Default profile must not be deletable"
     assert card.live_readings["gpu"].text() == "167 MHz"
     assert card.live_readings["vram"].text() == "1258 MHz"
