@@ -2,10 +2,15 @@ name: LACT-Integration testen
 
 on:
   push:
-    branches: [feature/lact-gpu-tuning, feature/vitalux-integrated-gpu-engine]
+    branches: [feature/lact-gpu-tuning, feature/vitalux-integrated-gpu-engine, fix/appimage-gpu-setup-protected-presets-tray-hint]
     paths:
       - "vitalux/lact_*.py"
       - "vitalux/pages.py"
+      - "vitalux/gpu_setup.py"
+      - "vitalux/control.py"
+      - "vitalux/window.py"
+      - "tests/test_gpu_setup.py"
+      - "tests/test_preferences_changelog.py"
       - "tests/test_lact_*.py"
       - "tests/test_vitalux_gpu_service.py"
       - "packaging/vitalux-gpu-service.py"
@@ -14,6 +19,11 @@ on:
     paths:
       - "vitalux/lact_*.py"
       - "vitalux/pages.py"
+      - "vitalux/gpu_setup.py"
+      - "vitalux/control.py"
+      - "vitalux/window.py"
+      - "tests/test_gpu_setup.py"
+      - "tests/test_preferences_changelog.py"
       - "tests/test_lact_*.py"
       - "tests/test_vitalux_gpu_service.py"
       - "packaging/vitalux-gpu-service.py"
@@ -39,6 +49,7 @@ jobs:
           .venv/bin/python -m compileall -q vitalux
           .venv/bin/python tests/test_lact_client.py
           .venv/bin/python tests/test_vitalux_gpu_service.py
+          .venv/bin/python tests/test_gpu_setup.py
       - name: Native Vitalux-Oberfläche ohne Hardware prüfen
         env:
           QT_QPA_PLATFORM: offscreen
