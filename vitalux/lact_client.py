@@ -258,7 +258,6 @@ def read_gpu_metrics(stats):
     temps = temps if isinstance(temps, dict) else {}
     edge = sub(temps, "edge") or sub(temps, "junction")
     v = sub(edge, "current")
-    pwm = sub(fan, "pwm_current")
     return {
         "gpu": fmt(sub(clocks, "gpu_clockspeed"), "MHz"),
         "vram": fmt(sub(clocks, "vram_clockspeed"), "MHz"),
