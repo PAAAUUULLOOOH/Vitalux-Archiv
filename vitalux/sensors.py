@@ -59,14 +59,17 @@ def prime():
 def collect():
     net_total = psutil.net_io_counters()
     dio = psutil.disk_io_counters()
+    sensor_data = extended.sensor_info()
+    from .monitor_insights import motherboard_temperature
     return {
+        "motherboard": motherboard_temperature(sensor_data),
         "cpu": cpu_info(),
         "ram": ram_info(),
         "disks": disk_info(),
         "gpus": gpu_info(),
         "net": network_info(net_total),
         "io": {"read": _rate("dr", dio.read_bytes), "write": _rate("dw", dio.write_bytes)} if dio else {"read": 0, "write": 0},
-        "sensors": extended.sensor_info(),
+        "sensors": sensor_data,
         "app_resources": monitor_extra.app_resources(),
         "uptime": time.time() - psutil.boot_time(),
     }
