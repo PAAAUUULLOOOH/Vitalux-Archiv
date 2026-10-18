@@ -81,6 +81,14 @@ jobs:
           Erst nach ausdrücklicher Zustimmung wird GitHub einen Release bauen.
           TXT
           python3 -m compileall -q "$DEST/vitalux"
+          # Verify the *actual portable runtime*, not only the pip test env.
+          ROOT_DIR="$PWD"
+          (
+            cd "$DEST"
+            QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
+              PYTHONPATH="$PWD" "$PWD/runtime/bin/python3.12" \
+              "$ROOT_DIR/tests/test_monitoring_ui.py"
+          )
           (cd work/stage && zip -q -r -y '../artifacts/Vitalux-Monitoring-Experiment-Test.zip' 'Vitalux-Monitoring-Test')
           unzip -tq work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
           test -s work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
