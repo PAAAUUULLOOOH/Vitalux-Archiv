@@ -46,18 +46,20 @@
 
 Scrollen folgt der eingestellten Monitor-Bildwiederholrate (ohne FPS-Garantie); Touchpads bleiben direkt. **Automatisches Tiling** füllt nur größere Lücken nach dem Kachelverschieben oder Ausblenden; die Kachelabstände bleiben bei 14 px.
 
-### GPU-Tuning im Grafik-Reiter (LACT-Integration)
+### Vitalux GPU-Tuning
 
-Optional bietet Vitalux eine native Oberfläche für die **originale GPU-Steuerung von LACT** (Copyright © Ilya Zlobintsev, MIT-Lizenz). GPU-Tuning nutzt die lokale JSON-Schnittstelle des **separat installierten Dienstes `lactd`** (`/run/lactd.sock`). Die Bedienoberfläche ist vollständig im Vitalux-Design; die Original-Engine für GPU-Änderungen und Profile wird **nicht** neu implementiert oder von Vitalux ersetzt.
+Vitalux erkennt AMD-, NVIDIA- und Intel-Grafikkarten wie bisher automatisch über Linux – **auch ohne aktivierte GPU-Steuerung**. Im Grafik-Reiter stehen bei unterstützter Hardware Power-Limit, GPU-/VRAM-Takt, Spannung/Undervolting, Lüftermodus/-kurve und Profile zur Verfügung. Ein separater GPU-Tuning-Desktopclient ist **nicht** nötig.
 
-- GPU wählen, aktuelle Einstellungen laden, Power-Limit, Taktgrenzen, Spannungs-Offset und Lüftermodus/-kurve konfigurieren; zusätzliche LACT-Konfigurationsfelder lassen sich als JSON bearbeiten.
-- Profile anlegen, laden und löschen; automatische Profilumschaltung und Prozess-/GameMode-Regeln.
-- **Änderungen testen → Bestätigen oder Zurücksetzen.** Unbestätigte Einstellungen rollt **lactd** automatisch zurück; der Standardzeitraum beträgt nur fünf Sekunden. Höhere Spannungen, Taktraten und Power-Limits können zu Abstürzen und Schäden führen.
-- Unterstützte Optionen hängen stark von GPU, Treiber, Kernel und LACT-Version ab. Nicht unterstützte Einstellungen können vom Dienst abgewiesen werden. Bei fehlendem Dienst bleiben die übrigen Vitalux-Funktionen uneingeschränkt verfügbar.
+**Ersteinrichtung in Vitalux:** Der originale GPU-Steuerungsdienst wird **mit der Vitalux-Vollversion (ZIP und AppImage) mitgeliefert**. Auf **GPU-Steuerung einrichten** klicken und die einmalige Administratorabfrage bestätigen. Vitalux legt daraufhin einen eigenen Systemdienst `vitalux-gpu.service` an und erteilt dem aktuellen Benutzer kontrolliert Zugriff. Dafür sind `systemd` und `pkexec` (polkit) auf dem Linux-Host erforderlich. Das AppImage selbst läuft weiterhin ohne Root-Rechte. Der Systemdienst bleibt bei einem Vitalux-Neustart verfügbar; nach einem Vitalux-AppImage-Update ist keine erneute Einrichtung erforderlich, solange die Engine nicht aktualisiert werden muss.
 
-**Einrichtung:** LACT aus den Paketen deiner Linux-Distribution installieren, `lactd` über systemd aktivieren und den Zugriff auf den lokalen Socket gemäß [LACT-Dokumentation](https://github.com/ilya-zlobintsev/LACT/blob/master/docs/API.md) freigeben. Auf AMD kann zusätzlich das gezielte Aktivieren von OverDrive erforderlich sein. Vitalux führt **keine** eigenmächtigen Root-Kommandos aus, verändert keine Kernel-Bootoptionen und öffnet keine Remote-Steuerung. LACT muss separat installiert und eingerichtet sein – die Vitalux-ZIP bzw. das AppImage enthalten keinen privilegierten LACT-Dienst.
+- Automatische GPU-Auswahl (dedizierte GPUs bevorzugt), bestehendes Live-Monitoring bleibt unverändert.
+- GPU-Parameter und Profile im Vitalux-Farbschema. Prozess-/GameMode-Profilregeln, automatische Auswahl und Expertenparameter.
+- **Änderungen testen → Bestätigen oder Zurücksetzen.** Die originale Engine macht unbestätigte Änderungen automatisch rückgängig (standardmäßig nach 5 Sekunden).
+- Hardware, Treiber und Kernel bestimmen, welche Werte tatsächlich bearbeitet werden können. Für einzelne AMD-Overclocking-Optionen kann die bewusste Aktivierung entsprechender Kernel-Funktionen erforderlich sein. Diese nimmt Vitalux nicht ohne Einwilligung vor.
 
-LACT-Quellen: [Repository und MIT-Lizenz](https://github.com/ilya-zlobintsev/LACT), [API](https://github.com/ilya-zlobintsev/LACT/blob/master/docs/API.md), [Konfigurationsoptionen](https://github.com/ilya-zlobintsev/LACT/blob/master/docs/CONFIG.md).
+**Sicherheit:** Für die Einrichtung sind Administratorrechte unvermeidbar, weil Übertaktung auf geschützte GPU-Schnittstellen zugreift. Vitalux installiert den gebündelten Dienst nur nach Bestätigung und ändert keine fremden GPU-Dienste. Bestehende Profile bleiben beim Entfernen des Dienstes erhalten. Extreme Takt-/Spannungswerte können zu Instabilität und möglichen Hardwareproblemen führen.
+
+**Open-Source-Hinweis:** Die interne Hardware-Engine stammt unverändert aus [LACT](https://github.com/ilya-zlobintsev/LACT) von Ilya Zlobintsev, Version 0.10.1 (MIT-Lizenz). Rechtlicher Lizenztext: [LICENSES/LACT-MIT.txt](LICENSES/LACT-MIT.txt). Der Produktname und alle sichtbaren Bedienelemente heißen **Vitalux**.
 
 ### Design & Hintergründe
 
