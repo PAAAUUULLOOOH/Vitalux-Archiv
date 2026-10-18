@@ -11,6 +11,8 @@ from pathlib import Path
 import csv
 import json
 import math
+import os
+import tempfile
 import statistics
 import time
 
@@ -82,7 +84,8 @@ def findings(snapshot, recent=(), limits=None):
 
 class MonitoringLab:
     """One lightweight bounded stream used by detective, timeline and gaming."""
-    def __init__(self, max_samples=3600):
+    def __init__(self, max_samples=3600, snapshot_path=None):
+        self.snapshot_path = Path(snapshot_path) if snapshot_path else None
         self.recent = deque(maxlen=20)
         self.history = deque(maxlen=max_samples)
         self.events = deque(maxlen=300)
@@ -93,6 +96,7 @@ class MonitoringLab:
         self.last_session = None
         self.snapshots = [None, None]
         self.mangohud = None
+        self._load_snapshots()
 
     @staticmethod
     def _now():
@@ -106,7 +110,7 @@ class MonitoringLab:
         row = {"time": now, "metrics": current}
         self.history.append(row)
         self.recent.append(sample)
-        if self.started is not None:
+        if self.started is not None and len(self.session) < 14400:
             self.session.append(row)
         limits = limits or {}
         checks = (
@@ -162,15 +166,56 @@ class MonitoringLab:
                                              "min": min(values), "max": max(values)}
         return summary
 
+    def _load_snapshots(self):
+        if self.snapshot_path is None:
+            return
+        try:
+            if self.snapshot_path.stat().st_size > 30000:
+                return
+            data = json.loads(self.snapshot_path.read_text(encoding="utf-8"))
+            entries = data.get("snapshots") if isinstance(data, dict) else None
+            if isinstance(entries, list) and len(entries) == 2:
+                for i, entry in enumerate(entries):
+                    if (isinstance(entry, dict) and isinstance(entry.get("metrics"), dict)
+                            and isinstance(entry.get("time"), str)):
+                        self.snapshots[i] = entry
+        except (OSError, ValueError, TypeError):
+            return
+
+    def _save_snapshots(self):
+        if self.snapshot_path is None:
+            return
+        path = self.snapshot_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            fd, temporary = tempfile.mkstemp(prefix=".insights-", dir=path.parent)
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                json.dump({"version": 1, "snapshots": self.snapshots}, handle,
+                          ensure_ascii=False, indent=2)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, path)
+            temporary = None
+        finally:
+            if temporary:
+                try:
+                    os.unlink(temporary)
+                except OSError:
+                    pass
+
     def snapshot(self, slot, sample):
         if slot not in (0, 1) or not isinstance(sample, dict):
             raise ValueError("Ungültiger Vergleichsschnappschuss.")
         self.snapshots[slot] = {"time": self._now(), "metrics": telemetry(sample),
                                 "gpu": ((sample.get("gpus") or [{}])[0]).get("name") or "–"}
+        self._save_snapshots()
 
     def comparison(self):
         a, b = self.snapshots
         if not a or not b:
+            return []
+        if a.get("gpu") != b.get("gpu"):
             return []
         out = []
         for key in FIELDS:
