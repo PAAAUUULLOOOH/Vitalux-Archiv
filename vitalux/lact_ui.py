@@ -104,6 +104,11 @@ class LactTuningCard(Card):
             widget.setSuffix(suffix)
             widget.setSpecialValueText("Nicht gesetzt")
             widget.setProperty("lact_null", True)
+            widget.setContextMenuPolicy(Qt.CustomContextMenu)
+            widget.customContextMenuRequested.connect(
+                lambda pos, w=widget: self._show_clear_menu(w, pos))
+            widget.valueChanged.connect(
+                lambda _v, w=widget: w.setProperty("lact_null", False))
             self.fields[key] = widget
             self.form.addRow(label(title), widget)
         self.performance = QComboBox()
@@ -318,21 +323,11 @@ class LactTuningCard(Card):
                 self.fields["power_cap"].setRange(float(lo), float(hi))
         for key, widget in self.fields.items():
             value = config.get(key)
+            widget.blockSignals(True)
             widget.setValue(value if value is not None else widget.minimum())
+            widget.blockSignals(False)
             widget.setProperty("lact_null", value is None)
-            # Spinboxes have explicit clear-to-default via context menu.
             widget.setToolTip("Wert einstellen. Mit 'Zurücksetzen' im Kontextmenü wieder auf Standard.")
-            widget.setContextMenuPolicy(Qt.CustomContextMenu)
-            try:
-                widget.customContextMenuRequested.disconnect()
-            except (RuntimeError, TypeError):
-                pass
-            widget.customContextMenuRequested.connect(lambda pos, w=widget: self._show_clear_menu(w, pos))
-            try:
-                widget.valueChanged.disconnect()
-            except (RuntimeError, TypeError):
-                pass
-            widget.valueChanged.connect(lambda _v, w=widget: w.setProperty("lact_null", False))
         performance = self.performance.findData(config.get("performance_level"))
         self.performance.setCurrentIndex(max(0, performance))
         self.fan_enabled.setChecked(bool(config.get("fan_control_enabled", False)))
