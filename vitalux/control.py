@@ -216,8 +216,12 @@ class PreferencesPage(Page):
                 accent.addItem(item['name'], item['color'])
         accent.setCurrentIndex(max(0, accent.findData(stored)))
         accent.currentIndexChanged.connect(lambda _: self.change_accent(accent.currentData()))
-        accent.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        accent_selector.addWidget(accent, 1)
+        # Use the same compact width as the Farbschema selector; custom
+        # names can be long, so their complete text stays available as a tooltip.
+        accent.setFixedWidth(self.mode.sizeHint().width())
+        accent.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        accent_selector.addWidget(accent)
+        accent_selector.addStretch(1)
         accent_row.addLayout(accent_selector)
         accent_actions = QHBoxLayout()
         # Both actions appear only when a saved custom accent is selected.
@@ -481,8 +485,9 @@ class PreferencesPage(Page):
             return
         # Update visible widgets without emitting change handlers or tearing
         # down pages: the user keeps the current scroll position.
-        for key, default in self.DEFAULTS.items():
-            settings.set(key, default)
+        # Commit the reset atomically rather than rewriting settings.json
+        # once for every option. Custom colors, wallpapers and layouts remain.
+        settings.set_many(self.DEFAULTS)
         self.mode.blockSignals(True)
         self.mode.setCurrentIndex(self.mode.findData('glass'))
         self.mode.blockSignals(False)
@@ -568,6 +573,8 @@ class PreferencesPage(Page):
         return result
 
     def _sync_custom_accent_actions(self):
+        # A shortened combo must not hide the selected custom color's name.
+        self.accent_combo.setToolTip(self.accent_combo.currentText())
         selected = self.accent_combo.currentData()
         own_color_selected = (
             selected not in self.PRESET_COLORS
