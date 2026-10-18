@@ -667,3 +667,5 @@ EN_MORE.update({
     "LACT-Dienst nicht gefunden. Installiere LACT und aktiviere lactd.": "LACT service not found. Install LACT and enable lactd.",
     "Kein Zugriff auf /run/lactd.sock. Prüfe admin_user/admin_group in /etc/lact/config.yaml.": "Cannot access /run/lactd.sock. Check admin_user/admin_group in /etc/lact/config.yaml."
 })
+
+EN_MORE["Im Grafik-Reiter siehst du GPU-Werte; mit installiertem LACT-Dienst kannst du Takte, Lüfter und Profile einstellen."] = "The Graphics tab shows GPU data; when LACT is installed, you can tune clocks, fans and profiles."
