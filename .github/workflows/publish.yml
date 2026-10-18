@@ -220,6 +220,9 @@ jobs:
             LD_LIBRARY_PATH="$PWD/lib" \
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_guide_locale.py"
+          QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
+            "$PWD/runtime/bin/python3.12" \
+            "$GITHUB_WORKSPACE/tests/test_lact_ui.py"
       - name: Dashboard-Logo und themenabhängiges Branding prüfen
         shell: bash
         env:
@@ -260,6 +263,7 @@ jobs:
           python3 tests/test_update_rollback.py
           python3 tests/test_zip_rollback.py
           python3 tests/test_core_behaviors.py
+          python3 tests/test_lact_client.py
           python3 tests/test_dashboard_tiling.py
           python3 tests/test_versioning.py
           python3 tests/test_log_timestamps.py
