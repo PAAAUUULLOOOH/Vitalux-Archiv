@@ -34,12 +34,25 @@ class FakeLact:
         return self.config.copy()
 
     def device_stats(self, _):
-        return {"power": {"cap_min": 200.0, "cap_max": 300.0,
-                          "cap_current": 250.0},
-                "fan": {"speed_max": 3000}}
+        return {
+            "power": {"cap_min": 200.0, "cap_max": 300.0, "cap_current": 250.0,
+                      "average": 55.0},
+            "fan": {"speed_max": 3000, "speed_current": 896, "temperature_key": "edge"},
+            "clockspeed": {"gpu_clockspeed": 167, "vram_clockspeed": 1258},
+            "voltage": {"gpu": 552},
+            "temps": {"edge": {"current": 42.0, "display_only": False},
+                      "junction": {"current": 45.0, "display_only": False}},
+            "busy_percent": 3,
+        }
 
     def device_clocks(self, _):
-        return {"table": {"type": "amd", "value": {}}}
+        return {"table": {"type": "amd", "value": {
+            "kind": "rdna", "data": {
+                "sclk_offset": 200,
+                "od_range": {"sclk_offset": {"min": -500, "max": 1000},
+                             "voltage_offset": {"min": -200, "max": 0},
+                             "mclk": {"min": 97, "max": 1500}, "sclk": None},
+            }}}}
 
     def profiles(self):
         return {"profiles": {"Gaming": {"type": "process",
@@ -65,6 +78,17 @@ def check_ui():
     assert card.fields["power_cap"].maximum() == 300.0
     assert card._collect() == fake.config, "Loading settings must not modify original config"
     assert not card.delete_btn.isEnabled(), "Default profile must not be deletable"
+    assert card.live_readings["gpu"].text() == "167 MHz"
+    assert card.live_readings["vram"].text() == "1258 MHz"
+    assert card.live_readings["voltage"].text() == "552 mV"
+    assert card.live_readings["temperature"].text() == "42.0 °C"
+    assert card.live_readings["power"].text() == "55.0 W"
+    assert card.live_readings["fan"].text() == "896 U/min"
+    assert card.gpu_offset.isEnabled()
+    assert card.gpu_offset.value() == 200
+    assert card.fields["voltage_offset"].isEnabled()
+    assert not card.fields["max_core_clock"].isEnabled()
+    assert not card.advanced_group.isVisible()
 
     card.fields["power_cap"].setValue(275.0)
     changed = card._collect()
@@ -73,6 +97,24 @@ def check_ui():
     assert changed["fan_control_settings"] == fake.config["fan_control_settings"]
     assert fake.config["power_cap"] == 250.0
     card.fields["power_cap"].setValue(250.0)
+    card.gpu_offset.setValue(250)
+    assert card._collect()["gpu_clock_offsets"] == {"0": 250}
+    card.gpu_offset.setValue(200)
+    # Enabling custom fans from a previously incomplete configuration must
+    # ALWAYS provide the original daemon's required temperature key/interval.
+    card.fan_enabled.setChecked(True)
+    card.fan_curve.setPlainText("40: 30\n50: 35\n60: 50\n70: 75\n80: 100")
+    fan_change = card._collect()
+    assert fan_change["fan_control_enabled"] is True
+    assert fan_change["fan_control_settings"]["temperature_key"] == "edge"
+    assert fan_change["fan_control_settings"]["interval_ms"] == 500
+    assert len(fan_change["fan_control_settings"]["curve"]) == 5
+    card.fan_temperature.setCurrentIndex(card.fan_temperature.findData("junction"))
+    assert card._collect()["fan_control_settings"]["temperature_key"] == "junction"
+    card.fan_enabled.setChecked(False)
+    card.advanced_toggle.click()
+    assert card.advanced_group.isVisible() or not card.advanced_group.isHidden()
+    card.advanced_toggle.click()
 
     card.profile_combo.setCurrentIndex(card.profile_combo.findData("Gaming"))
     assert card.delete_btn.isEnabled()
