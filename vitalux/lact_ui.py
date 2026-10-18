@@ -134,7 +134,7 @@ class LactTuningCard(Card):
             widget = QDoubleSpinBox() if key == "power_cap" else QSpinBox()
             widget.setRange(minimum, maximum)
             widget.setSuffix(suffix)
-            widget.setSpecialValueText("Nicht gesetzt")
+            # Do not disguise the lowest valid driver value as "not set".
             widget.setProperty("lact_null", True)
             widget.setContextMenuPolicy(Qt.CustomContextMenu)
             widget.customContextMenuRequested.connect(
@@ -468,13 +468,31 @@ class LactTuningCard(Card):
             lo, hi = power.get("cap_min"), power.get("cap_max")
             if isinstance(lo, (int, float)) and isinstance(hi, (int, float)) and lo < hi and hi > 0:
                 self.fields["power_cap"].setRange(max(1.0, float(lo)), float(hi))
+        # On first load show the *real* driver values where the profile does
+        # not yet override them. Read-only telemetry stays above the editors.
+        table = (self.clock_info.get("table") or {}).get("value") or {}
+        data = table.get("data") or {} if isinstance(table, dict) else {}
+        current_sclk = data.get("current_sclk_range") or {}
+        current_mclk = data.get("current_mclk_range") or {}
+        power_now = power.get("cap_current") if isinstance(power, dict) else None
+        active = {
+            "power_cap": power_now,
+            "min_core_clock": current_sclk.get("min"),
+            "max_core_clock": current_sclk.get("max"),
+            "min_memory_clock": current_mclk.get("min"),
+            "max_memory_clock": current_mclk.get("max"),
+            "voltage_offset": data.get("voltage_offset"),
+        }
         for key, widget in self.fields.items():
             value = config.get(key)
+            shown = value if value is not None else active.get(key)
+            if shown is None:
+                shown = widget.minimum()
             widget.blockSignals(True)
-            widget.setValue(value if value is not None else widget.minimum())
+            widget.setValue(shown)
             widget.blockSignals(False)
             widget.setProperty("lact_null", value is None)
-            widget.setToolTip("Wert einstellen. Mit 'Zurücksetzen' im Kontextmenü wieder auf Standard.")
+            widget.setToolTip("Aktueller Treiberwert, sofern bekannt. Eine eigene Grenze wird erst beim Ändern gesetzt.")
         table = (self.clock_info.get("table") or {}).get("value") or {}
         data = table.get("data") or {} if isinstance(table, dict) else {}
         offsets = config.get("gpu_clock_offsets") or {}
