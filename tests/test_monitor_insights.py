@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 
 from vitalux.monitor_insights import (
-    SessionExtrema, format_range, motherboard_temperature, hardware_status,
+    SessionExtrema, format_range, hardware_status,
     pcie_link, report_data, report_text, write_report, valid_number,
 )
 
@@ -17,7 +17,6 @@ def sample():
         "gpus": [{"name": "AMD Radeon RX 9070 XT", "usage": 26.0,
                   "temp": 49.0, "clock": 1825.0, "power": 72.0,
                   "vram_total": 17179869184, "vram_used": 2147483648}],
-        "motherboard": {"temperature": 34.0, "source": "nct6798 · SYSTIN"},
         "disks": [{"mount": "/", "percent": 78.0}],
     }
 
@@ -26,32 +25,16 @@ def test_min_max():
     counter = SessionExtrema()
     s = sample()
     counter.update(s)
-    assert format_range(counter.snapshot(), "board_temp", "°C", 1) == "34.0–34.0 °C"
     assert format_range(counter.snapshot(), "gpu_clock", "MHz") == "1825–1825 MHz"
     s["cpu"]["temp"] = None
-    s["motherboard"]["temperature"] = None
     s["gpus"][0]["temp"] = 51
     counter.update(s)
     assert counter.snapshot()["cpu_temp"] == [42.1, 42.1]
     assert counter.snapshot()["gpu_temp"] == [49.0, 51]
-    assert counter.snapshot()["board_temp"] == [34.0, 34.0]
     assert not valid_number(float("nan"))
     assert not valid_number(True)
     counter.reset()
     assert counter.snapshot() == {}
-
-
-def test_board_identification():
-    sensors = {"temps": [
-        {"name": "coretemp · Package id 0", "value": 59},
-        {"name": "amdgpu · edge", "value": 63},
-        {"name": "nvme · Composite", "value": 48},
-    ]}
-    assert motherboard_temperature(sensors)["temperature"] is None
-    sensors["temps"].append({"name": "nct6775 · SYSTIN", "value": 35.5})
-    assert motherboard_temperature(sensors) == {
-        "temperature": 35.5, "source": "nct6775 · SYSTIN"}
-    assert motherboard_temperature({"temps": [{"name": "System Temp", "value": float("inf")}]})["temperature"] is None
 
 
 def test_pcie():
@@ -79,7 +62,7 @@ def test_report_formats():
         write_report(p_txt, report)
         write_report(p_json, report)
         assert "Vitalux" in p_txt.read_text()
-        assert json.loads(p_json.read_text())["sample"]["motherboard"]["temperature"] == 34.0
+        assert json.loads(p_json.read_text())["sample"]["cpu"]["temp"] == 42.1
         try:
             write_report(Path(base) / "bad.log", report)
         except ValueError:
@@ -90,7 +73,6 @@ def test_report_formats():
 
 if __name__ == "__main__":
     test_min_max()
-    test_board_identification()
     test_pcie()
     test_hardware_status()
     test_report_formats()
