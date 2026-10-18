@@ -4,6 +4,8 @@ import os
 import socket
 import tempfile
 import threading
+import sys
+sys.path.insert(0, os.getcwd())
 
 from vitalux.lact_client import (
     LactClient, LactError, format_fan_curve, merged_gpu_config, parse_fan_curve
