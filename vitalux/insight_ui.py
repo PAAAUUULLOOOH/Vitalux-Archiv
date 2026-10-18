@@ -66,6 +66,15 @@ class FocusWindow(QWidget):
         layout.addWidget(label("Nur vorhandene Sensordaten – keine Übertaktung oder Hardwaresteuerung.",
                                "muted", wrap=True))
 
+    def retranslate(self):
+        self.setWindowTitle(tr("Vitalux · Fokusmodus"))
+        for choose, reading in self.entries:
+            for idx in range(choose.count()):
+                key = choose.itemData(idx)
+                choose.setItemText(idx, tr(METRIC_TITLES[key][0]))
+            reading.setStyleSheet(
+                f"color: {theme.accent()}; font-size: 29px; font-weight: 800;")
+
     def _on_top(self, enabled):
         self.setWindowFlag(Qt.WindowStaysOnTopHint, enabled)
         self.show()
@@ -256,6 +265,23 @@ class MonitoringLabPanel(Card):
         self.show_advanced.setChecked(False)
         self._update_session()
         self._update_comparison()
+
+    def retranslate(self):
+        for group, title in (
+            (self.detector, "Performance Detective"),
+            (self.trend_group, "Performance-Verlauf"),
+            (self.record_group, "Gaming Session Analyzer"),
+            (self.compare_group, "Vorher-Nachher-Vergleich"),
+            (self.timeline_group, "Ereignis-Timeline"),
+            (self.hardware_group, "Interaktive Hardware-Übersicht"),
+        ):
+            group.setTitle(tr(title))
+        names = {"mainboard": "Mainboard", "cpu": "CPU", "ram": "RAM",
+                 "gpu": "Grafik", "disk": "Laufwerke"}
+        for node in self.map.scene().items():
+            if isinstance(node, _HardwareNode):
+                node.text.setText(tr(names[node.key]).upper())
+        self._advanced_visible(self.show_advanced.isChecked())
 
     def _advanced_visible(self, shown):
         for widget in getattr(self, "_tools", ()):
