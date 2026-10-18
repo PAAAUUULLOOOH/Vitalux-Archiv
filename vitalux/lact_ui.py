@@ -661,7 +661,7 @@ class LactTuningCard(Card):
         if not isinstance(advanced, dict):
             raise ValueError("Erweiterte Optionen müssen ein JSON-Objekt sein.")
         handled = {"power_cap", "performance_level", "fan_control_enabled",
-                   "fan_control_settings", *CLOCK_FIELDS}
+                   "fan_control_settings", "gpu_clock_offsets", *CLOCK_FIELDS}
         if handled.intersection(advanced):
             raise ValueError("Erweiterte Option überschreibt eine reguläre Einstellung.")
         for key in tuple(config):
