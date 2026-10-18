@@ -84,7 +84,6 @@ EN_MORE = {
     'Warnung': 'Warning',
     'Vitalux öffnen': 'Open Vitalux',
     'Beenden': 'Quit',
-    'Vitalux läuft in der Systemleiste weiter.': 'Vitalux is still running in the system tray.',
     'Fehlerdiagnose exportieren …': 'Export error diagnostics…',
     'Diagnoseberichte enthalten möglicherweise private Systemangaben. Sie werden nur lokal gespeichert, nicht automatisch versendet.': 'Diagnostic reports may contain private system information. They are saved locally and are never sent automatically.',
     'Lese SMART-Daten im Hintergrund …': 'Reading SMART data in the background…',
@@ -350,7 +349,6 @@ EN_MORE.update({
     'Optional · Ein Doppelklick auf das Symbol öffnet Vitalux. Über das Kontextmenü kann Vitalux vollständig beendet werden.':
         'Optional · Double-click the tray icon to open Vitalux. Use its context menu to quit.',
     'Vitalux öffnen': 'Open Vitalux', 'Beenden': 'Quit',
-    'Vitalux läuft in der Systemleiste weiter.': 'Vitalux continues in the system tray.',
     'Fehlerdiagnose exportieren …': 'Export diagnostics …',
     'Fehlerbericht speichern': 'Save diagnostics',
     'Fehlerbericht gespeichert.': 'Diagnostic report saved.',
@@ -606,7 +604,7 @@ EN_MORE.update({
 EN_MORE.update({
     "Nur Funkeln ist animiert. Die anderen Hintergründe sind statisch; Adaptiv folgt der ausgewählten Akzentfarbe.": "Only Sparkle is animated. Other wallpapers are static; Adaptive follows your selected accent color.",
     "Du kannst 14 Hintergrundeinstellungen wählen. Funkeln ist der einzige animierte Hintergrund; Perlmutt, Eisblau und die übrigen animierten Designs wurden entfernt.": "There are 14 background selections. Sparkle is the only animated wallpaper; Pearl, Ice Blue and the other animated styles were removed.",
-    "Du kannst 5 Farbschemas, 14 Hintergrundeinstellungen und 9 Akzentoptionen kombinieren: 5 × 14 × 9 = 630 Auswahlkombinationen, davon 560 mit festen Akzentfarben. Eigene Farben bieten weitere Möglichkeiten.": "Combine 5 themes, 14 wallpaper selections and 9 accent options: 5 × 14 × 9 = 630 selection combinations, including 560 using preset accent colors. Custom colors provide more possibilities.",
+    "Du kannst 5 Farbschemas, 14 Hintergrundeinstellungen und 9 Akzentoptionen kombinieren: 5 × 14 × 9 = 630 Auswahlkombinationen, davon 560 mit festen Akzentfarben. Nur selbst erstellte Akzentfarben sind bearbeitbar und löschbar.": "Combine 5 themes, 14 wallpaper selections and 9 accent options: 5 × 14 × 9 = 630 selection combinations, including 560 using preset accent colors. Only user-created accent colors can be edited and deleted.",
 })
 
 # Native LACT tuning panel: German and English use the same Vitalux locale switch.
@@ -698,3 +696,5 @@ EN_MORE.update({
     "Noch keine Grafikkarte erkannt.": "No graphics card detected yet.",
     "Vitalux erkennt deine Grafikkarte automatisch. GPU-Tuning, Lüftersteuerung und Profile kannst du im Grafik-Reiter einmalig einrichten.": "Vitalux automatically detects your graphics card. You can enable GPU tuning, fan control and profiles directly in the Graphics tab."
 })
+
+EN_MORE["GPU-Steuerung konnte nicht vorbereitet werden: {}"] = "GPU tuning setup could not be prepared: {}"
