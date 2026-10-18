@@ -7,12 +7,16 @@ on:
       - "vitalux/lact_*.py"
       - "vitalux/pages.py"
       - "tests/test_lact_*.py"
+      - "tests/test_vitalux_gpu_service.py"
+      - "packaging/vitalux-gpu-service.py"
       - ".github/workflows/lact-check.yml"
   pull_request:
     paths:
       - "vitalux/lact_*.py"
       - "vitalux/pages.py"
       - "tests/test_lact_*.py"
+      - "tests/test_vitalux_gpu_service.py"
+      - "packaging/vitalux-gpu-service.py"
       - ".github/workflows/lact-check.yml"
 
 permissions:
@@ -34,6 +38,7 @@ jobs:
         run: |
           .venv/bin/python -m compileall -q vitalux
           .venv/bin/python tests/test_lact_client.py
+          .venv/bin/python tests/test_vitalux_gpu_service.py
       - name: Native Vitalux-Oberfläche ohne Hardware prüfen
         env:
           QT_QPA_PLATFORM: offscreen
