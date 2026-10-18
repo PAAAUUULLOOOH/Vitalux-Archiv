@@ -1,8 +1,8 @@
-name: LACT-Integration testen
+name: Vitalux – GUI und GPU-Regressionsprüfung
 
 on:
   push:
-    branches: [fix/gpu-tuning-fan-schema-live-stats-layout]
+    branches: [fix/main-cleanup-accent-combobox-and-monitoring]
     paths:
       - "vitalux/lact_*.py"
       - "vitalux/theme.py"
@@ -13,6 +13,9 @@ on:
       - "tests/test_gpu_setup.py"
       - "tests/test_preferences_changelog.py"
       - "tests/test_protected_accents.py"
+      - "tests/test_gpu_history.py"
+      - "tests/test_core_behaviors.py"
+      - "vitalux/settings.py"
       - "tests/test_lact_*.py"
       - "tests/test_vitalux_gpu_service.py"
       - "packaging/vitalux-gpu-service.py"
@@ -54,12 +57,15 @@ jobs:
           .venv/bin/python tests/test_lact_client.py
           .venv/bin/python tests/test_vitalux_gpu_service.py
           .venv/bin/python tests/test_gpu_setup.py
+          .venv/bin/python tests/test_core_behaviors.py
       - name: Native Vitalux-Oberfläche ohne Hardware prüfen
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
           .venv/bin/python tests/test_lact_ui.py
           .venv/bin/python tests/test_protected_accents.py
+          .venv/bin/python tests/test_preferences_changelog.py
+          .venv/bin/python tests/test_gpu_history.py
       - name: Gebündelten Originaldienst vor Veröffentlichung prüfen
         run: |
           curl --fail --location --retry 3 --silent --show-error \
