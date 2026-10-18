@@ -317,6 +317,18 @@ class LactTuningCard(Card):
             self.device_combo.addItem(gpu.get("name") or "Grafikkarte erkannt", None)
         self.device_combo.blockSignals(False)
         if detected:
+            source = detected[0]
+            def val(key, unit):
+                number = source.get(key)
+                return f"{number:.0f} {unit}" if isinstance(number, (int, float)) else "–"
+            metrics = {
+                "gpu": val("clock", "MHz"), "vram": val("clock_mem", "MHz"),
+                "voltage": "–", "temperature": val("temp", "°C"),
+                "power": val("power", "W"), "fan": val("fan_rpm", "U/min"),
+                "power_cap": "–", "load": val("usage", "%"),
+            }
+            for key, widget in self.live_readings.items():
+                widget.setText(metrics[key])
             names = ", ".join(str(g.get("name") or "Grafikkarte") for g in detected)
             self.status.setText("Grafikkarte erkannt: " + names + ". "
                                 "Für das GPU-Tuning bitte Vitalux GPU-Steuerung einrichten.")
@@ -344,6 +356,7 @@ class LactTuningCard(Card):
         except (LactError, ValueError) as exc:
             self._loading = False
             self.gpu_id = None
+            self.refresh_timer.stop()
             self._set_access(False)
             self._show_detected_gpus(exc)
 
@@ -365,37 +378,82 @@ class LactTuningCard(Card):
             except LactError:
                 clocks = {}
             self._detect_capabilities(clocks)
+            self._update_live_readings(self.stats)
             self._load_fields()
-            self._load_profiles()
-            self.status.setText("Vitalux GPU-Steuerung aktiv · Einstellungen verfügbar")
+            try:
+                self._load_profiles()
+            except LactError as exc:
+                self.profile_state = {"profiles": {}}
+                self.status.setText(tr("Profilverwaltung ist derzeit nicht verfügbar: {}").format(exc))
+            else:
+                self.status.setText("Vitalux GPU-Steuerung aktiv · Einstellungen verfügbar")
             self._set_access(True)
+            self.refresh_timer.start()
         except (LactError, ValueError) as exc:
             self._set_access(False)
             self.status.setText(str(exc))
 
-    def _detect_capabilities(self, clocks):
-        """Gate direct editing by hardware information returned by LACT."""
-        cap = self.capabilities = {}
+    @staticmethod
+    def _clock_limits(clocks):
+        """Real, driver-advertised AMD ranges; do not show fabricated limits."""
         table = clocks.get("table") if isinstance(clocks, dict) else None
-        for key in CLOCK_FIELDS:
-            cap[key] = isinstance(table, dict)
-        stats = self.stats if isinstance(self.stats, dict) else {}
-        power = stats.get("power") or {}
-        if not isinstance(power, dict):
-            power = {}
-        cap["power_cap"] = any(power.get(k) is not None
-                               for k in ("cap_min", "cap_max", "cap_current"))
-        fan = stats.get("fan") or {}
+        if not isinstance(table, dict):
+            return {}
+        if table.get("type") != "amd":
+            return {}
+        value = table.get("value") or {}
+        data = value.get("data") or {} if isinstance(value, dict) else {}
+        od = data.get("od_range") or {} if isinstance(data, dict) else {}
+        return {
+            "min_core_clock": od.get("sclk"),
+            "max_core_clock": od.get("sclk"),
+            "min_memory_clock": od.get("mclk"),
+            "max_memory_clock": od.get("mclk"),
+            "voltage_offset": od.get("voltage_offset"),
+            "gpu_offset": od.get("sclk_offset"),
+        }
+
+    def _detect_capabilities(self, clocks):
+        self.clock_info = clocks if isinstance(clocks, dict) else {}
+        cap = self.capabilities = {key: False for key in CLOCK_FIELDS}
+        ranges = self._clock_limits(self.clock_info)
+        for key, raw in ranges.items():
+            supported = (
+                isinstance(raw, dict) and
+                type(raw.get("min")) is int and type(raw.get("max")) is int
+                and raw["min"] < raw["max"]
+            )
+            cap[key] = supported
+            widget = self.gpu_offset if key == "gpu_offset" else self.fields[key]
+            if supported:
+                widget.setRange(raw["min"], raw["max"])
+                widget.setToolTip(f"Treiberbereich: {raw['min']} bis {raw['max']}")
+        power = self.stats.get("power") or {} if isinstance(self.stats, dict) else {}
+        cap["power_cap"] = isinstance(power, dict) and (
+            isinstance(power.get("cap_max"), (int, float))
+            and isinstance(power.get("cap_min"), (int, float))
+            and power["cap_max"] > power["cap_min"])
+        fan = self.stats.get("fan") or {} if isinstance(self.stats, dict) else {}
         cap["fan"] = isinstance(fan, dict) and (
-            fan.get("speed_max") is not None or
-            fan.get("pwm_max") is not None or fan.get("control_enabled") is True)
-        device_name = (self.device_combo.currentText() or "").lower()
-        if "nvidia" in device_name or "geforce" in device_name:
-            cap["voltage_offset"] = False
-            cap["min_voltage"] = False
-            cap["max_voltage"] = False
-        else:
-            cap["voltage_boost"] = False
+            fan.get("speed_max") is not None or fan.get("pwm_max") is not None
+            or fan.get("control_enabled") is True)
+
+    def _update_live_readings(self, stats):
+        values = read_gpu_metrics(stats)
+        for key, widget in self.live_readings.items():
+            widget.setText(values[key])
+
+    def _refresh_live(self):
+        if not self.gpu_id or self.pending or not self.isVisible():
+            return
+        try:
+            current = self.client.device_stats(self.gpu_id)
+            if isinstance(current, dict):
+                self.stats = current
+                self._update_live_readings(current)
+        except LactError:
+            # Monitoring elsewhere in Vitalux is unaffected by a service restart.
+            pass
 
     def _load_fields(self):
         config = self.current_config
