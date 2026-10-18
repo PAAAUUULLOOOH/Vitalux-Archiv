@@ -48,12 +48,12 @@ Scrollen folgt der eingestellten Monitor-Bildwiederholrate (ohne FPS-Garantie); 
 
 ### Vitalux GPU-Tuning
 
-Vitalux erkennt AMD-, NVIDIA- und Intel-Grafikkarten wie bisher automatisch über Linux – **auch ohne aktivierte GPU-Steuerung**. Im Grafik-Reiter stehen bei unterstützter Hardware Power-Limit, GPU-/VRAM-Takt, Spannung/Undervolting, Lüftermodus/-kurve und Profile zur Verfügung. Ein separater GPU-Tuning-Desktopclient ist **nicht** nötig.
+Vitalux erkennt AMD-, NVIDIA- und Intel-Grafikkarten automatisch. Im Grafik-Reiter zeigt die Anwendung **aktuelle GPU-/VRAM-Taktraten, Spannung, Temperatur, Leistung, Auslastung und Lüfterdrehzahl**. Unterstützte Power-Limits, Taktgrenzen, RDNA4-Taktoffsets, Undervolting und Lüfterkurven lassen sich direkt bearbeiten; nicht unterstützte Regler bleiben ausgeblendet.
 
 **Ersteinrichtung in Vitalux:** Der originale GPU-Steuerungsdienst wird **mit der Vitalux-Vollversion (ZIP und AppImage) mitgeliefert**. Auf **GPU-Steuerung einrichten** klicken und die einmalige Administratorabfrage bestätigen. Vitalux legt daraufhin einen eigenen Systemdienst `vitalux-gpu.service` an und erteilt dem aktuellen Benutzer kontrolliert Zugriff. Dafür sind `systemd` und `pkexec` (polkit) auf dem Linux-Host erforderlich. Das AppImage selbst läuft weiterhin ohne Root-Rechte. Für AppImages werden die nötigen Einrichtungsdateien vor der Administratorabfrage sicher außerhalb des temporären AppImage-Mounts bereitgestellt. Der Systemdienst bleibt nach einem Vitalux-Neustart verfügbar.
 
 - Automatische GPU-Auswahl (dedizierte GPUs bevorzugt), bestehendes Live-Monitoring bleibt unverändert.
-- GPU-Parameter und Profile im Vitalux-Farbschema. Prozess-/GameMode-Profilregeln, automatische Auswahl und Expertenparameter.
+- Getrennte Bereiche für Live-Werte, Profile, Leistung/Spannung und Lüfter. Eigene Lüfterkurven nutzen eine auswählbare Temperaturquelle. Expertenparameter sind standardmäßig eingeklappt.
 - **Änderungen testen → Bestätigen oder Zurücksetzen.** Die originale Engine macht unbestätigte Änderungen automatisch rückgängig (standardmäßig nach 5 Sekunden).
 - Hardware, Treiber und Kernel bestimmen, welche Werte tatsächlich bearbeitet werden können. Für einzelne AMD-Overclocking-Optionen kann die bewusste Aktivierung entsprechender Kernel-Funktionen erforderlich sein. Diese nimmt Vitalux nicht ohne Einwilligung vor.
 

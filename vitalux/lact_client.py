@@ -53,7 +53,15 @@ class LactClient:
         if not isinstance(response, dict) or response.get("status") not in ("ok", "error"):
             raise LactError("Unbekanntes Antwortformat der GPU-Steuerung.")
         if response["status"] == "error":
-            raise LactError(str(response.get("data") or "GPU-Einstellung wurde abgelehnt."))
+            data = response.get("data")
+            if isinstance(data, dict):
+                # Original backend often wraps Rust deserialization errors.
+                description = data.get("description") or data.get("message")
+                source = data.get("source")
+                if isinstance(source, dict):
+                    description = source.get("description") or description
+                raise LactError(str(description or "GPU-Einstellung wurde abgelehnt."))
+            raise LactError(str(data or "GPU-Einstellung wurde abgelehnt."))
         return response.get("data")
 
     def devices(self):
@@ -125,7 +133,7 @@ def merged_gpu_config(current, overrides):
     updated = deepcopy(current)
     for key, value in overrides.items():
         if key not in ("power_cap", "performance_level", "fan_control_enabled",
-                       "fan_control_settings", *CLOCK_FIELDS):
+                       "fan_control_settings", "gpu_clock_offsets", *CLOCK_FIELDS):
             raise ValueError(f"Nicht freigegebenes Einstellungsfeld: {key}")
         if key == "fan_control_enabled" and not isinstance(value, bool):
             raise ValueError("Ungültige Lüftersteuerung.")
@@ -136,6 +144,13 @@ def merged_gpu_config(current, overrides):
                 raise ValueError("Das Power-Limit muss positiv und endlich sein.")
         if key == "performance_level" and value not in ("auto", "low", "high", "manual", None):
             raise ValueError("Unbekannter Performance-Modus.")
+        if key == "gpu_clock_offsets" and not (
+            isinstance(value, dict) and all(
+                isinstance(k, str) and k.isdecimal() and type(v) is int
+                for k, v in value.items()
+            )
+        ):
+            raise ValueError("Ungültige GPU-Takt-Offsets.")
         if key == "fan_control_settings" and value is not None and not isinstance(value, dict):
             raise ValueError("Ungültige Lüfterparameter.")
         updated[key] = deepcopy(value)
@@ -180,3 +195,76 @@ def format_fan_curve(curve):
         )
     except (TypeError, ValueError):
         return ""
+
+
+DEFAULT_FAN_CURVE = {"40": .3, "50": .35, "60": .5, "70": .75, "80": 1.0}
+
+
+def fan_temperature_sources(stats):
+    """Return temperature sensor keys the original service allows for fan control."""
+    if not isinstance(stats, dict):
+        return ["edge"]
+    temps = stats.get("temps") or {}
+    if not isinstance(temps, dict):
+        return ["edge"]
+    choices = [name for name, row in temps.items()
+               if isinstance(name, str) and isinstance(row, dict)
+               and not row.get("display_only", False) and row.get("current") is not None]
+    return choices or ["edge"]
+
+
+def complete_fan_settings(current, stats, *, mode, speed_percent, curve):
+    """Produce the complete required LACT 0.10.1 FanControlSettings schema.
+
+    In addition to mode/speed/curve the service *requires* temperature_key
+    and interval_ms, even for an initially unconfigured GPU.
+    """
+    if mode not in ("static", "curve"):
+        raise ValueError("Unbekannter Lüftermodus.")
+    if not isinstance(speed_percent, (int, float)) or isinstance(speed_percent, bool) or not math.isfinite(speed_percent) or not 0 <= speed_percent <= 100:
+        raise ValueError("Lüftergeschwindigkeit muss zwischen 0 und 100 % liegen.")
+    result = deepcopy(current) if isinstance(current, dict) else {}
+    temps = fan_temperature_sources(stats)
+    fan = stats.get("fan") or {} if isinstance(stats, dict) else {}
+    if not isinstance(fan, dict):
+        fan = {}
+    sensor = result.get("temperature_key") or fan.get("temperature_key")
+    if not isinstance(sensor, str) or not sensor.strip():
+        sensor = "edge" if "edge" in temps else temps[0]
+    result["temperature_key"] = sensor
+    interval = result.get("interval_ms")
+    result["interval_ms"] = interval if type(interval) is int and 100 <= interval <= 60000 else 500
+    result["mode"] = mode
+    result["static_speed"] = float(speed_percent) / 100
+    existing_curve = result.get("curve")
+    result["curve"] = deepcopy(curve if mode == "curve" else existing_curve or DEFAULT_FAN_CURVE)
+    if not isinstance(result["curve"], dict) or len(result["curve"]) < 2:
+        raise ValueError("Die Lüfterkurve benötigt mindestens zwei Punkte.")
+    return result
+
+
+def read_gpu_metrics(stats):
+    """Present current readings, not editable clock limits, without invented data."""
+    stats = stats if isinstance(stats, dict) else {}
+    clocks = stats.get("clockspeed") or {}
+    power = stats.get("power") or {}
+    fan = stats.get("fan") or {}
+    voltage = stats.get("voltage") or {}
+    temps = stats.get("temps") or {}
+    def sub(mapping, key):
+        return mapping.get(key) if isinstance(mapping, dict) else None
+    def fmt(value, unit, digits=0):
+        return "–" if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) else f"{value:.{digits}f} {unit}"
+    temps = temps if isinstance(temps, dict) else {}
+    edge = sub(temps, "edge") or sub(temps, "junction")
+    v = sub(edge, "current")
+    return {
+        "gpu": fmt(sub(clocks, "gpu_clockspeed"), "MHz"),
+        "vram": fmt(sub(clocks, "vram_clockspeed"), "MHz"),
+        "voltage": fmt(sub(voltage, "gpu"), "mV"),
+        "temperature": fmt(v, "°C", 1),
+        "power": fmt(sub(power, "average") if sub(power, "average") is not None else sub(power, "current"), "W", 1),
+        "fan": fmt(sub(fan, "speed_current"), "U/min"),
+        "power_cap": fmt(sub(power, "cap_current"), "W", 1),
+        "load": fmt(sub(stats, "busy_percent"), "%"),
+    }

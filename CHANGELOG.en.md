@@ -4,6 +4,13 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.81] - 2026-10-18
+- **Fixed custom GPU fan curves:** The complete service-required data now includes the temperature sensor, polling interval and full curve. Existing settings are retained.
+- **Live GPU measurements on entry:** Current GPU/VRAM clocks, voltage, temperature, power consumption, power limit, usage and fan RPM are displayed and periodically refreshed while the service is connected.
+- **Cleaner GPU tuning layout:** Separate theme-aware sections for live telemetry, profiles, clock/power settings and fan controls. Unsupported controls are hidden; advanced settings start collapsed.
+- **RX 9070 XT / RDNA4:** Real driver-reported clock/voltage limits are respected and the supported GPU clock offset is editable. Existing driver values can be viewed without unintentionally writing overrides.
+- Added regression tests for fan schema, real hardware telemetry, apply/revert/confirm operations.
+
 ## [v0.9.3.80] - 2026-10-18
 - **Fixed AppImage GPU setup:** Vitalux stages the bundled service installer and engine in a private temporary directory before administrator authorization, avoiding permission errors when root cannot access the AppImage FUSE mount. Temporary files are removed afterward.
 - **Protected built-in accent colors:** Red and all other eight fixed colors remain available and cannot be edited or deleted, including after updates. Incorrect legacy custom entries overlapping presets are automatically cleaned up; only user-created colors can be changed.
