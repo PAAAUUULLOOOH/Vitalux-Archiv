@@ -66,7 +66,6 @@ class MainWindow(QMainWindow):
         self._alerts = AlertMonitor()
         self._force_quit = False
         self.restart_requested = False
-        self._tray_announce = False
         self._update_notice_queued = False
         self._notified_update_version = str(settings.get('last_notified_update_version', ''))
         self._tray_was_maximized = False
@@ -795,10 +794,6 @@ class MainWindow(QMainWindow):
         if not self._force_quit and settings.get('close_to_tray', True):
             if self._hide_to_tray():
                 event.ignore()
-                if not self._tray_announce and QSystemTrayIcon.supportsMessages():
-                    self._tray.showMessage(APP_NAME, tr('Vitalux läuft in der Systemleiste weiter.'),
-                                           QSystemTrayIcon.Information, 4000)
-                    self._tray_announce = True
                 return
             # On systems without an available system tray, do not silently
             # terminate the process when the user expects X to hide the app.

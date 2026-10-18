@@ -145,6 +145,21 @@ class AlertThresholdField(QFrame):
 
 
 class PreferencesPage(Page):
+    # Built-in colors are never editable or removable, even when older saved
+    # settings incorrectly contain an entry with the same hex color.
+    PRESET_ACCENTS = (
+        ('Distribution', 'auto'),
+        ('Vitalux Blau', '#4f8cff'),
+        ('Cyan', '#52d3ff'),
+        ('Violett', '#a78bfa'),
+        ('Grün', '#73ba25'),
+        ('Orange', '#f59e0b'),
+        ('Gelb', '#facc15'),
+        ('Rot', '#ef4444'),
+        ('Rosa', '#f472b6'),
+    )
+    PRESET_COLORS = frozenset(value for _, value in PRESET_ACCENTS)
+
     DEFAULTS = {
         'theme': 'glass', 'accent': '#4f8cff', 'motion': 'smooth',
         'background_style': 'theme_default', 'custom_background_fit': 'cover',
@@ -183,9 +198,7 @@ class PreferencesPage(Page):
         accent_selector.addWidget(label('Akzentfarbe', 'strong'))
         accent = QComboBox()
         self.accent_combo = accent
-        for title, value in [('Distribution', 'auto'), ('Vitalux Blau', '#4f8cff'),
-            ('Cyan', '#52d3ff'), ('Violett', '#a78bfa'), ('Grün', '#73ba25'),
-            ('Orange', '#f59e0b'), ('Gelb', '#facc15'), ('Rot', '#ef4444'), ('Rosa', '#f472b6')]:
+        for title, value in self.PRESET_ACCENTS:
             accent.addItem(title, value)
         self.custom_accents = self._read_custom_accents()
         stored = settings.get('accent', '#4f8cff')
@@ -544,14 +557,22 @@ class PreferencesPage(Page):
                 continue
             color = QColor(str(entry.get('color', '')))
             name = str(entry.get('name', '')).strip()[:32]
-            if color.isValid() and name and color.name() not in seen:
+            if (color.isValid() and name and color.name() not in seen
+                    and color.name() not in PreferencesPage.PRESET_COLORS):
                 result.append({'name': name, 'color': color.name()})
                 seen.add(color.name())
+        # Repair settings written by older releases, so the protected default
+        # palette survives subsequent upgrades and application restarts.
+        if saved != result:
+            settings.set('custom_accents', result)
         return result
 
     def _sync_custom_accent_actions(self):
         selected = self.accent_combo.currentData()
-        own_color_selected = any(item['color'] == selected for item in self.custom_accents)
+        own_color_selected = (
+            selected not in self.PRESET_COLORS
+            and any(item['color'] == selected for item in self.custom_accents)
+        )
         self.edit_custom_accent_button.setVisible(own_color_selected)
         self.remove_custom_accent_button.setVisible(own_color_selected)
 
@@ -573,7 +594,7 @@ class PreferencesPage(Page):
         original_color = combo.currentData()
         entry = next((item for item in self.custom_accents
                       if item['color'] == original_color), None)
-        if entry is None or index < 0:
+        if entry is None or index < 0 or original_color in self.PRESET_COLORS:
             return
         updated = QColorDialog.getColor(
             QColor(original_color), self, tr('Eigene Farbe bearbeiten'))
@@ -608,7 +629,8 @@ class PreferencesPage(Page):
 
     def remove_custom_accent(self):
         value = self.accent_combo.currentData()
-        if not any(item['color'] == value for item in self.custom_accents):
+        if (value in self.PRESET_COLORS
+                or not any(item['color'] == value for item in self.custom_accents)):
             return
         self.custom_accents = [item for item in self.custom_accents if item['color'] != value]
         settings.set('custom_accents', self.custom_accents)

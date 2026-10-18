@@ -8,14 +8,14 @@ from copy import deepcopy
 
 from PySide6.QtCore import Qt, QTimer, QProcess
 from PySide6.QtWidgets import (QFormLayout, QHBoxLayout, QInputDialog, QLineEdit,
-                              QSpinBox, QDoubleSpinBox, QPlainTextEdit, QWidget,
-                              QVBoxLayout, QGroupBox, QMenu)
+                              QSpinBox, QDoubleSpinBox, QPlainTextEdit, QMenu)
 
 from .ui_locale import QPushButton, QComboBox, QMessageBox, QCheckBox
 from .widgets import Card, label
 from .lact_client import (LactClient, LactError, CLOCK_FIELDS, merged_gpu_config,
                           parse_fan_curve, format_fan_curve)
 from .i18n import tr
+from .gpu_setup import stage_gpu_setup, remove_gpu_setup
 
 
 class LactTuningCard(Card):
@@ -43,6 +43,7 @@ class LactTuningCard(Card):
             "Einmalige Administratorbestätigung erforderlich.")
         self.body.addWidget(self.setup_button)
         self.setup_process = None
+        self.setup_staging_dir = None
         devices = QHBoxLayout()
         self.device_combo = QComboBox()
         self.device_combo.currentIndexChanged.connect(self._device_selected)
@@ -195,26 +196,38 @@ class LactTuningCard(Card):
             self._error("Die Administratorabfrage (pkexec) fehlt auf diesem System.")
             return
         root = Path(__file__).resolve().parents[1]
-        installer = root / "packaging" / "vitalux-gpu-service.py"
-        engine = root / "bin" / "vitalux-gpu-engine"
-        if not installer.is_file() or not engine.is_file():
-            self._error("Die Vitalux-GPU-Steuerung fehlt im Programm-Paket. "
-                        "Bitte die vollständige neue Vitalux-Version verwenden.")
+        try:
+            self.setup_staging_dir, installer = stage_gpu_setup(root)
+        except (OSError, ValueError) as exc:
+            self._error(tr("GPU-Steuerung konnte nicht vorbereitet werden: {}").format(exc))
             return
         self.setup_button.setEnabled(False)
         self.status.setText("Vitalux GPU-Steuerung wird eingerichtet. Administratorabfrage öffnen.")
         process = QProcess(self)
         self.setup_process = process
         process.finished.connect(self._setup_finished)
+        process.errorOccurred.connect(self._setup_process_error)
         process.start(shutil.which("pkexec"), ["/usr/bin/python3", str(installer), "--install"])
+
+    def _setup_process_error(self, _error):
+        process = self.setup_process
+        if process is not None and process.state() == QProcess.NotRunning:
+            self._setup_finished(1, QProcess.CrashExit)
+
+    def _cleanup_setup_staging(self):
+        stage, self.setup_staging_dir = self.setup_staging_dir, None
+        remove_gpu_setup(stage)
 
     def _setup_finished(self, code, _status):
         process = self.setup_process
         if process is None:
             return
         error_text = bytes(process.readAllStandardError()).decode("utf-8", "replace").strip()
+        if not error_text and process.error() != QProcess.UnknownError:
+            error_text = process.errorString()
         process.deleteLater()
         self.setup_process = None
+        self._cleanup_setup_staging()
         self.setup_button.setEnabled(True)
         if code == 0:
             self.status.setText("Vitalux GPU-Steuerung gestartet. Grafikkarte wird verbunden.")
