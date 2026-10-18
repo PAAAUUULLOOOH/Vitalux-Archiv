@@ -43,6 +43,12 @@ def check_preferences(app):
         original_notice = QMessageBox.information
         try:
             settings.set("accent", "auto")
+            # Older releases could mistakenly persist an immutable preset as
+            # a user accent, making Red deletable and removable from the menu.
+            settings.set("custom_accents", [
+                {"name": "Rot (alt)", "color": "#ef4444"},
+                {"name": "Vitalux Blau (alt)", "color": "#4f8cff"},
+            ])
             window = FakeWindow()
             page = PreferencesPage(window)
             page.resize(1100, 900)
@@ -102,6 +108,22 @@ def check_preferences(app):
                 assert page.background_combo.findData(name) == -1
             assert page.accent_combo.findData('#facc15') >= 0
             assert page.accent_combo.findData('#ef4444') >= 0
+            assert settings.get("custom_accents") == [], "Old preset duplicates must be repaired"
+            for name, color in PreferencesPage.PRESET_ACCENTS:
+                assert page.accent_combo.findData(color) >= 0, name
+                page.accent_combo.setCurrentIndex(page.accent_combo.findData(color))
+                app.processEvents()
+                assert not page.edit_custom_accent_button.isVisible(), name
+                assert not page.remove_custom_accent_button.isVisible(), name
+                page.remove_custom_accent()  # Even a direct call must be safe.
+                page.edit_custom_accent()
+                assert page.accent_combo.findData(color) >= 0, name
+            assert settings.get("custom_accents") == []
+            # Reopening after update must restore all built-in color entries.
+            restored = PreferencesPage(window)
+            for name, color in PreferencesPage.PRESET_ACCENTS:
+                assert restored.accent_combo.findData(color) >= 0, name
+            restored.close()
             assert not hasattr(page, 'background_animate')
             assert page.background_combo.findData('theme_default') >= 0
             assert [page.background_combo.itemText(page.background_combo.findData(key))
