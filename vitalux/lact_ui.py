@@ -381,22 +381,37 @@ class LactTuningCard(Card):
     def _collect(self):
         overrides = {}
         for key, widget in self.fields.items():
-            overrides[key] = None if widget.property("lact_null") else widget.value()
-        overrides["performance_level"] = self.performance.currentData()
-        overrides["fan_control_enabled"] = self.fan_enabled.isChecked()
-        fan = deepcopy(self.current_config.get("fan_control_settings") or {})
-        fan["mode"] = self.fan_mode.currentData()
-        fan["static_speed"] = self.fan_speed.value() / 100.0
-        if fan["mode"] == "curve" and self.fan_enabled.isChecked():
-            fan["curve"] = parse_fan_curve(self.fan_curve.toPlainText())
-        overrides["fan_control_settings"] = fan
+            if not widget.isEnabled():
+                continue
+            value = None if widget.property("lact_null") else widget.value()
+            if value != self.current_config.get(key):
+                overrides[key] = value
+        mode = self.performance.currentData()
+        if mode != self.current_config.get("performance_level"):
+            overrides["performance_level"] = mode
+        if self.capabilities.get("fan", False):
+            enabled = self.fan_enabled.isChecked()
+            if enabled != bool(self.current_config.get("fan_control_enabled", False)):
+                overrides["fan_control_enabled"] = enabled
+            if enabled:
+                fan = deepcopy(self.current_config.get("fan_control_settings") or {})
+                fan["mode"] = self.fan_mode.currentData()
+                fan["static_speed"] = self.fan_speed.value() / 100.0
+                if fan["mode"] == "curve":
+                    fan["curve"] = parse_fan_curve(self.fan_curve.toPlainText())
+                if fan != self.current_config.get("fan_control_settings"):
+                    overrides["fan_control_settings"] = fan
         config = merged_gpu_config(self.current_config, overrides)
         advanced = json.loads(self.extra.toPlainText() or "{}")
         if not isinstance(advanced, dict):
             raise ValueError("Erweiterte Optionen müssen ein JSON-Objekt sein.")
-        for key in advanced:
-            if key in overrides:
-                raise ValueError("Erweiterte Option überschreibt eine reguläre Einstellung.")
+        handled = {"power_cap", "performance_level", "fan_control_enabled",
+                   "fan_control_settings", *CLOCK_FIELDS}
+        if handled.intersection(advanced):
+            raise ValueError("Erweiterte Option überschreibt eine reguläre Einstellung.")
+        for key in tuple(config):
+            if key not in handled and key not in advanced:
+                del config[key]
         config.update(advanced)
         return config
 
