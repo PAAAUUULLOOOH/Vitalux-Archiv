@@ -1,4 +1,5 @@
 from collections import deque
+from pathlib import Path
 
 from PySide6.QtCore import Qt, QThread, QTimer, Signal, QVariantAnimation, QEasingCurve, QPoint, QRect, QEventLoop
 from PySide6.QtGui import QRegion, QAction
@@ -60,7 +61,7 @@ class MainWindow(QMainWindow):
             "cpu", "ram", "gpu", "vram", "net_down", "net_up", "io_read", "io_write",
             "cpu_temp", "gpu_temp", "gpu_clock", "gpu_power")}
         self._extrema = SessionExtrema()
-        self.lab = MonitoringLab()
+        self.lab = MonitoringLab(snapshot_path=Path(settings.PATH).with_name("insights-snapshots.json"))
         self._focus_window = None
         self.last_sample = None
         self.pages = []
