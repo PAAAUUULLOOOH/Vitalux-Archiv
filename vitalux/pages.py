@@ -13,7 +13,6 @@ from .i18n import tr
 from .sensors import drives, fmt_bytes, fmt_duration, fmt_rate, system_static
 from .monitor_extra import graphics_runtime, system_gpu_device
 from . import smart_monitor
-from .lact_ui import LactTuningCard
 from .smart_ui import SmartPane
 from .widgets import (Bar, Card, ChipsGrid, GaugeBox, GaugeCard, HistoryGraph, ChartPanel, KeyValue,
                       Meter, label, legend, SidebarToggle)
@@ -440,52 +439,131 @@ class CpuPage(Page):
             m.set(v)
 
 
-# ------------------------------------------------------------------ Grafik
+# ------------------------------------------------------------------ Grafik (schreibgeschützt)
 class GpuCard(Card):
+    """One coherent read-only GPU card: no privileged service or tuning controls."""
+
     def __init__(self):
         super().__init__()
         self.name = label("–", "bigName", wrap=True)
-        self.meta = label("", "muted")
+        self.meta = label("", "muted", wrap=True)
         self.body.addWidget(self.name)
         self.body.addWidget(self.meta)
+
         gauges = QHBoxLayout()
-        self.g_use, self.g_vram = GaugeBox("Auslastung"), GaugeBox("Videospeicher")
+        gauges.setSpacing(12)
+        self.g_use = GaugeBox("Auslastung")
+        self.g_vram = GaugeBox("Videospeicher")
         gauges.addWidget(self.g_use, 1)
         gauges.addWidget(self.g_vram, 1)
         self.body.addLayout(gauges)
-        self.body.addWidget(label('LIVE-SENSOREN', 'cardTitle'))
-        self.kv = {k: KeyValue(k) for k in ("Temperatur", "Hotspot", "Leistung", "Lüfter", "Lüfterdrehzahl", "GPU-Takt", "Speicher-Takt")}
-        live_metrics = QGridLayout()
-        live_metrics.setHorizontalSpacing(22)
-        for i, key in enumerate(('Temperatur', 'Hotspot', 'Leistung', 'Lüfter')):
-            live_metrics.addWidget(self.kv[key], i // 2, i % 2)
-        self.body.addLayout(live_metrics)
-        self.graph = ChartPanel(['Auslastung', 'VRAM'], [theme.accent(), theme.secondary_accent()])
-        self.body.addWidget(self.graph)
-        self.body.addWidget(label('TECHNISCHE DETAILS', 'cardTitle'))
-        technical = QGridLayout()
-        for i, key in enumerate(('Lüfterdrehzahl', 'GPU-Takt', 'Speicher-Takt')):
-            technical.addWidget(self.kv[key], i // 2, i % 2)
-        self.body.addLayout(technical)
-        self.h_use, self.h_vram = deque(maxlen=900), deque(maxlen=900)
 
-    def refresh(self, g):
-        self.name.setText(g["name"])
-        self.meta.setText(" · ".join(x for x in (g["vendor"], g.get("driver") and f"{tr('Treiber')} {g['driver']}") if x))
-        self.g_use.set(g["usage"], "")
-        pct = g["vram_used"] / g["vram_total"] * 100 if g["vram_total"] else None
-        self.g_vram.set(pct, _vram_text(g) or "nicht verfügbar")
-        fmt = lambda v, u: f"{v:.0f} {u}" if v is not None else tr("nicht verfügbar")
-        self.kv["Temperatur"].set(fmt(g["temp"], "°C"))
-        self.kv["Hotspot"].set(fmt(g.get("hotspot"), "°C"))
-        self.kv["Leistung"].set(fmt(g["power"], "W"))
-        self.kv["Lüfter"].set(fmt(g["fan"], "%"))
-        self.kv["Lüfterdrehzahl"].set(fmt(g.get("fan_rpm"), "RPM"))
-        self.kv["GPU-Takt"].set(fmt(g["clock"], "MHz"))
-        self.kv["Speicher-Takt"].set(fmt(g["clock_mem"], "MHz"))
-        self.h_use.append(g["usage"] or 0)
-        self.h_vram.append(pct or 0)
-        self.graph.set_series([(self.h_use, theme.accent()), (self.h_vram, theme.secondary_accent())])
+        self.body.addWidget(label("AKTUELLE GPU-WERTE", "cardTitle"))
+        self.kv = {key: KeyValue(key) for key in (
+            "GPU-Takt", "Speicher-Takt", "Temperatur", "Hotspot",
+            "Spannung", "Leistung", "Lüfterdrehzahl", "Lüfter",
+            "PCIe aktuell", "PCIe maximal", "Datenquelle", "Mesa",
+        )}
+        live = QGridLayout()
+        live.setHorizontalSpacing(18)
+        live.setVerticalSpacing(10)
+        for i, name in enumerate((
+            "GPU-Takt", "Speicher-Takt", "Temperatur", "Hotspot",
+            "Spannung", "Leistung", "Lüfterdrehzahl", "Lüfter",
+        )):
+            live.addWidget(self.kv[name], i // 2, i % 2)
+        self.body.addLayout(live)
+
+        self.body.addWidget(label("AUSLASTUNG UND VIDEOSPEICHER · VERLAUF", "cardTitle"))
+        self.graph = ChartPanel(["Auslastung", "VRAM"], [theme.accent(), theme.secondary_accent()])
+        self.body.addWidget(self.graph)
+        self.h_use = deque(maxlen=900)
+        self.h_vram = deque(maxlen=900)
+        self.h_temp = deque(maxlen=900)
+        self.h_clock = deque(maxlen=900)
+
+        # Genuine detail-on-demand, not a second duplicate overview.
+        self.more_btn = QPushButton("Technische Details anzeigen")
+        self.more_btn.setCheckable(True)
+        self.more_btn.toggled.connect(self._toggle_details)
+        self.body.addWidget(self.more_btn)
+        self.details = QWidget()
+        detail_layout = QVBoxLayout(self.details)
+        detail_layout.setContentsMargins(0, 0, 0, 0)
+        detail_layout.setSpacing(12)
+        technical = QGridLayout()
+        technical.setHorizontalSpacing(18)
+        for i, name in enumerate(("PCIe aktuell", "PCIe maximal", "Datenquelle", "Mesa")):
+            technical.addWidget(self.kv[name], i // 2, i % 2)
+        detail_layout.addLayout(technical)
+        self.sensor_hint = label(
+            "Fehlende Werte bedeuten: Der Linux-Treiber liefert dafür momentan keine Daten.",
+            "muted", wrap=True)
+        detail_layout.addWidget(self.sensor_hint)
+        self.temperature_graph = ChartPanel(["GPU-Temperatur"], [theme.accent()], mode="temperature")
+        self.clock_graph = ChartPanel(["GPU-Takt"], [theme.secondary_accent()], mode="clock")
+        detail_layout.addWidget(label("TEMPERATURVERLAUF", "cardTitle"))
+        detail_layout.addWidget(self.temperature_graph)
+        detail_layout.addWidget(label("TAKTVERLAUF", "cardTitle"))
+        detail_layout.addWidget(self.clock_graph)
+        self.body.addWidget(self.details)
+        self.details.hide()
+
+        self.extrema = KeyValue("GPU-Temperatur · Min/Max seit Start")
+        self.body.addWidget(self.extrema)
+
+    def _toggle_details(self, checked):
+        self.details.setVisible(checked)
+        self.more_btn.setText(tr("Technische Details ausblenden") if checked
+                              else tr("Technische Details anzeigen"))
+
+    def refresh(self, g, history=None, extrema=None, mesa=None):
+        from .monitor_insights import format_range, valid_number
+
+        self.name.setText(g.get("name") or tr("nicht verfügbar"))
+        vendor = g.get("vendor")
+        driver = g.get("driver")
+        self.meta.setText(" · ".join(str(x) for x in (
+            vendor, f"{tr('Treiber')} {driver}" if driver else None
+        ) if x))
+        self.g_use.set(g.get("usage"), "")
+        used, total = g.get("vram_used"), g.get("vram_total")
+        pct = used / total * 100 if valid_number(used) and valid_number(total) and total > 0 else None
+        self.g_vram.set(pct, _vram_text(g) if total else tr("nicht verfügbar"))
+
+        def fmt(value, unit, places=0):
+            return f"{value:.{places}f} {unit}" if valid_number(value) else tr("nicht verfügbar")
+        for field, source, unit in (
+            ("GPU-Takt", "clock", "MHz"), ("Speicher-Takt", "clock_mem", "MHz"),
+            ("Temperatur", "temp", "°C"), ("Hotspot", "hotspot", "°C"),
+            ("Spannung", "voltage", "mV"), ("Leistung", "power", "W"),
+            ("Lüfterdrehzahl", "fan_rpm", "U/min"), ("Lüfter", "fan", "%"),
+        ):
+            self.kv[field].set(fmt(g.get(source), unit))
+        for field, source in (("PCIe aktuell", "pcie_current"), ("PCIe maximal", "pcie_max")):
+            self.kv[field].set(g.get(source) or tr("nicht verfügbar"))
+        self.kv["Datenquelle"].set(g.get("sensor_source") or tr("nicht verfügbar"))
+        self.kv["Mesa"].set(mesa or tr("nicht verfügbar"))
+        self.extrema.set(format_range(extrema or {}, "gpu_temp", "°C", 1))
+
+        self.h_use.append(g.get("usage"))
+        self.h_vram.append(pct)
+        self.h_temp.append(g.get("temp"))
+        self.h_clock.append(g.get("clock"))
+        if history:
+            self.graph.set_series([
+                (history.get("gpu", self.h_use), theme.accent()),
+                (history.get("vram", self.h_vram), theme.secondary_accent()),
+            ])
+            self.temperature_graph.set_series([
+                (history.get("gpu_temp", self.h_temp), theme.accent())])
+            self.clock_graph.set_series([
+                (history.get("gpu_clock", self.h_clock), theme.secondary_accent())])
+        else:
+            self.graph.set_series([(self.h_use, theme.accent()),
+                                   (self.h_vram, theme.secondary_accent())])
+            self.temperature_graph.set_series([(self.h_temp, theme.accent())])
+            self.clock_graph.set_series([(self.h_clock, theme.secondary_accent())])
 
 
 class GpuPage(Page):
@@ -493,13 +571,13 @@ class GpuPage(Page):
         super().__init__("Grafik", "GPU-Auslastung, Videospeicher und Sensoren")
         self.cards = []
         self.none = Card()
-        self.none.body.addWidget(label("Keine GPU-Daten gefunden. Unterstützt werden NVIDIA (nvidia-smi), AMD (amdgpu) und Intel (Name, ohne Auslastung).", wrap=True))
+        self.none.body.addWidget(label(
+            "Keine GPU-Daten gefunden. Unterstützt werden NVIDIA, AMD und Intel, "
+            "soweit Linux entsprechende Sensorwerte liefert.", wrap=True))
         self.content.addWidget(self.none)
-        self.tuning = LactTuningCard()
-        self.content.addWidget(self.tuning)
 
     def refresh(self, d, h):
-        gpus = d["gpus"]
+        gpus = d.get("gpus") or []
         self.none.setVisible(not gpus)
         while len(self.cards) < len(gpus):
             card = GpuCard()
@@ -508,7 +586,9 @@ class GpuPage(Page):
         for i, card in enumerate(self.cards):
             card.setVisible(i < len(gpus))
             if i < len(gpus):
-                card.refresh(gpus[i])
+                card.refresh(
+                    gpus[i], history=h if i == 0 else None,
+                    extrema=d.get("session_extrema"), mesa=system_static().get("mesa"))
 
 
 # ------------------------------------------------------------------ Speicher
