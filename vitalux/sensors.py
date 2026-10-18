@@ -60,9 +60,7 @@ def collect():
     net_total = psutil.net_io_counters()
     dio = psutil.disk_io_counters()
     sensor_data = extended.sensor_info()
-    from .monitor_insights import motherboard_temperature
     return {
-        "motherboard": motherboard_temperature(sensor_data),
         "cpu": cpu_info(),
         "ram": ram_info(),
         "disks": disk_info(),
