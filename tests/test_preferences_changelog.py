@@ -55,6 +55,17 @@ def check_preferences(app):
             page.show()
             app.processEvents()
 
+            # Both selectors must be equally compact even at wide settings
+            # windows; long custom accent names remain readable on hover.
+            assert abs(page.accent_combo.width() - page.mode.width()) <= 2, (
+                page.accent_combo.width(), page.mode.width())
+            assert page.accent_combo.sizePolicy().horizontalPolicy() == page.mode.sizePolicy().horizontalPolicy() or page.accent_combo.maximumWidth() == page.mode.width()
+            assert page.accent_combo.toolTip() == page.accent_combo.currentText()
+            width_before = page.accent_combo.width()
+            page.resize(1400, 900)
+            app.processEvents()
+            assert page.accent_combo.width() == width_before
+
             warning_x = set()
             warning_gaps = []
             for name, spin in page.alert_boxes.items():
