@@ -50,7 +50,7 @@ Scrollen folgt der eingestellten Monitor-Bildwiederholrate (ohne FPS-Garantie); 
 
 **Grafik:** Auslastung, belegter Videospeicher, aktuelle GPU-/VRAM-Taktraten, Temperatur/Hotspot, Spannung, Leistung und Lüfterwerte in einer übersichtlichen Ansicht. Aufklappbare Details zeigen verfügbare PCIe-Linkdaten (aktuell/maximal), Mesa-Version und die Sensor-Datenquelle. Live-Diagramme bieten 60 Sekunden, 5 und 15 Minuten Verlauf. Nicht vorhandene Werte erscheinen als **Nicht verfügbar**, niemals als erfundene Nullwerte.
 
-**CPU & Mainboard:** CPU-Temperaturverlauf, Mainboard-Hersteller/Modell/BIOS und – soweit von Linux eindeutig erkannt – ein eigener Temperaturverlauf für den Mainboard-Sensor. Kein Ersatz durch CPU- oder NVMe-Temperaturen.
+**CPU & System:** CPU-Temperaturverlauf, Mainboard-/BIOS-Basisdaten im System-Reiter; kein separater Mainboard-Temperaturbereich.
 
 **Analyse:** Min-/Max-Werte seit dem Start, manuell zurücksetzbar; sachlicher Hardwarestatus anhand der vorhandenen Warnwerte. Systemberichte lassen sich lokal als **TXT oder JSON** exportieren. Berichte können Hostnamen, System- und Netzwerkdaten enthalten; es erfolgt kein automatischer Upload.
 
