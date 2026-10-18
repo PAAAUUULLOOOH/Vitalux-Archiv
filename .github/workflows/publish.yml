@@ -112,7 +112,7 @@ jobs:
           mkdir -p "$DEST/LICENSES"
           cp LICENSES/LACT-MIT.txt "$DEST/LICENSES/LACT-MIT.txt"
           test -s "$DEST/bin/vitalux-gpu-engine"
-          "$DEST/bin/vitalux-gpu-engine" --version
+          "$DEST/bin/vitalux-gpu-engine" --help
           if ldd "$DEST/bin/vitalux-gpu-engine" | grep -F "not found"; then
             echo "Vitalux GPU engine has missing system library dependencies" >&2
             exit 1
