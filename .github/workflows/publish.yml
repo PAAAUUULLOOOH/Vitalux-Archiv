@@ -280,6 +280,7 @@ jobs:
           LD_LIBRARY_PATH="$PWD/lib" \
             "$PWD/runtime/bin/python3.12" \
             "$GITHUB_WORKSPACE/tests/test_preferences_changelog.py"
+          LD_LIBRARY_PATH="$PWD/lib" "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_protected_accents.py"
           LD_LIBRARY_PATH="$PWD/lib" "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_warning_render.py"
           LD_LIBRARY_PATH="$PWD/lib" "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_update_indicators.py"
           LD_LIBRARY_PATH="$PWD/lib" "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_sidebar_position_icons.py"
