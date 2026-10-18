@@ -730,3 +730,5 @@ EN_MORE.update({
     "VRAM-Takt Maximum": "Maximum VRAM clock",
     "Lüfterkurve · Temperatur °C: Drehzahl %": "Fan curve · temperature °C: speed %"
 })
+
+EN_MORE["Im Grafik-Reiter stehen aktuelle GPU-Taktraten, Spannung, Temperatur und Lüfterwerte. GPU-Tuning ist übersichtlich in Profile, Leistung und Lüftersteuerung gegliedert."] = "The Graphics tab shows live GPU clocks, voltage, temperatures and fan readings. GPU tuning is organized into profiles, power and fan controls."
