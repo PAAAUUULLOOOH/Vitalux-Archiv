@@ -667,3 +667,45 @@ EN_MORE.update({
 })
 
 EN_MORE["Keine GPU-Daten gefunden. Unterstützt werden NVIDIA, AMD und Intel, soweit Linux entsprechende Sensorwerte liefert."] = "No GPU data found. NVIDIA, AMD and Intel devices are supported where Linux exposes sensors."
+
+# Experimental Vitalux Insights panels, focus mode and nine-slide help guide.
+EN_MORE.update({
+    "Unter Vitalux Insights findest du Performance Detective, Gaming-Aufzeichnungen und Vergleichsmessungen.": "Vitalux Insights includes Performance Detective, gaming recordings and measurement comparisons.",
+    "Ereignis-Timeline, anklickbare Hardware-Übersicht und Fokusmodus für den zweiten Monitor findest du im Grafik-Reiter unter Vitalux Insights.": "The Graphics tab provides an event timeline, interactive hardware map and a second-monitor focus mode in Vitalux Insights.",
+    "Vitalux Insights · Performance-Analyse": "Vitalux Insights · Performance analysis",
+    "Rein lesende Analyse · gemessene Fakten und mögliche Ursachen werden unterschieden.": "Read-only analysis · facts and potential causes are clearly distinguished.",
+    "Fokusmodus für zweiten Monitor öffnen": "Open focus mode for second monitor",
+    "Performance Detective": "Performance Detective",
+    "Warte auf Messwerte …": "Waiting for live readings …",
+    "Gaming Session Analyzer": "Gaming Session Analyzer",
+    "Sitzungsname, z. B. CS2 oder Cyberpunk": "Session name, e.g. CS2 or Cyberpunk",
+    "Aufzeichnung starten": "Start recording",
+    "Stoppen & auswerten": "Stop and analyze",
+    "MangoHud-CSV importieren": "Import MangoHud CSV",
+    "Sitzung als JSON speichern": "Save session as JSON",
+    "Noch keine Gaming-Sitzung abgeschlossen.": "No gaming session completed yet.",
+    "FPS und 1%-Lows nur aus importierten MangoHud-Daten; 1%-Low ist bei Stichproben ein Näherungswert.": "FPS and 1% lows require imported MangoHud data; 1% low is approximate for sampled values.",
+    "Vorher-Nachher-Vergleich": "Before / after comparison",
+    "Vorher speichern": "Save before",
+    "Nachher speichern": "Save after",
+    "Speichere zuerst Vorher und Nachher.": "Capture before and after first.",
+    "Einzelne Momentaufnahmen sind kein Benchmark. Für belastbare Vergleiche gleiche Testbedingungen verwenden.": "Single snapshots are not benchmarks. Use identical test conditions for meaningful comparisons.",
+    "Ereignis-Timeline": "Event timeline",
+    "Wähle ein Ereignis, um die damaligen Werte zu sehen.": "Select an event to inspect its recorded readings.",
+    "Interaktive Hardware-Übersicht": "Interactive hardware overview",
+    "Komponenten auswählen · schematische Gruppierung, keine Aussage über den tatsächlichen PCIe-Kabelweg.": "Select components · schematic grouping, not an exact PCIe topology.",
+    "Klicke auf eine Komponente.": "Select a component for details.",
+    "Analysewerkzeuge einklappen": "Collapse analysis tools",
+    "Analysewerkzeuge anzeigen": "Show analysis tools",
+    "MangoHud-Protokoll öffnen": "Open MangoHud log",
+    "Gaming-Sitzung speichern": "Save gaming session",
+    "LIVE · FOKUSMODUS": "LIVE · FOCUS MODE",
+    "Vitalux · Fokusmodus": "Vitalux · Focus mode",
+    "Immer im Vordergrund": "Always on top",
+    "Nur vorhandene Sensordaten – keine Übertaktung oder Hardwaresteuerung.": "Actual sensor readings only – no overclocking or hardware control.",
+    "Anklicken, um echte Hardwareinformationen zu sehen": "Click to inspect real hardware information",
+    "GPU-Temperatur": "GPU temperature",
+    "CPU-Temperatur": "CPU temperature",
+    "GPU-Takt": "GPU clock",
+    "GPU-Leistung": "GPU power"
+})
