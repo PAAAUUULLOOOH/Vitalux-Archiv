@@ -14,7 +14,6 @@ import math
 import os
 import tempfile
 import statistics
-import time
 
 
 FIELDS = ("cpu_usage", "cpu_temp", "gpu_usage", "gpu_temp", "gpu_clock",
@@ -91,7 +90,9 @@ class MonitoringLab:
         self.events = deque(maxlen=300)
         self.prev = {}
         self.started = None
-        self.session = []
+        self.session = deque(maxlen=900)
+        self.session_count = 0
+        self.session_aggregates = {}
         self.session_name = ""
         self.last_session = None
         self.snapshots = [None, None]
@@ -110,8 +111,21 @@ class MonitoringLab:
         row = {"time": now, "metrics": current}
         self.history.append(row)
         self.recent.append(sample)
-        if self.started is not None and len(self.session) < 14400:
+        if self.started is not None:
             self.session.append(row)
+            self.session_count += 1
+            for key in FIELDS:
+                value = current.get(key)
+                if not number(value):
+                    continue
+                record = self.session_aggregates.get(key)
+                if record is None:
+                    record = self.session_aggregates[key] = {
+                        "count": 0, "sum": 0.0, "min": value, "max": value}
+                record["count"] += 1
+                record["sum"] += value
+                record["min"] = min(record["min"], value)
+                record["max"] = max(record["max"], value)
         limits = limits or {}
         checks = (
             ("cpu_temp", "CPU-Temperatur überschreitet Warnwert", limits.get("cpu_temp", 90)),
@@ -142,7 +156,9 @@ class MonitoringLab:
             raise ValueError("Eine Aufzeichnung läuft bereits.")
         self.session_name = (name or "Gaming-Sitzung").strip()[:80]
         self.started = self._now()
-        self.session = []
+        self.session = deque(maxlen=900)
+        self.session_count = 0
+        self.session_aggregates = {}
         self.last_session = None
         self.mangohud = None
 
@@ -150,8 +166,14 @@ class MonitoringLab:
         if self.started is None:
             raise ValueError("Es läuft keine Aufzeichnung.")
         self.last_session = self._summarize(self.session, self.session_name, self.started)
+        self.last_session["samples"] = self.session_count
+        self.last_session["metrics"] = {
+            key: {"avg": round(record["sum"] / record["count"], 2),
+                  "min": record["min"], "max": record["max"]}
+            for key, record in self.session_aggregates.items()
+        }
         self.started = None
-        self.session = []
+        self.session = deque(maxlen=900)
         return self.last_session
 
     @staticmethod
