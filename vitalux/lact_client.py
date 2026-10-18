@@ -64,6 +64,10 @@ class LactClient:
 
     def gpu_config(self, gpu_id):
         data = self.request("get_gpu_config", {"id": gpu_id})
+        # LACT returns null for an untouched GPU. In that case its actual
+        # GpuConfig default is the empty JSON object.
+        if data is None:
+            return {}
         if not isinstance(data, dict):
             raise LactError("Ungültige LACT-GPU-Konfiguration.")
         return data
@@ -132,7 +136,7 @@ def merged_gpu_config(current, overrides):
                 raise ValueError("Das Power-Limit muss positiv und endlich sein.")
         if key == "performance_level" and value not in ("auto", "low", "high", "manual", None):
             raise ValueError("Unbekannter Performance-Modus.")
-        if key == "fan_control_settings" and not isinstance(value, dict):
+        if key == "fan_control_settings" and value is not None and not isinstance(value, dict):
             raise ValueError("Ungültige Lüfterparameter.")
         updated[key] = deepcopy(value)
     return updated
