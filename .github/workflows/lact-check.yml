@@ -2,7 +2,7 @@ name: LACT-Integration testen
 
 on:
   push:
-    branches: [feature/lact-gpu-tuning]
+    branches: [feature/lact-gpu-tuning, feature/vitalux-integrated-gpu-engine]
     paths:
       - "vitalux/lact_*.py"
       - "vitalux/pages.py"
@@ -43,3 +43,12 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: .venv/bin/python tests/test_lact_ui.py
+      - name: Gebündelten Originaldienst vor Veröffentlichung prüfen
+        run: |
+          curl --fail --location --retry 3 --silent --show-error \
+            "https://github.com/ilya-zlobintsev/LACT/releases/download/v0.10.1/lact-headless-0.10.1-0.amd64.ubuntu-2404.deb" \
+            --output lact-headless.deb
+          echo "c94ca31a1be6e005253a11f3bd02a48d9d08d356f08e2a5a6e9f2565283fca55  lact-headless.deb" | sha256sum --check -
+          dpkg-deb -x lact-headless.deb upstream
+          test -x upstream/usr/bin/lact
+          upstream/usr/bin/lact --version
