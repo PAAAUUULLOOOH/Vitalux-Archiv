@@ -55,6 +55,9 @@ def check_lab_panel():
     app.processEvents()
     assert panel.record_group.isVisible()
     assert panel.compare_group.isVisible()
+    assert panel.trend_group.isVisible()
+    assert panel.trend_chart.graph.mode == "percent"
+    assert len(panel.trend_chart.toggles) == 3
     assert panel.map.scene().items()
     nodes = [node for node in panel.map.scene().items() if isinstance(node, _HardwareNode)]
     assert {node.key for node in nodes} == {"cpu", "gpu", "ram", "disk", "mainboard"}
