@@ -698,3 +698,35 @@ EN_MORE.update({
 })
 
 EN_MORE["GPU-Steuerung konnte nicht vorbereitet werden: {}"] = "GPU tuning setup could not be prepared: {}"
+
+# Vitalux GPU tuning: live readings and grouped, hardware-aware controls.
+EN_MORE.update({
+    "Aktuelle GPU-Werte": "Current GPU readings",
+    "GPU-Profile": "GPU profiles",
+    "Taktraten, Leistung und Spannung": "Clocks, power and voltage",
+    "Lüftersteuerung": "Fan control",
+    "Experten-Einstellungen (JSON)": "Advanced settings (JSON)",
+    "GPU-Takt": "GPU clock",
+    "VRAM-Takt": "VRAM clock",
+    "GPU-Spannung": "GPU voltage",
+    "Temperatur": "Temperature",
+    "Leistungsaufnahme": "Power draw",
+    "Lüfter": "Fan",
+    "Power-Limit (aktuell)": "Power cap (current)",
+    "Auslastung": "GPU usage",
+    "GPU-Takt-Offset": "GPU clock offset",
+    "Temperaturquelle": "Temperature sensor",
+    "Expertenoptionen anzeigen": "Show advanced options",
+    "Expertenoptionen ausblenden": "Hide advanced options",
+    "Oben stehen aktuelle Messwerte. Hier legst du unterstützte Grenzen und Offsets fest.": "Live measurements are shown above. Only supported clock limits and offsets can be edited.",
+    "Optionale Treiberparameter. Bestehende Einstellungen bleiben erhalten.": "Optional driver parameters. Existing options will be preserved.",
+    "Profilverwaltung ist derzeit nicht verfügbar: {}": "Profile manager is currently unavailable: {}",
+    "Aktueller Treiberwert, sofern bekannt. Eine eigene Grenze wird erst beim Ändern gesetzt.": "Actual driver value where available. A custom limit is set only when you change it.",
+    "GPU-Taktoffset – verfügbar bei unterstützten GPUs.": "GPU clock offset – supported GPUs only.",
+    "Änderung aktiv: Bitte sofort bestätigen oder zurücksetzen.": "Changes applied: confirm or revert immediately.",
+    "GPU-Takt Minimum": "Minimum GPU clock",
+    "GPU-Takt Maximum": "Maximum GPU clock",
+    "VRAM-Takt Minimum": "Minimum VRAM clock",
+    "VRAM-Takt Maximum": "Maximum VRAM clock",
+    "Lüfterkurve · Temperatur °C: Drehzahl %": "Fan curve · temperature °C: speed %"
+})
