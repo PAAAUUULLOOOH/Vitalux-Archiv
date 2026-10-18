@@ -10,7 +10,7 @@ import json
 import math
 
 METRICS = ("cpu_usage", "cpu_temp", "gpu_usage", "gpu_temp", "gpu_clock",
-           "gpu_power", "ram_usage", "board_temp")
+           "gpu_power", "ram_usage")
 
 
 def valid_number(value):
@@ -37,7 +37,6 @@ class SessionExtrema:
             "gpu_clock": gpu.get("clock"),
             "gpu_power": gpu.get("power"),
             "ram_usage": ram.get("percent"),
-            "board_temp": (sample.get("motherboard") or {}).get("temperature"),
         }
         for key, number in values.items():
             if not valid_number(number):
@@ -157,23 +156,3 @@ def write_report(path, data):
             target.write(report_text(data))
         else:
             raise ValueError("Unterstützte Berichtsformate: .txt oder .json")
-
-# Boards expose very different sensor labels. Never treat a CPU, GPU or NVMe
-# reading as a mainboard value solely because the hwmon chip is motherboard
-# connected. When no unambiguous label is present, show unavailable.
-_BOARD_TOKENS = ("motherboard", "mainboard", "system temp", "system temperature",
-                 "sys_temp", "systin", "chipset", "pch temp", "pch temperature",
-                 "t_sensor", "mb temperature", "board temperature")
-_EXCLUDED_TOKENS = ("nvme", "gpu", "junction", "edge", "coretemp", "k10temp",
-                    "cpu", "package", "ccd", "tdie", "tctl", "memory")
-
-
-def motherboard_temperature(sensors):
-    for sensor in (sensors or {}).get("temps", []):
-        name = str(sensor.get("name") or "").lower()
-        value = sensor.get("value")
-        if (valid_number(value) and -20 <= value <= 125
-                and any(term in name for term in _BOARD_TOKENS)
-                and not any(term in name for term in _EXCLUDED_TOKENS)):
-            return {"temperature": value, "source": sensor.get("name")}
-    return {"temperature": None, "source": None}
