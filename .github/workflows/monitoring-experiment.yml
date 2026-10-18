@@ -29,6 +29,7 @@ jobs:
       - name: Vor dem Testpaket alle Monitoring-Funktionen prüfen
         env:
           QT_QPA_PLATFORM: offscreen
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           set -euo pipefail
           .venv/bin/python -m compileall -q vitalux
