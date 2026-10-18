@@ -598,7 +598,8 @@ class GpuPage(Page):
             if i < len(gpus):
                 card.refresh(
                     gpus[i], history=h if i == 0 else None,
-                    extrema=d.get("session_extrema"), mesa=system_static().get("mesa"))
+                    extrema=d.get("session_extrema") if i == 0 else None,
+                    mesa=system_static().get("mesa"))
 
 
 # ------------------------------------------------------------------ Speicher
