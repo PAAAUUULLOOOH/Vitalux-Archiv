@@ -8,12 +8,14 @@ from copy import deepcopy
 
 from PySide6.QtCore import Qt, QTimer, QProcess
 from PySide6.QtWidgets import (QFormLayout, QHBoxLayout, QInputDialog, QLineEdit,
-                              QSpinBox, QDoubleSpinBox, QPlainTextEdit, QMenu)
+                              QSpinBox, QDoubleSpinBox, QPlainTextEdit, QMenu,
+                              QGroupBox, QVBoxLayout, QGridLayout, QLabel)
 
 from .ui_locale import QPushButton, QComboBox, QMessageBox, QCheckBox
 from .widgets import Card, label
 from .lact_client import (LactClient, LactError, CLOCK_FIELDS, merged_gpu_config,
-                          parse_fan_curve, format_fan_curve)
+                          parse_fan_curve, format_fan_curve,
+                          complete_fan_settings, read_gpu_metrics, fan_temperature_sources)
 from .i18n import tr
 from .gpu_setup import stage_gpu_setup, remove_gpu_setup
 
@@ -28,6 +30,7 @@ class LactTuningCard(Card):
         self.stats = {}
         self.profile_state = {}
         self.capabilities = {}
+        self.clock_info = {}
         self._loading = False
         self.pending = False
         self.confirm_timer = QTimer(self)
@@ -54,6 +57,31 @@ class LactTuningCard(Card):
         devices.addWidget(self.connect_button)
         self.body.addLayout(devices)
 
+        self.live_group = QGroupBox("Aktuelle GPU-Werte")
+        live_layout = QGridLayout(self.live_group)
+        live_layout.setHorizontalSpacing(20)
+        live_layout.setVerticalSpacing(10)
+        self.live_readings = {}
+        for i, (key, title) in enumerate((
+            ("gpu", "GPU-Takt"), ("vram", "VRAM-Takt"),
+            ("voltage", "GPU-Spannung"), ("temperature", "Temperatur"),
+            ("power", "Leistungsaufnahme"), ("fan", "Lüfter"),
+            ("power_cap", "Power-Limit (aktuell)"), ("load", "Auslastung"),
+        )):
+            row, column = divmod(i, 2)
+            cell = QVBoxLayout()
+            cell.setSpacing(1)
+            cell.addWidget(label(title, "muted"))
+            value = QLabel("–")
+            value.setObjectName("gpuReadingValue")
+            self.live_readings[key] = value
+            cell.addWidget(value)
+            live_layout.addLayout(cell, row, column)
+        self.body.addWidget(self.live_group)
+
+        self.profile_group = QGroupBox("GPU-Profile")
+        profile_layout = QVBoxLayout(self.profile_group)
+        profile_layout.setSpacing(8)
         profiles = QHBoxLayout()
         self.profile_combo = QComboBox()
         self.profile_combo.currentIndexChanged.connect(self._profile_changed)
@@ -68,10 +96,10 @@ class LactTuningCard(Card):
         profiles.addWidget(self.profile_combo, 1)
         for button in (self.load_btn, self.create_btn, self.delete_btn):
             profiles.addWidget(button)
-        self.body.addLayout(profiles)
+        profile_layout.addLayout(profiles)
         self.auto = QCheckBox("Profile automatisch wechseln")
         self.auto.clicked.connect(self._change_auto)
-        self.body.addWidget(self.auto)
+        profile_layout.addWidget(self.auto)
 
         rule = QHBoxLayout()
         self.rule_type = QComboBox()
@@ -84,8 +112,11 @@ class LactTuningCard(Card):
         rule.addWidget(self.rule_type)
         rule.addWidget(self.rule_process, 1)
         rule.addWidget(self.rule_save)
-        self.body.addLayout(rule)
+        profile_layout.addLayout(rule)
+        self.body.addWidget(self.profile_group)
 
+        self.clock_group = QGroupBox("Taktraten, Leistung und Spannung")
+        clock_layout = QVBoxLayout(self.clock_group)
         self.form = QFormLayout()
         self.form.setLabelAlignment(Qt.AlignLeft)
         self.form.setSpacing(10)
@@ -117,8 +148,22 @@ class LactTuningCard(Card):
                              ("Hoch", "high"), ("Manuell", "manual")):
             self.performance.addItem(title, value)
         self.form.addRow(label("Leistungsprofil"), self.performance)
-        self.body.addLayout(self.form)
+        self.gpu_offset = QSpinBox()
+        self.gpu_offset.setRange(-500, 1000)
+        self.gpu_offset.setSuffix(" MHz")
+        self.gpu_offset.setProperty("lact_null", True)
+        self.gpu_offset.setToolTip("GPU-Taktoffset – verfügbar bei unterstützten GPUs.")
+        self.gpu_offset.valueChanged.connect(
+            lambda _v: self.gpu_offset.setProperty("lact_null", False))
+        self.form.addRow(label("GPU-Takt-Offset"), self.gpu_offset)
+        clock_layout.addLayout(self.form)
+        clock_layout.addWidget(label(
+            "Oben stehen aktuelle Messwerte. Hier legst du unterstützte Grenzen und Offsets fest.",
+            "muted", wrap=True))
+        self.body.addWidget(self.clock_group)
 
+        self.fan_group = QGroupBox("Lüftersteuerung")
+        fan_layout = QVBoxLayout(self.fan_group)
         fan_row = QHBoxLayout()
         self.fan_enabled = QCheckBox("Eigene Lüftersteuerung")
         self.fan_mode = QComboBox()
@@ -131,18 +176,34 @@ class LactTuningCard(Card):
         fan_row.addWidget(self.fan_enabled)
         fan_row.addWidget(self.fan_mode)
         fan_row.addWidget(self.fan_speed)
-        self.body.addLayout(fan_row)
-        self.body.addWidget(label("Lüfterkurve · Temperatur °C: Drehzahl %", "muted"))
+        fan_layout.addLayout(fan_row)
+        source_row = QHBoxLayout()
+        source_row.addWidget(label("Temperaturquelle"))
+        self.fan_temperature = QComboBox()
+        self.fan_temperature.addItem("GPU (edge)", "edge")
+        source_row.addWidget(self.fan_temperature, 1)
+        fan_layout.addLayout(source_row)
+        fan_layout.addWidget(label("Lüfterkurve · Temperatur °C: Drehzahl %", "muted"))
         self.fan_curve = QPlainTextEdit()
         self.fan_curve.setMaximumHeight(116)
         self.fan_curve.setPlaceholderText("40: 30\n50: 35\n60: 50\n70: 75\n80: 100")
-        self.body.addWidget(self.fan_curve)
-
-        self.body.addWidget(label("Experten-Einstellungen (JSON)", "muted"))
+        fan_layout.addWidget(self.fan_curve)
+        self.body.addWidget(self.fan_group)
+        self.advanced_toggle = QPushButton("Expertenoptionen anzeigen")
+        self.advanced_toggle.setCheckable(True)
+        self.advanced_toggle.toggled.connect(self._toggle_advanced)
+        self.body.addWidget(self.advanced_toggle)
+        self.advanced_group = QGroupBox("Experten-Einstellungen (JSON)")
+        advanced_layout = QVBoxLayout(self.advanced_group)
+        advanced_layout.addWidget(label(
+            "Optionale Treiberparameter. Bestehende Einstellungen bleiben erhalten.",
+            "muted", wrap=True))
         self.extra = QPlainTextEdit()
         self.extra.setMaximumHeight(110)
         self.extra.setToolTip("Erweiterte GPU-Konfiguration; bestehende Einstellungen bleiben erhalten.")
-        self.body.addWidget(self.extra)
+        advanced_layout.addWidget(self.extra)
+        self.body.addWidget(self.advanced_group)
+        self.advanced_group.hide()
         buttons = QHBoxLayout()
         self.apply_btn = QPushButton("Änderungen testen")
         self.apply_btn.clicked.connect(self._apply)
@@ -158,6 +219,9 @@ class LactTuningCard(Card):
             "Nur unterstützte GPU-Optionen verwenden; Übertaktung kann das System instabil machen.",
             "muted", wrap=True))
         self.fan_enabled.toggled.connect(self._toggle_fan_controls)
+        self.refresh_timer = QTimer(self)
+        self.refresh_timer.setInterval(4000)
+        self.refresh_timer.timeout.connect(self._refresh_live)
         self._set_access(False)
         self._first_show = True
 
@@ -167,15 +231,21 @@ class LactTuningCard(Card):
             self._first_show = False
             QTimer.singleShot(0, self.reload)
 
+    def _toggle_advanced(self, shown):
+        self.advanced_group.setVisible(shown)
+        self.advanced_toggle.setText(
+            tr("Expertenoptionen ausblenden") if shown else tr("Expertenoptionen anzeigen"))
+
     def _set_access(self, available):
         for widget in (self.profile_combo, self.load_btn, self.create_btn, self.delete_btn,
                        self.auto, self.rule_type, self.rule_process, self.rule_save,
                        self.performance, self.fan_enabled, self.fan_mode, self.fan_speed,
-                       self.fan_curve, self.extra, *self.fields.values()):
+                       self.fan_temperature, self.fan_curve, self.extra, self.gpu_offset, *self.fields.values()):
             widget.setEnabled(available and not self.pending)
         if available and not self.pending:
             for key, widget in self.fields.items():
-                widget.setEnabled(self.capabilities.get(key, True))
+                widget.setEnabled(self.capabilities.get(key, False))
+            self.gpu_offset.setEnabled(self.capabilities.get("gpu_offset", False))
             self.fan_enabled.setEnabled(self.capabilities.get("fan", False))
             self._toggle_fan_controls()
             name = self.profile_combo.currentData()
@@ -356,11 +426,12 @@ class LactTuningCard(Card):
 
     def _toggle_fan_controls(self, *_):
         enabled = not self.pending and self.capabilities.get("fan", False)
-        for widget in (self.fan_mode, self.fan_speed, self.fan_curve):
+        for widget in (self.fan_mode, self.fan_speed, self.fan_curve, self.fan_temperature):
             widget.setEnabled(enabled and self.fan_enabled.isChecked())
         if enabled and self.fan_enabled.isChecked():
             self.fan_speed.setEnabled(self.fan_mode.currentData() == "static")
             self.fan_curve.setEnabled(self.fan_mode.currentData() == "curve")
+            self.fan_temperature.setEnabled(self.fan_mode.currentData() == "curve")
 
     def _show_clear_menu(self, widget, pos):
         menu = QMenu(widget)
