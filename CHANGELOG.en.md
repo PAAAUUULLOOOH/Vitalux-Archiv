@@ -4,6 +4,12 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.80] - 2026-10-18
+- **Fixed AppImage GPU setup:** Vitalux stages the bundled service installer and engine in a private temporary directory before administrator authorization, avoiding permission errors when root cannot access the AppImage FUSE mount. Temporary files are removed afterward.
+- **Protected built-in accent colors:** Red and all other eight fixed colors remain available and cannot be edited or deleted, including after updates. Incorrect legacy custom entries overlapping presets are automatically cleaned up; only user-created colors can be changed.
+- Removed the one-time “Vitalux continues in the system tray” popup on window close. Tray functionality, live readings and warning notifications are unchanged.
+- Removed obsolete notification state, translations and unused Qt imports. Updated the compact README, bilingual in-app guide, and AppImage/color/tray regression tests.
+
 ## [v0.9.3.79] - 2026-10-18
 - **GPU tuning now included in Vitalux:** The original LACT 0.10.1 open-source GPU control backend is bundled with the full ZIP and AppImage and SHA-256 verified. No separate LACT desktop application or package installation is needed.
 - Automatic GPU detection works even before the privileged tuning service is enabled. Click **Set up GPU tuning** and authorize the one-time setup of **vitalux-gpu.service**.
