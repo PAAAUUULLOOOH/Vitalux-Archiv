@@ -18,6 +18,7 @@ from .smooth_scroll import AdaptiveScrollArea
 from .alerts import AlertMonitor, readings_from_sample
 from .tray_preview import TrayPreview, tray_tooltip
 from .wallpaper_accents import resolve_accent
+from .monitor_insights import SessionExtrema
 
 
 class Sampler(QThread):
@@ -55,7 +56,9 @@ class MainWindow(QMainWindow):
         else:
             self.resize(1380, 900)
         self.hist = {k: deque(maxlen=900) for k in (
-            "cpu", "ram", "gpu", "vram", "net_down", "net_up", "io_read", "io_write")}
+            "cpu", "ram", "gpu", "vram", "net_down", "net_up", "io_read", "io_write",
+            "cpu_temp", "gpu_temp", "gpu_clock", "gpu_power", "board_temp")}
+        self._extrema = SessionExtrema()
         self.last_sample = None
         self.pages = []
         self.update_btn = None
@@ -687,9 +690,17 @@ class MainWindow(QMainWindow):
             if hasattr(overview, 'apply_layout'):
                 overview.apply_layout()
 
+    def reset_session_extrema(self):
+        """Reset displayed minimum/maximum values without touching hardware."""
+        self._extrema.reset()
+        if self.last_sample is not None:
+            self.last_sample["session_extrema"] = self._extrema.snapshot()
+            self._refresh_visible_page()
+
     def on_sample(self, d):
         import time
         started = time.perf_counter()
+        d["session_extrema"] = self._extrema.update(d)
         self.last_sample = d
         self._check_alerts(d)
         if self._tray is not None:
@@ -704,7 +715,12 @@ class MainWindow(QMainWindow):
         h["cpu"].append(d["cpu"]["usage"])
         h["ram"].append(d["ram"]["percent"])
         h["gpu"].append(g.get("usage") if g else None)
-        h["vram"].append(g["vram_used"] / g["vram_total"] * 100 if g and g["vram_total"] else None)
+        h["vram"].append(g["vram_used"] / g["vram_total"] * 100 if g and g.get("vram_total") and g.get("vram_used") is not None else None)
+        h["cpu_temp"].append(d.get("cpu", {}).get("temp"))
+        h["gpu_temp"].append(g.get("temp") if g else None)
+        h["gpu_clock"].append(g.get("clock") if g else None)
+        h["gpu_power"].append(g.get("power") if g else None)
+        h["board_temp"].append((d.get("motherboard") or {}).get("temperature"))
         h["net_down"].append(d["net"]["down"])
         h["net_up"].append(d["net"]["up"])
         h['io_read'].append(d['io']['read'])
