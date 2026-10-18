@@ -78,6 +78,20 @@ jobs:
           unzip -q "build/$ZIP" -d build/baseline
           test -x "build/baseline/Vitalux-${BASELINE_TAG}/runtime/bin/python3.12"
           test -f "build/baseline/Vitalux-${BASELINE_TAG}/bin/fio.real"
+      - name: Originalen GPU-Dienst für Vitalux mitliefern
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The LACT 0.10.1 headless binary contains the original open-source
+          # privileged GPU engine. No external installation is required.
+          mkdir -p build/vitalux-gpu/upstream
+          curl --fail --location --retry 3 --silent --show-error \
+            "https://github.com/ilya-zlobintsev/LACT/releases/download/v0.10.1/lact-headless-0.10.1-0.amd64.ubuntu-2404.deb" \
+            --output build/vitalux-gpu/lact-headless.deb
+          dpkg-deb -x build/vitalux-gpu/lact-headless.deb build/vitalux-gpu/upstream
+          test -s build/vitalux-gpu/upstream/usr/bin/lact
+          chmod 755 build/vitalux-gpu/upstream/usr/bin/lact
+          file build/vitalux-gpu/upstream/usr/bin/lact
       - name: Vollständiges Programm aus Repository-Quellcode zusammensetzen
         shell: bash
         run: |
@@ -91,9 +105,18 @@ jobs:
           cp run.sh Portable-pruefen.sh CHANGELOG.md CHANGELOG.en.md "$DEST/"
           mkdir -p "$DEST/bin" "$DEST/packaging"
           cp bin/fio "$DEST/bin/fio"
+          cp build/vitalux-gpu/upstream/usr/bin/lact "$DEST/bin/vitalux-gpu-engine"
+          chmod 755 "$DEST/bin/vitalux-gpu-engine"
+          cp packaging/vitalux-gpu-service.py "$DEST/packaging/vitalux-gpu-service.py"
+          mkdir -p "$DEST/LICENSES"
+          cp LICENSES/LACT-MIT.txt "$DEST/LICENSES/LACT-MIT.txt"
+          test -s "$DEST/bin/vitalux-gpu-engine"
+          test -s "$DEST/LICENSES/LACT-MIT.txt"
           cp packaging/build-appimage.sh "$DEST/packaging/build-appimage.sh"
           find "$DEST" -type d -name __pycache__ -prune -exec rm -rf {} +
           python3 -m compileall -q vitalux
+          python3 -m py_compile packaging/vitalux-gpu-service.py
+          python3 tests/test_vitalux_gpu_service.py
           python3 - <<'PY'
           import pathlib, os
           root = pathlib.Path('build/staged') / ('Vitalux-' + os.environ['TAG'])
