@@ -1,0 +1,92 @@
+name: Vitalux Monitoring – privater ZIP-Test
+
+on:
+  push:
+    branches: [experiment/monitoring-refresh-no-gpu-control]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vitalux-monitoring-experiment
+  cancel-in-progress: true
+
+jobs:
+  check-and-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Experimentiellen Quellcode laden
+        uses: actions/checkout@v4
+      - name: Native Qt-Tests vorbereiten
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y libegl1 libgl1 libopengl0 libxkbcommon0 libxcb-cursor0
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --disable-pip-version-check PySide6 psutil
+      - name: Vor dem Testpaket alle Monitoring-Funktionen prüfen
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          set -euo pipefail
+          .venv/bin/python -m compileall -q vitalux
+          .venv/bin/python tests/test_monitor_insights.py
+          .venv/bin/python tests/test_monitoring_ui.py
+          .venv/bin/python tests/test_core_behaviors.py
+          .venv/bin/python tests/test_guide_locale.py
+          .venv/bin/python tests/test_protected_accents.py
+          .venv/bin/python tests/test_versioning.py
+          .venv/bin/python tests/test_dashboard_tiling.py
+      - name: Vorheriges portables Paket herunterladen
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p work/baseline
+          gh release download v0.9.3.81 \
+            --repo PAAAUUULLOOOH/Vitalux \
+            --pattern 'Vitalux-v0.9.3.81-linux-x86_64.zip' \
+            --dir work
+          unzip -tq work/Vitalux-v0.9.3.81-linux-x86_64.zip
+          unzip -q work/Vitalux-v0.9.3.81-linux-x86_64.zip -d work/baseline
+      - name: Monitoring-Testversion als portable ZIP bauen
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE='work/baseline/Vitalux-v0.9.3.81'
+          test -x "$SOURCE/runtime/bin/python3.12"
+          DEST='work/stage/Vitalux-Monitoring-Test'
+          mkdir -p work/stage work/artifacts
+          cp -a "$SOURCE" "$DEST"
+          rm -rf "$DEST/vitalux"
+          cp -a vitalux "$DEST/vitalux"
+          cp README.md CHANGELOG.md CHANGELOG.en.md "$DEST/"
+          rm -f "$DEST/bin/vitalux-gpu-engine"
+          rm -f "$DEST/packaging/vitalux-gpu-service.py"
+          rm -f "$DEST/LICENSES/LACT-MIT.txt"
+          cat > "$DEST/EXPERIMENT-LESEN.txt" <<'TXT'
+          VITALUX – EXPERIMENTELLE TESTVERSION
+          -------------------------------------
+          Kein offizieller Release. Das Programm zeigt möglicherweise noch die
+          Versionsnummer der letzten stabilen Version an.
+          Neue read-only GPU-, Mainboard- und Verlaufsansichten.
+          Keine GPU-Übertaktung oder Lüftersteuerung.
+          Diese ZIP ist zum Entpacken und Testen vorgesehen.
+          Das installierte alte vitalux-gpu.service wird aus Sicherheitsgründen
+          nicht automatisch gelöscht oder verändert.
+          Erst nach ausdrücklicher Zustimmung wird GitHub einen Release bauen.
+          TXT
+          python3 -m compileall -q "$DEST/vitalux"
+          (cd work/stage && zip -q -r -y '../artifacts/Vitalux-Monitoring-Experiment-Test.zip' 'Vitalux-Monitoring-Test')
+          unzip -tq work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
+          test -s work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
+      - name: Nur Test-ZIP als GitHub-Actions-Artefakt anbieten
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vitalux-Monitoring-Experiment-Test
+          path: work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
+          if-no-files-found: error
+          retention-days: 14
