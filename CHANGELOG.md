@@ -5,6 +5,15 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.82] - 2026-10-18
+- **Vitalux Insights freigegeben:** Performance Detective mit vorsichtigen, auf echten Sensorwerten basierenden Hinweisen, Ereignis-Timeline mit gespeicherten Messwerten und gemeinsamem CPU-/GPU-/VRAM-Diagramm.
+- **Gaming Session Analyzer:** Gaming-Sitzungen manuell aufzeichnen und als JSON exportieren; optional MangoHud-CSV für tatsächlich gemessene FPS und Näherungswerte für 1%-Lows importieren.
+- **Vorher/Nachher und Hardwareübersicht:** Lokale Vergleichsschnappschüsse, anklickbare Geräteinformationen und ein frei verschiebbarer Fokusmodus für einen zweiten Monitor.
+- **Grafik aufgeräumt:** GPU-/VRAM-Takt, Auslastung, Speicher, Temperatur, Spannung und PCIe-Anbindung übersichtlich und rein lesend. Separate Mainboard-Temperaturkarte entfernt; Mainboard/BIOS im System-Reiter erhalten.
+- **GPU-Übertaktung und Lüftersteuerung entfernt:** Keine privilegierte GPU-Engine mehr in neuen Paketen; ein bisher installierter Dienst wird nicht automatisch verändert. Frühere Releases bleiben unverändert.
+- **Hauptzweig-Bereinigung übernommen:** Kompakte Akzentfarben-Auswahl wie Farbschema; Standardfarben geschützt. Gemeinsame GPU-Verläufe statt doppelter Datenspeicherung, korrekte Anzeige fehlender Messungen, weniger Schreibvorgänge in den Einstellungen und verbesserte Fehlerprotokollierung.
+- Testpaket, native Qt-Oberfläche, portable Laufzeit sowie alle betroffenen Einstellungen, Berichte und Diagramme mit Regressionstests geprüft.
+
 ## [v0.9.3.81] - 2026-10-18
 - **Eigene GPU-Lüfterkurven repariert:** Beim Aktivieren werden jetzt alle vom integrierten GPU-Dienst benötigten Daten mitgesendet, insbesondere Temperaturquelle, Aktualisierungsintervall und vollständige Lüfterkennlinie. Bereits konfigurierte Werte bleiben erhalten.
 - **Aktuelle GPU-Daten sofort sichtbar:** Im Grafik-Reiter erscheinen reale GPU-/VRAM-Taktraten, Spannung, Temperaturen, Leistungsaufnahme, Power-Limit, Auslastung und Lüfterdrehzahl; bei aktivem Dienst werden die Messwerte regelmäßig erneuert.
