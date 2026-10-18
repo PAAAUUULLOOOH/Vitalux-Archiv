@@ -64,7 +64,7 @@ def configured_for_user(content, username):
     if not headers:
         if re.search(r"^daemon:", content, re.M):
             raise RuntimeError("Bestehende, nicht unterstützte daemon-Konfiguration wird nicht überschrieben.")
-        return content.rstrip("\n") + f"\ndaemon:\n  admin_user: {username}\n"
+        return (content.rstrip("\n") + "\n" if content.strip() else "") + f"daemon:\n  admin_user: {username}\n"
     start = headers[0]
     end = next((i for i in range(start + 1, len(rows))
                 if rows[i].strip() and not rows[i].startswith((" ", "\t", "#"))),
