@@ -99,6 +99,16 @@ def check_lab_panel():
     focus.entries[0][0].setCurrentIndex(focus.entries[0][0].findData("cpu_temp"))
     focus.update_sample(s2)
     assert "62.0" in focus.entries[0][1].text()
+    from vitalux import i18n
+    i18n.set_lang("en")
+    panel.retranslate()
+    focus.retranslate()
+    assert panel.compare_group.title() == "Before / after comparison"
+    assert "Focus mode" in focus.windowTitle()
+    assert "DRIVES" in [node.text.text() for node in nodes]
+    i18n.set_lang("de")
+    panel.retranslate()
+    focus.retranslate()
     focus.close()
     page.close()
     app.processEvents()
