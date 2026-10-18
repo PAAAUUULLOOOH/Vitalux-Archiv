@@ -19,6 +19,7 @@ from .alerts import AlertMonitor, readings_from_sample
 from .tray_preview import TrayPreview, tray_tooltip
 from .wallpaper_accents import resolve_accent
 from .monitor_insights import SessionExtrema
+from .insight_engine import MonitoringLab
 
 
 class Sampler(QThread):
@@ -57,8 +58,10 @@ class MainWindow(QMainWindow):
             self.resize(1380, 900)
         self.hist = {k: deque(maxlen=900) for k in (
             "cpu", "ram", "gpu", "vram", "net_down", "net_up", "io_read", "io_write",
-            "cpu_temp", "gpu_temp", "gpu_clock", "gpu_power", "board_temp")}
+            "cpu_temp", "gpu_temp", "gpu_clock", "gpu_power")}
         self._extrema = SessionExtrema()
+        self.lab = MonitoringLab()
+        self._focus_window = None
         self.last_sample = None
         self.pages = []
         self.update_btn = None
@@ -159,7 +162,7 @@ class MainWindow(QMainWindow):
         self.pages = [
             ("Übersicht", OverviewPage(distro, logo)),
             ("Prozessor", CpuPage()),
-            ("Grafik", GpuPage()),
+            ("Grafik", GpuPage(self.lab, self.open_focus_window)),
             ("Arbeitsspeicher", MemoryPage()),
             ("Netzwerk", NetworkPage()),
             ("Laufwerke", DiskPage()),
@@ -690,6 +693,16 @@ class MainWindow(QMainWindow):
             if hasattr(overview, 'apply_layout'):
                 overview.apply_layout()
 
+    def open_focus_window(self):
+        from .insight_ui import FocusWindow
+        if self._focus_window is None:
+            self._focus_window = FocusWindow(self)
+        if self.last_sample is not None:
+            self._focus_window.update_sample(self.last_sample)
+        self._focus_window.show()
+        self._focus_window.raise_()
+        self._focus_window.activateWindow()
+
     def reset_session_extrema(self):
         """Reset displayed minimum/maximum values without touching hardware."""
         self._extrema.reset()
@@ -701,6 +714,12 @@ class MainWindow(QMainWindow):
         import time
         started = time.perf_counter()
         d["session_extrema"] = self._extrema.update(d)
+        self.lab.ingest(d, {
+            key: settings.get(key, default)
+            for key, default in (("cpu_temp", 90), ("gpu_temp", 90), ("ram_usage", 90))
+        })
+        if self._focus_window is not None and self._focus_window.isVisible():
+            self._focus_window.update_sample(d)
         self.last_sample = d
         self._check_alerts(d)
         if self._tray is not None:
@@ -720,7 +739,6 @@ class MainWindow(QMainWindow):
         h["gpu_temp"].append(g.get("temp") if g else None)
         h["gpu_clock"].append(g.get("clock") if g else None)
         h["gpu_power"].append(g.get("power") if g else None)
-        h["board_temp"].append((d.get("motherboard") or {}).get("temperature"))
         h["net_down"].append(d["net"]["down"])
         h["net_up"].append(d["net"]["up"])
         h['io_read'].append(d['io']['read'])
