@@ -333,7 +333,7 @@ class HistoryGraph(QWidget):
             p.end()
             return
         top = max((max((float(v or 0) for v in values), default=0)
-                   for values, _ in self.series), default=0) if self.mode == 'rate' else 100.0
+                   for values, _ in self.series), default=0) if self.mode != 'percent' else 100.0
         top = max(1.0, top * 1.15)
         p.setPen(QPen(QColor(theme.GRID), 1))
         for fraction in (0.0, 0.5, 1.0):
@@ -341,7 +341,7 @@ class HistoryGraph(QWidget):
             p.drawLine(QPointF(rect.left(), y), QPointF(rect.right(), y))
             p.setPen(QColor(theme.MUTED))
             p.drawText(QRectF(rect.right()+5, y-10, 60, 20),
-                       Qt.AlignVCenter | Qt.AlignLeft, f'{top*fraction:.0f}' + ('%' if self.mode != 'rate' else ''))
+                       Qt.AlignVCenter | Qt.AlignLeft, f'{top*fraction:.0f}' + ('%' if self.mode == 'percent' else ''))
             p.setPen(QPen(QColor(theme.GRID), 1))
         for values, color in self.series:
             vals = list(values)[-min(self.maxlen, 120):]
@@ -388,6 +388,8 @@ class HistoryGraph(QWidget):
                 step = 10 ** _math.floor(_math.log10(raw))
                 upper = _math.ceil(raw / step * 2) / 2 * step
             upper = max(1024.0, upper)
+        elif self.mode in ("temperature", "clock", "power"):
+            upper = max(10.0, largest * 1.18)
         else:
             upper = 100.0
         def y_of(value):
@@ -395,6 +397,12 @@ class HistoryGraph(QWidget):
         def format_tick(v):
             if self.mode == "percent":
                 return f"{v:.0f}%"
+            if self.mode == "temperature":
+                return f"{v:.0f}°C"
+            if self.mode == "clock":
+                return f"{v:.0f} MHz"
+            if self.mode == "power":
+                return f"{v:.0f} W"
             from .sensors import fmt_rate
             return fmt_rate(v)
         p.setFont(QFont(self.font().family(), 9))
@@ -606,14 +614,30 @@ class ChartPanel(QWidget):
             vals = [float(v) for v in list(values)[-count:] if v is not None]
             if vals:
                 from .sensors import fmt_rate
-                fmt = (lambda value: f'{value:.0f}%') if self.graph.mode == 'percent' else fmt_rate
+                if self.graph.mode == "percent":
+                    fmt = lambda value: f"{value:.0f}%"
+                elif self.graph.mode == "temperature":
+                    fmt = lambda value: f"{value:.1f} °C"
+                elif self.graph.mode == "clock":
+                    fmt = lambda value: f"{value:.0f} MHz"
+                elif self.graph.mode == "power":
+                    fmt = lambda value: f"{value:.1f} W"
+                else:
+                    fmt = fmt_rate
                 self.live_labels[i].setText(f'{tr(self.series_names[i])} {fmt(vals[-1])}  ·  {fmt(min(vals))}–{fmt(max(vals))}')
                 self.live_labels[i].setToolTip(f'{tr(self.series_names[i])}: {tr("Jetzt")} {fmt(vals[-1])} | Min {fmt(min(vals))} | Max {fmt(max(vals))}')
             else:
                 self.live_labels[i].setText(f'{tr(self.series_names[i])} –')
             self.live_labels[i].show()
             if vals:
-                active.append((list(values)[-count:], color))
+                # A missing sensor sample is not zero: draw only the most
+                # recent uninterrupted run so the line cannot dive to 0.
+                recent = list(values)[-count:]
+                start = next((i + 1 for i in range(len(recent) - 1, -1, -1)
+                              if recent[i] is None), 0)
+                run = recent[start:]
+                if len(run) >= 2:
+                    active.append((run, color))
         self.graph.set_series(active)
 
 
