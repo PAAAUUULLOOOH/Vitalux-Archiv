@@ -38,7 +38,7 @@
 | Bereich | Inhalt |
 | --- | --- |
 | **Übersicht** | Live-Dashboard mit frei anordenbaren Kacheln, Diagrammen und Systemlaufzeit |
-| **CPU, GPU, RAM** | Auslastung, Taktraten, Speicher, Sensorwerte und integriertes Vitalux GPU-Tuning |
+| **CPU, GPU, RAM** | Auslastung, Taktraten, Speicher, Sensorwerte, PCIe, echte GPU-Taktraten und Live-Diagramme |
 | **Netzwerk & System** | Schnittstellen, Übertragungsraten, Distribution, Kernel und Treiber |
 | **Laufwerke** | Partitionen, SMART-Analyse und fio-Lese-/Schreibbenchmarks |
 | **Einstellungen** | Farbschemas, eigene Akzentfarben, Hintergründe, Animationen und Warnwerte |
@@ -46,20 +46,15 @@
 
 Scrollen folgt der eingestellten Monitor-Bildwiederholrate (ohne FPS-Garantie); Touchpads bleiben direkt. **Automatisches Tiling** füllt nur größere Lücken nach dem Kachelverschieben oder Ausblenden; die Kachelabstände bleiben bei 14 px.
 
-### Vitalux GPU-Tuning
+### Hardware-Überwachung (ohne Übertaktung)
 
-Vitalux erkennt AMD-, NVIDIA- und Intel-Grafikkarten automatisch. Im Grafik-Reiter zeigt die Anwendung **aktuelle GPU-/VRAM-Taktraten, Spannung, Temperatur, Leistung, Auslastung und Lüfterdrehzahl**. Unterstützte Power-Limits, Taktgrenzen, RDNA4-Taktoffsets, Undervolting und Lüfterkurven lassen sich direkt bearbeiten; nicht unterstützte Regler bleiben ausgeblendet.
+**Grafik:** Auslastung, belegter Videospeicher, aktuelle GPU-/VRAM-Taktraten, Temperatur/Hotspot, Spannung, Leistung und Lüfterwerte in einer übersichtlichen Ansicht. Aufklappbare Details zeigen verfügbare PCIe-Linkdaten (aktuell/maximal), Mesa-Version und die Sensor-Datenquelle. Live-Diagramme bieten 60 Sekunden, 5 und 15 Minuten Verlauf. Nicht vorhandene Werte erscheinen als **Nicht verfügbar**, niemals als erfundene Nullwerte.
 
-**Ersteinrichtung in Vitalux:** Der originale GPU-Steuerungsdienst wird **mit der Vitalux-Vollversion (ZIP und AppImage) mitgeliefert**. Auf **GPU-Steuerung einrichten** klicken und die einmalige Administratorabfrage bestätigen. Vitalux legt daraufhin einen eigenen Systemdienst `vitalux-gpu.service` an und erteilt dem aktuellen Benutzer kontrolliert Zugriff. Dafür sind `systemd` und `pkexec` (polkit) auf dem Linux-Host erforderlich. Das AppImage selbst läuft weiterhin ohne Root-Rechte. Für AppImages werden die nötigen Einrichtungsdateien vor der Administratorabfrage sicher außerhalb des temporären AppImage-Mounts bereitgestellt. Der Systemdienst bleibt nach einem Vitalux-Neustart verfügbar.
+**CPU & Mainboard:** CPU-Temperaturverlauf, Mainboard-Hersteller/Modell/BIOS und – soweit von Linux eindeutig erkannt – ein eigener Temperaturverlauf für den Mainboard-Sensor. Kein Ersatz durch CPU- oder NVMe-Temperaturen.
 
-- Automatische GPU-Auswahl (dedizierte GPUs bevorzugt), bestehendes Live-Monitoring bleibt unverändert.
-- Getrennte Bereiche für Live-Werte, Profile, Leistung/Spannung und Lüfter. Eigene Lüfterkurven nutzen eine auswählbare Temperaturquelle. Expertenparameter sind standardmäßig eingeklappt.
-- **Änderungen testen → Bestätigen oder Zurücksetzen.** Die originale Engine macht unbestätigte Änderungen automatisch rückgängig (standardmäßig nach 5 Sekunden).
-- Hardware, Treiber und Kernel bestimmen, welche Werte tatsächlich bearbeitet werden können. Für einzelne AMD-Overclocking-Optionen kann die bewusste Aktivierung entsprechender Kernel-Funktionen erforderlich sein. Diese nimmt Vitalux nicht ohne Einwilligung vor.
+**Analyse:** Min-/Max-Werte seit dem Start, manuell zurücksetzbar; sachlicher Hardwarestatus anhand der vorhandenen Warnwerte. Systemberichte lassen sich lokal als **TXT oder JSON** exportieren. Berichte können Hostnamen, System- und Netzwerkdaten enthalten; es erfolgt kein automatischer Upload.
 
-**Sicherheit:** Für die Einrichtung sind Administratorrechte unvermeidbar, weil Übertaktung auf geschützte GPU-Schnittstellen zugreift. Vitalux installiert den gebündelten Dienst nur nach Bestätigung und ändert keine fremden GPU-Dienste. Bestehende Profile bleiben beim Entfernen des Dienstes erhalten. Extreme Takt-/Spannungswerte können zu Instabilität und möglichen Hardwareproblemen führen.
-
-**Open-Source-Hinweis:** Die interne Hardware-Engine stammt unverändert aus [LACT](https://github.com/ilya-zlobintsev/LACT) von Ilya Zlobintsev, Version 0.10.1 (MIT-Lizenz). Rechtlicher Lizenztext: [LICENSES/LACT-MIT.txt](LICENSES/LACT-MIT.txt). Der Produktname und alle sichtbaren Bedienelemente heißen **Vitalux**.
+Vitalux arbeitet vollständig lesend über vorhandene Linux-Schnittstellen. **GPU-Übertaktung und Lüftersteuerung wurden aus der Anwendung entfernt.** Es ist keine privilegierte GPU-Steuerungsengine und keine Administrator-Einrichtung mehr erforderlich. Ein gegebenenfalls aus älteren Testversionen bereits installierter Dienst wird nicht automatisch verändert oder deinstalliert.
 
 ### Design & Hintergründe
 
