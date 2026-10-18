@@ -334,7 +334,7 @@ class MonitoringLabPanel(Card):
         self.save_session.setEnabled(self.lab.last_session is not None)
         if live:
             self.session_report.setText(
-                f"Aufzeichnung läuft: {self.lab.session_name} · {len(self.lab.session)} Messpunkte")
+                f"Aufzeichnung läuft: {self.lab.session_name} · {self.lab.session_count} Messpunkte")
             return
         report = self.lab.last_session
         if report:
