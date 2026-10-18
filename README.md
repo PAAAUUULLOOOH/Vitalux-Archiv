@@ -38,13 +38,26 @@
 | Bereich | Inhalt |
 | --- | --- |
 | **Übersicht** | Live-Dashboard mit frei anordenbaren Kacheln, Diagrammen und Systemlaufzeit |
-| **CPU, GPU, RAM** | Auslastung, Taktraten, Speicher und verfügbare Sensorwerte |
+| **CPU, GPU, RAM** | Auslastung, Taktraten, Speicher, Sensorwerte; optional GPU-Tuning über LACT |
 | **Netzwerk & System** | Schnittstellen, Übertragungsraten, Distribution, Kernel und Treiber |
 | **Laufwerke** | Partitionen, SMART-Analyse und fio-Lese-/Schreibbenchmarks |
 | **Einstellungen** | Farbschemas, eigene Akzentfarben, Hintergründe, Animationen und Warnwerte |
 | **Updates & Info** | Bestätigte Aktualisierungen, lokaler Changelog und integrierte Anleitung |
 
 Scrollen folgt der eingestellten Monitor-Bildwiederholrate (ohne FPS-Garantie); Touchpads bleiben direkt. **Automatisches Tiling** füllt nur größere Lücken nach dem Kachelverschieben oder Ausblenden; die Kachelabstände bleiben bei 14 px.
+
+### GPU-Tuning im Grafik-Reiter (LACT-Integration)
+
+Optional bietet Vitalux eine native Oberfläche für die **originale GPU-Steuerung von LACT** (Copyright © Ilya Zlobintsev, MIT-Lizenz). GPU-Tuning nutzt die lokale JSON-Schnittstelle des **separat installierten Dienstes `lactd`** (`/run/lactd.sock`). Die Bedienoberfläche ist vollständig im Vitalux-Design; die Original-Engine für GPU-Änderungen und Profile wird **nicht** neu implementiert oder von Vitalux ersetzt.
+
+- GPU wählen, aktuelle Einstellungen laden, Power-Limit, Taktgrenzen, Spannungs-Offset und Lüftermodus/-kurve konfigurieren; zusätzliche LACT-Konfigurationsfelder lassen sich als JSON bearbeiten.
+- Profile anlegen, laden und löschen; automatische Profilumschaltung und Prozess-/GameMode-Regeln.
+- **Änderungen testen → Bestätigen oder Zurücksetzen.** Unbestätigte Einstellungen rollt **lactd** automatisch zurück; der Standardzeitraum beträgt nur fünf Sekunden. Höhere Spannungen, Taktraten und Power-Limits können zu Abstürzen und Schäden führen.
+- Unterstützte Optionen hängen stark von GPU, Treiber, Kernel und LACT-Version ab. Nicht unterstützte Einstellungen können vom Dienst abgewiesen werden. Bei fehlendem Dienst bleiben die übrigen Vitalux-Funktionen uneingeschränkt verfügbar.
+
+**Einrichtung:** LACT aus den Paketen deiner Linux-Distribution installieren, `lactd` über systemd aktivieren und den Zugriff auf den lokalen Socket gemäß [LACT-Dokumentation](https://github.com/ilya-zlobintsev/LACT/blob/master/docs/API.md) freigeben. Auf AMD kann zusätzlich das gezielte Aktivieren von OverDrive erforderlich sein. Vitalux führt **keine** eigenmächtigen Root-Kommandos aus, verändert keine Kernel-Bootoptionen und öffnet keine Remote-Steuerung. LACT muss separat installiert und eingerichtet sein – die Vitalux-ZIP bzw. das AppImage enthalten keinen privilegierten LACT-Dienst.
+
+LACT-Quellen: [Repository und MIT-Lizenz](https://github.com/ilya-zlobintsev/LACT), [API](https://github.com/ilya-zlobintsev/LACT/blob/master/docs/API.md), [Konfigurationsoptionen](https://github.com/ilya-zlobintsev/LACT/blob/master/docs/CONFIG.md).
 
 ### Design & Hintergründe
 
