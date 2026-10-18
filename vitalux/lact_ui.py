@@ -8,8 +8,7 @@ from copy import deepcopy
 
 from PySide6.QtCore import Qt, QTimer, QProcess
 from PySide6.QtWidgets import (QFormLayout, QHBoxLayout, QInputDialog, QLineEdit,
-                              QSpinBox, QDoubleSpinBox, QPlainTextEdit, QWidget,
-                              QVBoxLayout, QGroupBox, QMenu)
+                              QSpinBox, QDoubleSpinBox, QPlainTextEdit, QMenu)
 
 from .ui_locale import QPushButton, QComboBox, QMessageBox, QCheckBox
 from .widgets import Card, label
@@ -200,7 +199,7 @@ class LactTuningCard(Card):
         try:
             self.setup_staging_dir, installer = stage_gpu_setup(root)
         except (OSError, ValueError) as exc:
-            self._error(f"GPU-Steuerung konnte nicht vorbereitet werden: {exc}")
+            self._error(tr("GPU-Steuerung konnte nicht vorbereitet werden: {}").format(exc))
             return
         self.setup_button.setEnabled(False)
         self.status.setText("Vitalux GPU-Steuerung wird eingerichtet. Administratorabfrage öffnen.")
