@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import json
+import shutil
+from pathlib import Path
 from copy import deepcopy
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QProcess
 from PySide6.QtWidgets import (QFormLayout, QHBoxLayout, QInputDialog, QLineEdit,
                               QSpinBox, QDoubleSpinBox, QPlainTextEdit, QWidget,
                               QVBoxLayout, QGroupBox, QMenu)
@@ -19,7 +21,7 @@ from .i18n import tr
 class LactTuningCard(Card):
     """Profile, overclock, voltage and fan controls. No GPU writes on page load."""
     def __init__(self):
-        super().__init__("GPU-Tuning · LACT")
+        super().__init__("Vitalux GPU-Tuning")
         self.client = LactClient()
         self.gpu_id = None
         self.current_config = {}
@@ -32,8 +34,15 @@ class LactTuningCard(Card):
         self.confirm_timer.setSingleShot(True)
         self.confirm_timer.timeout.connect(self._expired)
 
-        self.status = label("LACT-Dienst wird geprüft.", "muted", wrap=True)
+        self.status = label("Vitalux erkennt deine Grafikkarte.", "muted", wrap=True)
         self.body.addWidget(self.status)
+        self.setup_button = QPushButton("GPU-Steuerung einrichten")
+        self.setup_button.clicked.connect(self._setup_service)
+        self.setup_button.setToolTip(
+            "Installiert den mit Vitalux mitgelieferten GPU-Dienst. "
+            "Einmalige Administratorbestätigung erforderlich.")
+        self.body.addWidget(self.setup_button)
+        self.setup_process = None
         devices = QHBoxLayout()
         self.device_combo = QComboBox()
         self.device_combo.currentIndexChanged.connect(self._device_selected)
@@ -59,7 +68,7 @@ class LactTuningCard(Card):
         for button in (self.load_btn, self.create_btn, self.delete_btn):
             profiles.addWidget(button)
         self.body.addLayout(profiles)
-        self.auto = QCheckBox("Profile automatisch wechseln (LACT)")
+        self.auto = QCheckBox("Profile automatisch wechseln")
         self.auto.clicked.connect(self._change_auto)
         self.body.addWidget(self.auto)
 
@@ -95,6 +104,11 @@ class LactTuningCard(Card):
             widget.setSuffix(suffix)
             widget.setSpecialValueText("Nicht gesetzt")
             widget.setProperty("lact_null", True)
+            widget.setContextMenuPolicy(Qt.CustomContextMenu)
+            widget.customContextMenuRequested.connect(
+                lambda pos, w=widget: self._show_clear_menu(w, pos))
+            widget.valueChanged.connect(
+                lambda _v, w=widget: w.setProperty("lact_null", False))
             self.fields[key] = widget
             self.form.addRow(label(title), widget)
         self.performance = QComboBox()
@@ -123,10 +137,10 @@ class LactTuningCard(Card):
         self.fan_curve.setPlaceholderText("40: 30\n50: 35\n60: 50\n70: 75\n80: 100")
         self.body.addWidget(self.fan_curve)
 
-        self.body.addWidget(label("Erweiterte LACT-Optionen (JSON)", "muted"))
+        self.body.addWidget(label("Experten-Einstellungen (JSON)", "muted"))
         self.extra = QPlainTextEdit()
         self.extra.setMaximumHeight(110)
-        self.extra.setToolTip("Erweiterte GPU-Konfiguration; originale LACT-Felder bleiben erhalten.")
+        self.extra.setToolTip("Erweiterte GPU-Konfiguration; bestehende Einstellungen bleiben erhalten.")
         self.body.addWidget(self.extra)
         buttons = QHBoxLayout()
         self.apply_btn = QPushButton("Änderungen testen")
@@ -139,7 +153,7 @@ class LactTuningCard(Card):
             buttons.addWidget(button)
         self.body.addLayout(buttons)
         self.body.addWidget(label(
-            "LACT verwirft unbestätigte Änderungen automatisch (standardmäßig nach 5 Sekunden). "
+            "Vitalux setzt unbestätigte Änderungen automatisch zurück (standardmäßig nach 5 Sekunden). "
             "Nur unterstützte GPU-Optionen verwenden; Übertaktung kann das System instabil machen.",
             "muted", wrap=True))
         self.fan_enabled.toggled.connect(self._toggle_fan_controls)
@@ -174,6 +188,59 @@ class LactTuningCard(Card):
         QMessageBox.warning(self, "GPU-Tuning", str(error))
         self.status.setText(str(error))
 
+    def _setup_service(self):
+        if self.setup_process is not None:
+            return
+        if not shutil.which("pkexec"):
+            self._error("Die Administratorabfrage (pkexec) fehlt auf diesem System.")
+            return
+        root = Path(__file__).resolve().parents[1]
+        installer = root / "packaging" / "vitalux-gpu-service.py"
+        engine = root / "bin" / "vitalux-gpu-engine"
+        if not installer.is_file() or not engine.is_file():
+            self._error("Die Vitalux-GPU-Steuerung fehlt im Programm-Paket. "
+                        "Bitte die vollständige neue Vitalux-Version verwenden.")
+            return
+        self.setup_button.setEnabled(False)
+        self.status.setText("Vitalux GPU-Steuerung wird eingerichtet. Administratorabfrage öffnen.")
+        process = QProcess(self)
+        self.setup_process = process
+        process.finished.connect(self._setup_finished)
+        process.start(shutil.which("pkexec"), ["/usr/bin/python3", str(installer), "--install"])
+
+    def _setup_finished(self, code, _status):
+        process = self.setup_process
+        if process is None:
+            return
+        error_text = bytes(process.readAllStandardError()).decode("utf-8", "replace").strip()
+        process.deleteLater()
+        self.setup_process = None
+        self.setup_button.setEnabled(True)
+        if code == 0:
+            self.status.setText("Vitalux GPU-Steuerung gestartet. Grafikkarte wird verbunden.")
+            QTimer.singleShot(800, self.reload)
+        elif code not in (126, 127):
+            self._error(error_text or "GPU-Steuerung konnte nicht eingerichtet werden.")
+        else:
+            self.status.setText("Einrichtung abgebrochen. GPU-Monitoring funktioniert weiterhin.")
+
+    def _show_detected_gpus(self, reason):
+        """GPU detection belongs to Vitalux, even when tuning is not configured."""
+        from .sensors import gpu_info
+        detected = gpu_info()
+        self.device_combo.blockSignals(True)
+        self.device_combo.clear()
+        for gpu in detected:
+            self.device_combo.addItem(gpu.get("name") or "Grafikkarte erkannt", None)
+        self.device_combo.blockSignals(False)
+        if detected:
+            names = ", ".join(str(g.get("name") or "Grafikkarte") for g in detected)
+            self.status.setText("Grafikkarte erkannt: " + names + ". "
+                                "Für das GPU-Tuning bitte Vitalux GPU-Steuerung einrichten.")
+        else:
+            self.status.setText("Noch keine Grafikkarte erkannt. " + str(reason))
+        self.setup_button.setVisible(True)
+
     def reload(self):
         if self.pending:
             return
@@ -182,18 +249,20 @@ class LactTuningCard(Card):
             self._loading = True
             selected = self.gpu_id
             self.device_combo.clear()
+            devices.sort(key=lambda item: item.get("device_type") != "Dedicated")
             for device in devices:
                 self.device_combo.addItem(device.get("name") or device["id"], device["id"])
             target = self.device_combo.findData(selected)
             if target >= 0:
                 self.device_combo.setCurrentIndex(target)
             self._loading = False
+            self.setup_button.setVisible(False)
             self._device_selected()
         except (LactError, ValueError) as exc:
             self._loading = False
             self.gpu_id = None
             self._set_access(False)
-            self.status.setText(str(exc))
+            self._show_detected_gpus(exc)
 
     def _device_selected(self, *_):
         if self._loading or self.pending:
@@ -215,7 +284,7 @@ class LactTuningCard(Card):
             self._detect_capabilities(clocks)
             self._load_fields()
             self._load_profiles()
-            self.status.setText("Mit LACT verbunden · GPU-Einstellungen verfügbar")
+            self.status.setText("Vitalux GPU-Steuerung aktiv · Einstellungen verfügbar")
             self._set_access(True)
         except (LactError, ValueError) as exc:
             self._set_access(False)
@@ -254,21 +323,11 @@ class LactTuningCard(Card):
                 self.fields["power_cap"].setRange(float(lo), float(hi))
         for key, widget in self.fields.items():
             value = config.get(key)
+            widget.blockSignals(True)
             widget.setValue(value if value is not None else widget.minimum())
+            widget.blockSignals(False)
             widget.setProperty("lact_null", value is None)
-            # Spinboxes have explicit clear-to-default via context menu.
             widget.setToolTip("Wert einstellen. Mit 'Zurücksetzen' im Kontextmenü wieder auf Standard.")
-            widget.setContextMenuPolicy(Qt.CustomContextMenu)
-            try:
-                widget.customContextMenuRequested.disconnect()
-            except (RuntimeError, TypeError):
-                pass
-            widget.customContextMenuRequested.connect(lambda pos, w=widget: self._show_clear_menu(w, pos))
-            try:
-                widget.valueChanged.disconnect()
-            except (RuntimeError, TypeError):
-                pass
-            widget.valueChanged.connect(lambda _v, w=widget: w.setProperty("lact_null", False))
         performance = self.performance.findData(config.get("performance_level"))
         self.performance.setCurrentIndex(max(0, performance))
         self.fan_enabled.setChecked(bool(config.get("fan_control_enabled", False)))
@@ -439,7 +498,7 @@ class LactTuningCard(Card):
                 self.status.setText("Keine Änderungen vorhanden")
                 return
             if QMessageBox.question(self, "GPU-Tuning", 
-                    "GPU-Einstellungen jetzt testen? Nicht bestätigte Änderungen setzt LACT automatisch zurück.") != QMessageBox.Yes:
+                    "GPU-Einstellungen jetzt testen? Nicht bestätigte Änderungen werden automatisch zurückgesetzt.") != QMessageBox.Yes:
                 return
             seconds = self.client.set_gpu_config(self.gpu_id, config)
             self.pending = True
@@ -463,7 +522,7 @@ class LactTuningCard(Card):
             self.pending = False
             self.confirm_timer.stop()
             self._device_selected()
-            self.status.setText("GPU-Einstellungen von LACT bestätigt und gespeichert")
+            self.status.setText("GPU-Einstellungen von Vitalux bestätigt und gespeichert")
         except LactError as exc:
             self._error(exc)
 
@@ -481,5 +540,5 @@ class LactTuningCard(Card):
 
     def _expired(self):
         self.pending = False
-        self.status.setText("Bestätigungszeit abgelaufen. LACT setzt nicht bestätigte Änderungen zurück.")
+        self.status.setText("Bestätigungszeit abgelaufen. Vitalux setzt unbestätigte Änderungen zurück.")
         self._device_selected()

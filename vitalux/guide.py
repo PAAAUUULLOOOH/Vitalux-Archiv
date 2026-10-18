@@ -45,7 +45,7 @@ SLIDES = [
         "CPU, GPU und Arbeitsspeicher",
         "Hier erfährst du, wie stark deine Hardware gerade beansprucht wird.",
         "Beim Prozessor findest du Auslastung, Takt und verfügbare Temperaturen.",
-        "Im Grafik-Reiter siehst du GPU-Werte; mit installiertem LACT-Dienst kannst du Takte, Lüfter und Profile einstellen.",
+        "Vitalux erkennt deine Grafikkarte automatisch. GPU-Tuning, Lüftersteuerung und Profile kannst du im Grafik-Reiter einmalig einrichten.",
         "Im RAM-Bereich erkennst du belegten, verfügbaren Speicher und Swap.",
         "hardware",
     ),

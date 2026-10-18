@@ -87,6 +87,23 @@ def check_ui():
         pass
     else:
         raise AssertionError("Malformed advanced config must be rejected")
+    # Hardware names are still visible if the privileged engine is unavailable.
+    from vitalux import sensors
+    previous_gpu_info = sensors.gpu_info
+    original_client = card.client
+    class Offline:
+        def devices(self):
+            raise LactError("Vitalux GPU-Steuerung noch nicht eingerichtet.")
+    try:
+        sensors.gpu_info = lambda: [{"name": "AMD Radeon RX 9070 XT"}]
+        card.client = Offline()
+        card.reload()
+        assert card.device_combo.itemText(0) == "AMD Radeon RX 9070 XT"
+        assert not card.setup_button.isHidden()
+        assert not card.apply_btn.isEnabled()
+    finally:
+        sensors.gpu_info = previous_gpu_info
+        card.client = original_client
     card.close()
     card.deleteLater()
     app.processEvents()
