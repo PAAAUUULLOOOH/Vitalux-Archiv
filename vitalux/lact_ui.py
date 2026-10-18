@@ -395,12 +395,23 @@ class LactTuningCard(Card):
             if enabled != bool(self.current_config.get("fan_control_enabled", False)):
                 overrides["fan_control_enabled"] = enabled
             if enabled:
-                fan = deepcopy(self.current_config.get("fan_control_settings") or {})
-                fan["mode"] = self.fan_mode.currentData()
-                fan["static_speed"] = self.fan_speed.value() / 100.0
-                if fan["mode"] == "curve":
-                    fan["curve"] = parse_fan_curve(self.fan_curve.toPlainText())
-                if fan != self.current_config.get("fan_control_settings"):
+                old_fan = self.current_config.get("fan_control_settings") or {}
+                mode = self.fan_mode.currentData()
+                old_speed = round(float(old_fan.get("static_speed", 0.5)) * 100)
+                dirty = (
+                    not self.current_config.get("fan_control_enabled")
+                    or mode != old_fan.get("mode", "curve")
+                    or (mode == "static" and self.fan_speed.value() != old_speed)
+                    or (mode == "curve" and self.fan_curve.toPlainText()
+                        != format_fan_curve(old_fan.get("curve")))
+                )
+                if dirty:
+                    fan = deepcopy(old_fan)
+                    fan["mode"] = mode
+                    if mode == "static":
+                        fan["static_speed"] = self.fan_speed.value() / 100.0
+                    else:
+                        fan["curve"] = parse_fan_curve(self.fan_curve.toPlainText())
                     overrides["fan_control_settings"] = fan
         config = merged_gpu_config(self.current_config, overrides)
         advanced = json.loads(self.extra.toPlainText() or "{}")
