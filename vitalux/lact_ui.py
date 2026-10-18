@@ -250,8 +250,12 @@ class LactTuningCard(Card):
             widget.setEnabled(available and not self.pending)
         if available and not self.pending:
             for key, widget in self.fields.items():
-                widget.setEnabled(self.capabilities.get(key, False))
-            self.gpu_offset.setEnabled(self.capabilities.get("gpu_offset", False))
+                supported = self.capabilities.get(key, False)
+                widget.setEnabled(supported)
+                self.form.setRowVisible(widget, supported)
+            offset_supported = self.capabilities.get("gpu_offset", False)
+            self.gpu_offset.setEnabled(offset_supported)
+            self.form.setRowVisible(self.gpu_offset, offset_supported)
             self.fan_enabled.setEnabled(self.capabilities.get("fan", False))
             self._toggle_fan_controls()
             name = self.profile_combo.currentData()
