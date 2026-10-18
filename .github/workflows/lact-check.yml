@@ -11,6 +11,7 @@ on:
       - "vitalux/window.py"
       - "tests/test_gpu_setup.py"
       - "tests/test_preferences_changelog.py"
+      - "tests/test_protected_accents.py"
       - "tests/test_lact_*.py"
       - "tests/test_vitalux_gpu_service.py"
       - "packaging/vitalux-gpu-service.py"
@@ -24,6 +25,7 @@ on:
       - "vitalux/window.py"
       - "tests/test_gpu_setup.py"
       - "tests/test_preferences_changelog.py"
+      - "tests/test_protected_accents.py"
       - "tests/test_lact_*.py"
       - "tests/test_vitalux_gpu_service.py"
       - "packaging/vitalux-gpu-service.py"
@@ -53,7 +55,9 @@ jobs:
       - name: Native Vitalux-Oberfläche ohne Hardware prüfen
         env:
           QT_QPA_PLATFORM: offscreen
-        run: .venv/bin/python tests/test_lact_ui.py
+        run: |
+          .venv/bin/python tests/test_lact_ui.py
+          .venv/bin/python tests/test_protected_accents.py
       - name: Gebündelten Originaldienst vor Veröffentlichung prüfen
         run: |
           curl --fail --location --retry 3 --silent --show-error \
