@@ -141,7 +141,13 @@ class LactTuningCard(Card):
             "Nur unterstützte GPU-Optionen verwenden; Übertaktung kann das System instabil machen.",
             "muted", wrap=True))
         self._set_access(False)
-        QTimer.singleShot(0, self.reload)
+        self._first_show = True
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if self._first_show:
+            self._first_show = False
+            QTimer.singleShot(0, self.reload)
 
     def _set_access(self, available):
         for widget in (self.profile_combo, self.load_btn, self.create_btn, self.delete_btn,
@@ -203,8 +209,8 @@ class LactTuningCard(Card):
         config = self.current_config
         for key, widget in self.fields.items():
             value = config.get(key)
-            widget.setProperty("lact_null", value is None)
             widget.setValue(value if value is not None else widget.minimum())
+            widget.setProperty("lact_null", value is None)
             # Spinboxes have explicit clear-to-default via context menu.
             widget.setToolTip("Wert einstellen. Mit 'Zurücksetzen' im Kontextmenü wieder auf Standard.")
             widget.setContextMenuPolicy(Qt.CustomContextMenu)
