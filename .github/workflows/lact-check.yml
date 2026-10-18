@@ -2,9 +2,10 @@ name: LACT-Integration testen
 
 on:
   push:
-    branches: [feature/lact-gpu-tuning, feature/vitalux-integrated-gpu-engine, fix/appimage-gpu-setup-protected-presets-tray-hint]
+    branches: [fix/gpu-tuning-fan-schema-live-stats-layout]
     paths:
       - "vitalux/lact_*.py"
+      - "vitalux/theme.py"
       - "vitalux/pages.py"
       - "vitalux/gpu_setup.py"
       - "vitalux/control.py"
@@ -19,6 +20,7 @@ on:
   pull_request:
     paths:
       - "vitalux/lact_*.py"
+      - "vitalux/theme.py"
       - "vitalux/pages.py"
       - "vitalux/gpu_setup.py"
       - "vitalux/control.py"
