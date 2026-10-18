@@ -219,6 +219,12 @@ class LactTuningCard(Card):
             "Nur unterstützte GPU-Optionen verwenden; Übertaktung kann das System instabil machen.",
             "muted", wrap=True))
         self.fan_enabled.toggled.connect(self._toggle_fan_controls)
+        for group in (self.live_group, self.profile_group, self.clock_group,
+                      self.fan_group, self.advanced_group):
+            group.setObjectName("gpuTuningGroup")
+        self.fan_curve.setObjectName("gpuCurveInput")
+        self.extra.setObjectName("gpuExpertInput")
+        self.apply_btn.setObjectName("primaryBtn")
         self.refresh_timer = QTimer(self)
         self.refresh_timer.setInterval(4000)
         self.refresh_timer.timeout.connect(self._refresh_live)
