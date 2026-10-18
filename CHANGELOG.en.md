@@ -4,6 +4,12 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.78] - 2026-10-18
+- **Native GPU tuning in the Graphics tab:** Vitalux-themed frontend communicating with the original local **LACT daemon (lactd)**, while preserving existing live GPU stats.
+- Configure supported clock, voltage, power and fan parameters. Unknown LACT configuration fields are preserved and exposed in an advanced JSON editor. Explicit confirmation is required; unconfirmed changes are reverted by LACT.
+- Create, activate and delete profiles; auto-switch and process/GameMode rules use LACT's API. Vitalux monitoring remains available when lactd is not installed or accessible.
+- Expanded README, bilingual built-in guide, translations, MIT credit and automated LACT/Qt regression checks. Hardware support varies by GPU, drivers and LACT; live hardware verification remains necessary.
+
 ## [v0.9.3.77] - 2026-10-18
 - Restored the full About-page acknowledgement, with a bold “Thanks to:” heading and clickable TimBooH GitHub profile; it follows the active language and accent color.
 - Conservative automatic dashboard tiling fills only large holes after tile moves or hiding, retaining the same 14 px spacing, saved order, undo and drag-and-drop.

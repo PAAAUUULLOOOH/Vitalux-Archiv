@@ -13,6 +13,7 @@ from .i18n import tr
 from .sensors import drives, fmt_bytes, fmt_duration, fmt_rate, system_static
 from .monitor_extra import graphics_runtime, system_gpu_device
 from . import smart_monitor
+from .lact_ui import LactTuningCard
 from .smart_ui import SmartPane
 from .widgets import (Bar, Card, ChipsGrid, GaugeBox, GaugeCard, HistoryGraph, ChartPanel, KeyValue,
                       Meter, label, legend, SidebarToggle)
@@ -494,6 +495,8 @@ class GpuPage(Page):
         self.none = Card()
         self.none.body.addWidget(label("Keine GPU-Daten gefunden. Unterstützt werden NVIDIA (nvidia-smi), AMD (amdgpu) und Intel (Name, ohne Auslastung).", wrap=True))
         self.content.addWidget(self.none)
+        self.tuning = LactTuningCard()
+        self.content.addWidget(self.tuning)
 
     def refresh(self, d, h):
         gpus = d["gpus"]

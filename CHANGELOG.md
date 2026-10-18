@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.78] - 2026-10-18
+- **GPU-Tuning direkt im Grafik-Reiter:** Native, farbschemaabhängige Vitalux-Bedienoberfläche auf Basis des originalen lokalen **LACT-Hintergrunddienstes (lactd)** – die bisherigen Live-Sensordaten bleiben erhalten.
+- GPU wählen und unterstützte Takt-, Spannungs-, Leistungs- und Lüfterparameter bearbeiten. Erweiterte LACT-Konfigurationsfelder bleiben erhalten und sind zusätzlich über den JSON-Expertenbereich zugänglich. Änderungen benötigen eine ausdrückliche Bestätigung; unbestätigte Werte rollt LACT automatisch zurück.
+- Profile erstellen, aktivieren und löschen; automatische Umschaltung und Prozess-/GameMode-Regeln werden über die LACT-Schnittstelle verwaltet. Ohne installierten und freigegebenen lactd-Dienst bleibt Vitalux als Systemmonitor nutzbar.
+- README, integrierte DE/EN-Anleitung, Übersetzungen, Lizenzhinweise und isolierte LACT-/Qt-Regressionstests ergänzt. Unterstützte Regler hängen von GPU, Treiber und LACT ab; GPU-Tuning ist nicht ohne weitere Hardwaretests garantiert.
+
 ## [v0.9.3.77] - 2026-10-18
 - Im Info-Reiter steht wieder die vollständige Danksagung mit fettgedrucktem „Danke an:“ und anklickbarem GitHub-Profillink auf TimBooH. Die Danksagung folgt DE/EN und der Akzentfarbe.
 - Automatisches Dashboard-Tiling: Nur größere Leerflächen nach dem Verschieben oder Ausblenden von Kacheln werden vorsichtig ausgefüllt. Der bisherige Abstand von 14 px zwischen Kacheln bleibt gleich. Keine Änderung gespeicherter Reihenfolgen, Undo oder Drag-and-drop-Bedienung.
