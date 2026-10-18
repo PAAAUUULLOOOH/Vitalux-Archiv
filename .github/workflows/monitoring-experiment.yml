@@ -2,7 +2,7 @@ name: Vitalux Monitoring – privater ZIP-Test
 
 on:
   push:
-    branches: [experiment/monitoring-refresh-no-gpu-control]
+    branches: [experiment/monitoring-insights-v2]
   workflow_dispatch:
 
 permissions:
@@ -34,7 +34,9 @@ jobs:
           set -euo pipefail
           .venv/bin/python -m compileall -q vitalux
           .venv/bin/python tests/test_monitor_insights.py
+          .venv/bin/python tests/test_insight_engine.py
           .venv/bin/python tests/test_monitoring_ui.py
+          .venv/bin/python tests/test_insight_ui.py
           .venv/bin/python tests/test_core_behaviors.py
           .venv/bin/python tests/test_guide_locale.py
           .venv/bin/python tests/test_protected_accents.py
@@ -59,7 +61,7 @@ jobs:
           set -euo pipefail
           SOURCE='work/baseline/Vitalux-v0.9.3.81'
           test -x "$SOURCE/runtime/bin/python3.12"
-          DEST='work/stage/Vitalux-Monitoring-Test'
+          DEST='work/stage/Vitalux-Insights-Test'
           mkdir -p work/stage work/artifacts
           cp -a "$SOURCE" "$DEST"
           rm -rf "$DEST/vitalux"
@@ -73,7 +75,10 @@ jobs:
           -------------------------------------
           Kein offizieller Release. Das Programm zeigt möglicherweise noch die
           Versionsnummer der letzten stabilen Version an.
-          Neue read-only GPU-, Mainboard- und Verlaufsansichten.
+          Lesende GPU-Überwachung, Performance Detective, Gaming Session
+          Analyzer, Vorher-/Nachher-Vergleiche, Ereignis-Timeline,
+          anklickbare Hardware-Übersicht und Fokusmodus.
+          Separater Mainboard-Temperaturbereich entfernt.
           Keine GPU-Übertaktung oder Lüftersteuerung.
           Diese ZIP ist zum Entpacken und Testen vorgesehen.
           Das installierte alte vitalux-gpu.service wird aus Sicherheitsgründen
@@ -88,14 +93,17 @@ jobs:
             QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
               PYTHONPATH="$PWD" "$PWD/runtime/bin/python3.12" \
               "$ROOT_DIR/tests/test_monitoring_ui.py"
+            QT_QPA_PLATFORM=offscreen LD_LIBRARY_PATH="$PWD/lib" \
+              PYTHONPATH="$PWD" "$PWD/runtime/bin/python3.12" \
+              "$ROOT_DIR/tests/test_insight_ui.py"
           )
-          (cd work/stage && zip -q -r -y '../artifacts/Vitalux-Monitoring-Experiment-Test.zip' 'Vitalux-Monitoring-Test')
+          (cd work/stage && zip -q -r -y '../artifacts/Vitalux-Insights-Experiment-Test.zip' 'Vitalux-Insights-Test')
           unzip -tq work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
           test -s work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
       - name: Nur Test-ZIP als GitHub-Actions-Artefakt anbieten
         uses: actions/upload-artifact@v4
         with:
-          name: Vitalux-Monitoring-Experiment-Test
+          name: Vitalux-Insights-Experiment-Test
           path: work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
           if-no-files-found: error
           retention-days: 14
