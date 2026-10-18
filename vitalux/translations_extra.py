@@ -665,3 +665,5 @@ EN_MORE.update({
     "Mainboard und CPU besitzen eigene Temperaturverläufe, sofern Linux die Sensoren bereitstellt.": "Motherboard and CPU have their own temperature histories when Linux exposes the relevant sensors.",
     "Unter Einstellungen exportierst du aktuelle Systemberichte lokal als TXT oder JSON; Min-/Max-Werte lassen sich im System-Reiter zurücksetzen.": "Export local TXT or JSON system reports from Settings, and reset minimum/maximum readings in the System tab."
 })
+
+EN_MORE["Keine GPU-Daten gefunden. Unterstützt werden NVIDIA, AMD und Intel, soweit Linux entsprechende Sensorwerte liefert."] = "No GPU data found. NVIDIA, AMD and Intel devices are supported where Linux exposes sensors."
