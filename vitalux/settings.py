@@ -55,9 +55,26 @@ def _report_write_error(exc):
 
 
 def set(key, value):
+    """Update one preference using the shared atomic writer."""
+    return set_many({key: value})
+
+
+def set_many(changes):
+    """Save multiple preferences with one fsync/replace and one cache update.
+
+    A no-op update skips disk writes only if a preferences file already exists.
+    The caller-owned values are copied so later mutation cannot alter the cache.
+    """
     global _cache_identity, _cache_value
+    if not isinstance(changes, dict):
+        raise TypeError("Preferences changes must be a dictionary")
+    if not changes:
+        return True
     data = _load()
-    data[key] = value
+    if os.path.isfile(PATH) and all(key in data and data[key] == value
+                                    for key, value in changes.items()):
+        return True
+    data.update(copy.deepcopy(changes))
     temporary = None
     try:
         parent = os.path.dirname(PATH)
