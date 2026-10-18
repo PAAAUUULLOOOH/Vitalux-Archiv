@@ -630,7 +630,14 @@ class ChartPanel(QWidget):
                 self.live_labels[i].setText(f'{tr(self.series_names[i])} –')
             self.live_labels[i].show()
             if vals:
-                active.append((list(values)[-count:], color))
+                # A missing sensor sample is not zero: draw only the most
+                # recent uninterrupted run so the line cannot dive to 0.
+                recent = list(values)[-count:]
+                start = next((i + 1 for i in range(len(recent) - 1, -1, -1)
+                              if recent[i] is None), 0)
+                run = recent[start:]
+                if len(run) >= 2:
+                    active.append((run, color))
         self.graph.set_series(active)
 
 
