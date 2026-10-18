@@ -48,6 +48,14 @@ def test_games_and_profiles():
     assert result["metrics"]["gpu_clock"]["min"] == 2400
     assert result["metrics"]["gpu_clock"]["max"] == 2480
     assert round(result["metrics"]["gpu_usage"]["avg"],1) == 42
+    # Long sessions stay memory bounded without truncating averages.
+    lab.start_session("Langzeit-Test")
+    for i in range(1300):
+        lab.ingest(sample(gpu=40 if i < 650 else 60))
+    assert len(lab.session) <= 900
+    long = lab.stop_session()
+    assert long["samples"] == 1300
+    assert long["metrics"]["gpu_usage"]["avg"] == 50
     try:
         lab.stop_session()
     except ValueError:
