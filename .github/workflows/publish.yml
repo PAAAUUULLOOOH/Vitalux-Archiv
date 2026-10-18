@@ -88,6 +88,7 @@ jobs:
           curl --fail --location --retry 3 --silent --show-error \
             "https://github.com/ilya-zlobintsev/LACT/releases/download/v0.10.1/lact-headless-0.10.1-0.amd64.ubuntu-2404.deb" \
             --output build/vitalux-gpu/lact-headless.deb
+          echo "c94ca31a1be6e005253a11f3bd02a48d9d08d356f08e2a5a6e9f2565283fca55  build/vitalux-gpu/lact-headless.deb" | sha256sum --check -
           dpkg-deb -x build/vitalux-gpu/lact-headless.deb build/vitalux-gpu/upstream
           test -s build/vitalux-gpu/upstream/usr/bin/lact
           chmod 755 build/vitalux-gpu/upstream/usr/bin/lact
@@ -111,6 +112,11 @@ jobs:
           mkdir -p "$DEST/LICENSES"
           cp LICENSES/LACT-MIT.txt "$DEST/LICENSES/LACT-MIT.txt"
           test -s "$DEST/bin/vitalux-gpu-engine"
+          "$DEST/bin/vitalux-gpu-engine" --version
+          if ldd "$DEST/bin/vitalux-gpu-engine" | grep -F "not found"; then
+            echo "Vitalux GPU engine has missing system library dependencies" >&2
+            exit 1
+          fi
           test -s "$DEST/LICENSES/LACT-MIT.txt"
           cp packaging/build-appimage.sh "$DEST/packaging/build-appimage.sh"
           find "$DEST" -type d -name __pycache__ -prune -exec rm -rf {} +
