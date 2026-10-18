@@ -577,7 +577,7 @@ class GpuCard(Card):
 
 
 class GpuPage(Page):
-    def __init__(self):
+    def __init__(self, lab=None, open_focus=None):
         super().__init__("Grafik", "GPU-Auslastung, Videospeicher und Sensoren")
         self.cards = []
         self.none = Card()
@@ -585,13 +585,21 @@ class GpuPage(Page):
             "Keine GPU-Daten gefunden. Unterstützt werden NVIDIA, AMD und Intel, "
             "soweit Linux entsprechende Sensorwerte liefert.", wrap=True))
         self.content.addWidget(self.none)
+        self.lab_panel = None
+        if lab is not None and open_focus is not None:
+            from .insight_ui import MonitoringLabPanel
+            self.lab_panel = MonitoringLabPanel(lab, open_focus)
+            self.content.addWidget(self.lab_panel)
 
     def refresh(self, d, h):
         gpus = d.get("gpus") or []
         self.none.setVisible(not gpus)
         while len(self.cards) < len(gpus):
             card = GpuCard()
-            self.content.addWidget(card)
+            if self.lab_panel is None:
+                self.content.addWidget(card)
+            else:
+                self.content.insertWidget(self.content.indexOf(self.lab_panel), card)
             self.cards.append(card)
         for i, card in enumerate(self.cards):
             card.setVisible(i < len(gpus))
@@ -600,6 +608,8 @@ class GpuPage(Page):
                     gpus[i], history=h if i == 0 else None,
                     extrema=d.get("session_extrema") if i == 0 else None,
                     mesa=system_static().get("mesa"))
+        if self.lab_panel is not None:
+            self.lab_panel.refresh(d)
 
 
 # ------------------------------------------------------------------ Speicher
@@ -852,28 +862,6 @@ class SystemPage(Page):
         perf_card.body.addWidget(self.app_paint)
         self.content.addWidget(perf_card)
 
-        # Mainboard is a real hardware section, not a guessed PC illustration.
-        self.board_card = Card("Mainboard")
-        self.board_info = {}
-        for title, value in (
-            ("Hersteller / Modell", s["board"] or "–"),
-            ("BIOS", s["bios"]),
-        ):
-            kv = KeyValue(title)
-            kv.set(value)
-            self.board_card.body.addWidget(kv)
-        self.board_temp = KeyValue("Temperatur")
-        self.board_source = KeyValue("Sensor")
-        self.board_extrema = KeyValue("Temperatur · Min/Max seit Start")
-        for kv in (self.board_temp, self.board_extrema, self.board_source):
-            self.board_card.body.addWidget(kv)
-        self.board_temp_graph = ChartPanel(["Mainboard-Temperatur"], [theme.accent()], mode="temperature")
-        self.board_card.body.addWidget(self.board_temp_graph)
-        self.board_card.body.addWidget(label(
-            "Mainboard-Temperatur nur bei eindeutig zuordenbarem Linux-Sensor. "
-            "Kein Ersatz durch CPU-/GPU-/SSD-Temperaturen.", "muted", wrap=True))
-        self.content.addWidget(self.board_card)
-
         self.status_card = Card("Hardware-Status")
         self.status_rows = {title: KeyValue(title) for title in (
             "CPU", "GPU", "RAM", "Systemlaufwerk")}
@@ -893,13 +881,7 @@ class SystemPage(Page):
             main.reset_session_extrema()
 
     def refresh(self, d, h):
-        from .monitor_insights import format_range, hardware_status, valid_number
-        board = d.get("motherboard") or {}
-        temperature = board.get("temperature")
-        self.board_temp.set(f"{temperature:.1f} °C" if valid_number(temperature) else tr("nicht verfügbar"))
-        self.board_source.set(board.get("source") or tr("nicht verfügbar"))
-        self.board_extrema.set(format_range(d.get("session_extrema") or {}, "board_temp", "°C", 1))
-        self.board_temp_graph.set_series([(h.get("board_temp", ()), theme.accent())])
+        from .monitor_insights import hardware_status
         from . import settings
         limits = {name: settings.get(name, default) for name, default in (
             ("cpu_temp", 90), ("gpu_temp", 90),
