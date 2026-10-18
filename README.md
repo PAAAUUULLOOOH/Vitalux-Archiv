@@ -46,15 +46,17 @@
 
 Scrollen folgt der eingestellten Monitor-Bildwiederholrate (ohne FPS-Garantie); Touchpads bleiben direkt. **Automatisches Tiling** füllt nur größere Lücken nach dem Kachelverschieben oder Ausblenden; die Kachelabstände bleiben bei 14 px.
 
-### Hardware-Überwachung (ohne Übertaktung)
+### Hardware-Überwachung & Vitalux Insights
 
-**Grafik:** Auslastung, belegter Videospeicher, aktuelle GPU-/VRAM-Taktraten, Temperatur/Hotspot, Spannung, Leistung und Lüfterwerte in einer übersichtlichen Ansicht. Aufklappbare Details zeigen verfügbare PCIe-Linkdaten (aktuell/maximal), Mesa-Version und die Sensor-Datenquelle. Live-Diagramme bieten 60 Sekunden, 5 und 15 Minuten Verlauf. Nicht vorhandene Werte erscheinen als **Nicht verfügbar**, niemals als erfundene Nullwerte.
+**Grafik:** GPU-/VRAM-Auslastung, aktuelle Takte, Temperatur/Hotspot, Spannung, Leistungsaufnahme und Lüfterwerte. Details zu PCIe, Mesa und Sensorquelle sowie Live-Diagramme (60 Sekunden, 5 und 15 Minuten) sind aufklappbar. Fehlende Werte heißen **Nicht verfügbar**. Ein separater Mainboard-Temperaturbereich entfällt; Board und BIOS bleiben im System-Reiter erkennbar.
 
-**CPU & System:** CPU-Temperaturverlauf, Mainboard-/BIOS-Basisdaten im System-Reiter; kein separater Mainboard-Temperaturbereich.
+**Vitalux Insights (experimentell):** Performance Detective mit vorsichtigen, messwertbasierten Hinweisen; Gaming Session Analyzer mit manueller Aufzeichnung und optionalem MangoHud-CSV-Import (FPS/ungefähre 1%-Lows); Vorher-/Nachher-Vergleich mit lokal gespeicherten Messpunkten; Ereignis-Timeline mit Messwerten; anklickbare Hardware-Übersicht und verschiebbarer Fokusmodus für den zweiten Monitor.
 
-**Analyse:** Min-/Max-Werte seit dem Start, manuell zurücksetzbar; sachlicher Hardwarestatus anhand der vorhandenen Warnwerte. Systemberichte lassen sich lokal als **TXT oder JSON** exportieren. Berichte können Hostnamen, System- und Netzwerkdaten enthalten; es erfolgt kein automatischer Upload.
+**CPU & Diagnose:** CPU-Temperaturverlauf, Min-/Max-Werte seit Programmstart, zurücksetzbar. Berichte als lokale TXT- oder JSON-Datei. Nur vorliegende Linux-Daten werden verwendet – keine erfundenen Leistungswerte. Snapshot-Vergleiche ersetzen keinen kontrollierten Benchmark.
 
-Vitalux arbeitet vollständig lesend über vorhandene Linux-Schnittstellen. **GPU-Übertaktung und Lüftersteuerung wurden aus der Anwendung entfernt.** Es ist keine privilegierte GPU-Steuerungsengine und keine Administrator-Einrichtung mehr erforderlich. Ein gegebenenfalls aus älteren Testversionen bereits installierter Dienst wird nicht automatisch verändert oder deinstalliert.
+**Datenschutz:** Alle Analysen laufen lokal. Gaming-Aufzeichnungen bleiben im Arbeitsspeicher, bis du sie ausdrücklich als JSON exportierst; Vergleichsmessungen werden im Vitalux-Benutzerkonfigurationsverzeichnis gespeichert. MangoHud wird nur nach manueller Dateiauswahl gelesen.
+
+**Keine Hardwaresteuerung:** GPU-Übertaktung und eigene Lüfterkurven sind entfernt; es wird kein privilegierter GPU-Dienst mitgeliefert. Ein bereits aus älteren Testversionen installierter GPU-Systemdienst wird nicht automatisch gelöscht oder verändert.
 
 ### Design & Hintergründe
 
