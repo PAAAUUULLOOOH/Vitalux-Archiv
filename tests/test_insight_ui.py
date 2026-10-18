@@ -7,7 +7,11 @@ sys.path.insert(0, os.getcwd())
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
-from PySide6.QtTest import QTest
+try:
+    from PySide6.QtTest import QTest
+except ImportError:
+    # Portable runtime ships the Qt desktop widgets, but not QtTest.
+    QTest = None
 from vitalux import theme
 from vitalux.insight_engine import MonitoringLab
 from vitalux.insight_ui import FocusWindow, _HardwareNode
@@ -56,7 +60,10 @@ def check_lab_panel():
     assert {node.key for node in nodes} == {"cpu", "gpu", "ram", "disk", "mainboard"}
     node = next(x for x in nodes if x.key == "mainboard")
     point = panel.map.mapFromScene(node.mapToScene(node.rect().center()))
-    QTest.mouseClick(panel.map.viewport(), Qt.LeftButton, pos=point)
+    if QTest is not None:
+        QTest.mouseClick(panel.map.viewport(), Qt.LeftButton, pos=point)
+    else:
+        node.callback(node.key)  # Native item's wired click handler
     assert "Mainboard" in panel.hardware_detail.text()
 
     panel.session_name.setText("Cyberpunk")
