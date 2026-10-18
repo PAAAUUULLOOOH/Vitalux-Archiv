@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.79] - 2026-10-18
+- **Vitalux GPU-Tuning vollständig in die Anwendung integriert:** Das offizielle, unveränderte Open-Source-GPU-Backend (LACT 0.10.1) wird mit Vollversion und AppImage mitgeliefert, per SHA-256 geprüft und benötigt keine separat installierte LACT-Anwendung.
+- Automatische Grafikkartenerkennung auch ohne aktivierten Steuerungsdienst. Ein einziger Button **GPU-Steuerung einrichten** übernimmt nach einer ausdrücklichen Administratorfreigabe die Einrichtung des integrierten systemd-Dienstes **vitalux-gpu.service**.
+- Im Grafik-Reiter sowie allen Status- und Einrichtungstexten erscheint jetzt **Vitalux** statt LACT. Technische Herkunft und MIT-Lizenz bleiben gesetzeskonform dokumentiert.
+- Verbesserte Qt-Signalbehandlung und Offline-GPU-Anzeige; separate Tests für Dienstkonfiguration, Geräteerkennung und originales Dienst-Binary. Profile und Systemmonitor bleiben erhalten. Einmalige Administratorrechte und unterstützte GPU-Treiber sind weiterhin erforderlich.
+
 ## [v0.9.3.78] - 2026-10-18
 - **GPU-Tuning direkt im Grafik-Reiter:** Native, farbschemaabhängige Vitalux-Bedienoberfläche auf Basis des originalen lokalen **LACT-Hintergrunddienstes (lactd)** – die bisherigen Live-Sensordaten bleiben erhalten.
 - GPU wählen und unterstützte Takt-, Spannungs-, Leistungs- und Lüfterparameter bearbeiten. Erweiterte LACT-Konfigurationsfelder bleiben erhalten und sind zusätzlich über den JSON-Expertenbereich zugänglich. Änderungen benötigen eine ausdrückliche Bestätigung; unbestätigte Werte rollt LACT automatisch zurück.
