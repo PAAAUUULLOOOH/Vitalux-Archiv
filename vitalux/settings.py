@@ -40,6 +40,14 @@ def get(key, default=None):
     return _load().get(key, default)
 
 
+def get_many(defaults):
+    """Read several settings using just one snapshot of the settings file."""
+    if not isinstance(defaults, dict):
+        raise TypeError("Preferences defaults must be a dictionary")
+    data = _load()
+    return {key: data.get(key, default) for key, default in defaults.items()}
+
+
 def _report_write_error(exc):
     message = f"Vitalux konnte die Einstellungen nicht speichern: {exc}"
     warnings.warn(message, RuntimeWarning, stacklevel=2)
