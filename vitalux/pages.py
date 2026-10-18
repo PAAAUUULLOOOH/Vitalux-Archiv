@@ -899,7 +899,11 @@ class SystemPage(Page):
         self.board_source.set(board.get("source") or tr("nicht verfügbar"))
         self.board_extrema.set(format_range(d.get("session_extrema") or {}, "board_temp", "°C", 1))
         self.board_temp_graph.set_series([(h.get("board_temp", ()), theme.accent())])
-        status = dict(hardware_status(d))
+        from . import settings
+        limits = {name: settings.get(name, default) for name, default in (
+            ("cpu_temp", 90), ("gpu_temp", 90),
+            ("ram_usage", 90), ("disk_usage", 95))}
+        status = dict(hardware_status(d, limits))
         for key, row in self.status_rows.items():
             row.set(status.get(key, tr("nicht verfügbar")))
         self.render_gpu.set(system_gpu_device(d['gpus']))
