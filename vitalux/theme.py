@@ -172,23 +172,24 @@ QListWidget::item:selected { background: $ACTIVE_BG; color: $TEXT; }
 QToolButton#customAccentRemove { background: $BUTTON_BG; border: 1px solid $BORDER;
     border-radius: 8px; color: $MUTED; font-size: 19px; padding: 0px; }
 QToolButton#customAccentRemove:hover { color: $ACCENT; border-color: $ACCENT; background: $ACTIVE_BG; }
-/* Native GPU tuning: consistent, theme-aware visual groups. */
-QGroupBox#gpuTuningGroup {
-    background: $INPUT_BG; border: 1px solid $BORDER;
-    border-radius: 13px; padding: 12px 10px 10px 10px;
-    margin-top: 14px;
+/* Vitalux Insights: nested cards follow the active native color scheme. */
+QGroupBox#insightGroup {
+    background: $INPUT_BG;
+    border: 1px solid $BORDER;
+    border-radius: 12px;
+    margin-top: 16px;
+    padding: 12px 10px 10px 10px;
+    color: $TEXT;
 }
-QGroupBox#gpuTuningGroup::title {
-    color: $TEXT; font-size: 14px; font-weight: 750;
-    subcontrol-origin: margin; subcontrol-position: top left;
-    left: 14px; padding: 0 7px;
+QGroupBox#insightGroup::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 12px;
+    padding: 0 6px;
+    color: $TEXT;
+    font-weight: 750;
 }
-QLabel#gpuReadingValue { color: $ACCENT; font-size: 19px; font-weight: 800; }
-QPlainTextEdit#gpuCurveInput, QPlainTextEdit#gpuExpertInput {
-    background: $CARD; color: $TEXT; border: 1px solid $BORDER;
-    border-radius: 10px; padding: 9px;
-}
-QPlainTextEdit#gpuCurveInput:focus, QPlainTextEdit#gpuExpertInput:focus { border-color: $ACCENT; }
+QLabel#focusReading { color: $ACCENT; font-size: 29px; font-weight: 800; }
 QCheckBox { spacing: 8px; }
 QCheckBox::indicator { width: 16px; height: 16px; }
 QCheckBox::indicator:checked { background: $ACCENT; border: 1px solid $ACCENT; border-radius: 4px; }

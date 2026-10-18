@@ -4,6 +4,15 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.82] - 2026-10-18
+- **Vitalux Insights released:** Read-only Performance Detective with evidence-based hypotheses, an event timeline recording associated measurements, and a combined CPU/GPU/VRAM chart.
+- **Gaming Session Analyzer:** Manually record gaming sessions, export JSON, and optionally import measured FPS and approximate 1% lows from MangoHud CSV logs.
+- **Before/after and hardware map:** Local persistent comparison snapshots, clickable hardware details and a movable focus window for a second monitor.
+- **Clean read-only graphics:** Live clocks, usage, VRAM, temperature, voltage and PCIe connection. Removed separate motherboard-temperature panel; motherboard and BIOS identity remain under System.
+- **Removed GPU overclocking and fan control:** New packages no longer include the privileged tuning engine. Previously installed services are left unchanged; earlier releases are untouched.
+- **Preserved main-branch cleanup:** Compact accent selector matching the theme menu, protected preset colors, deduplicated GPU history, honest missing readings, atomic preference changes and improved error logs.
+- Expanded native Qt, portable-runtime, graphics, preferences, report and regression tests ahead of release.
+
 ## [v0.9.3.81] - 2026-10-18
 - **Fixed custom GPU fan curves:** The complete service-required data now includes the temperature sensor, polling interval and full curve. Existing settings are retained.
 - **Live GPU measurements on entry:** Current GPU/VRAM clocks, voltage, temperature, power consumption, power limit, usage and fan RPM are displayed and periodically refreshed while the service is connected.

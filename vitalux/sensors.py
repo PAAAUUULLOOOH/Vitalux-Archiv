@@ -59,6 +59,7 @@ def prime():
 def collect():
     net_total = psutil.net_io_counters()
     dio = psutil.disk_io_counters()
+    sensor_data = extended.sensor_info()
     return {
         "cpu": cpu_info(),
         "ram": ram_info(),
@@ -66,7 +67,7 @@ def collect():
         "gpus": gpu_info(),
         "net": network_info(net_total),
         "io": {"read": _rate("dr", dio.read_bytes), "write": _rate("dw", dio.write_bytes)} if dio else {"read": 0, "write": 0},
-        "sensors": extended.sensor_info(),
+        "sensors": sensor_data,
         "app_resources": monitor_extra.app_resources(),
         "uptime": time.time() - psutil.boot_time(),
     }
@@ -213,7 +214,8 @@ def _nvidia_gpus():
                      "vram_used": _num(p[3], 1048576), "vram_total": _num(p[4], 1048576),
                      "temp": _num(p[5]), "power": _num(p[6]), "fan": _num(p[7]),
                      "clock": _num(p[8]), "clock_mem": _num(p[9]), "hotspot": None,
-                     "fan_rpm": None})
+                     "fan_rpm": None, "voltage": None, "pcie_current": None,
+                     "pcie_max": None, "sensor_source": "nvidia-smi"})
     return gpus
 
 
@@ -235,6 +237,20 @@ def _drm_gpus(have_nvidia):
             temp = float(t) / 1000 if t and t.isdigit() else None
             pw = _read(os.path.join(hw[0], "power1_average")) or _read(os.path.join(hw[0], "power1_input"))
             power = float(pw) / 1e6 if pw and pw.isdigit() else None
+        # These read-only sysfs values are provided by the kernel; do not use
+        # optional overclocking drivers, services or elevated permissions.
+        voltage = None
+        if hw:
+            millivolts = _num(_read(os.path.join(hw[0], "in0_input")))
+            if millivolts is not None and 100 <= millivolts <= 2500:
+                voltage = millivolts
+        from .monitor_insights import pcie_link
+        pcie_now, pcie_max = pcie_link(
+            _read(os.path.join(dev, "current_link_speed")),
+            _read(os.path.join(dev, "current_link_width")),
+            _read(os.path.join(dev, "max_link_speed")),
+            _read(os.path.join(dev, "max_link_width")),
+        )
         busy = _read(os.path.join(dev, "gpu_busy_percent"))
         used, total = _read(os.path.join(dev, "mem_info_vram_used")), _read(os.path.join(dev, "mem_info_vram_total"))
         extra = extended.drm_extra(dev)
@@ -243,7 +259,9 @@ def _drm_gpus(have_nvidia):
                      "temp": extra["edge"] if extra["edge"] is not None else temp,
                      "hotspot": extra["hotspot"], "power": power, "fan": extra["fan_percent"],
                      "fan_rpm": extra["fan_rpm"], "clock": extra["clock"],
-                     "clock_mem": extra["clock_mem"]})
+                     "clock_mem": extra["clock_mem"], "voltage": voltage,
+                     "pcie_current": pcie_now, "pcie_max": pcie_max,
+                     "sensor_source": "Linux DRM / sysfs"})
     return gpus
 
 

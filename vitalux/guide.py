@@ -45,8 +45,8 @@ SLIDES = [
         "CPU, GPU und Arbeitsspeicher",
         "Hier erfährst du, wie stark deine Hardware gerade beansprucht wird.",
         "Beim Prozessor findest du Auslastung, Takt und verfügbare Temperaturen.",
-        "Im Grafik-Reiter stehen aktuelle GPU-Taktraten, Spannung, Temperatur und Lüfterwerte. GPU-Tuning ist übersichtlich in Profile, Leistung und Lüftersteuerung gegliedert.",
-        "Im RAM-Bereich erkennst du belegten, verfügbaren Speicher und Swap.",
+        "Der Grafik-Reiter vereint Auslastung, Videospeicher, Taktraten, Spannung und Temperatur. Technische Details und Live-Diagramme sind aufklappbar.",
+        "Unter Vitalux Insights findest du Performance Detective, Gaming-Aufzeichnungen und Vergleichsmessungen.",
         "hardware",
     ),
     (
@@ -86,7 +86,7 @@ SLIDES = [
         "Vitalux prüft automatisch beim Start und etwa alle sechs Stunden auf Updates.",
         "Bei einem Update glüht das Vitalux-Logo in der App und im Tray. Der Updates-Reiter pulsiert; eine Tray-Nachricht nennt die Version.",
         "Vor dem Aktualisieren siehst du die Neuerungen; erst „Jetzt aktualisieren“ startet den Download.",
-        "Der Changelog bleibt im Updates-Reiter zweisprachig lesbar; im Info-Reiter ist TimBooH mit seinem GitHub-Profil verlinkt.",
+        "Ereignis-Timeline, anklickbare Hardware-Übersicht und Fokusmodus für den zweiten Monitor findest du im Grafik-Reiter unter Vitalux Insights.",
         "updates",
     ),
 ]
