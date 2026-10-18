@@ -39,27 +39,27 @@ class LactClient:
                 with connection.makefile("rb") as stream:
                     line = stream.readline(MAX_REPLY_BYTES + 1)
         except FileNotFoundError as exc:
-            raise LactError("LACT-Dienst nicht gefunden. Installiere LACT und aktiviere lactd.") from exc
+            raise LactError("Vitalux GPU-Steuerung noch nicht eingerichtet.") from exc
         except PermissionError as exc:
-            raise LactError("Kein Zugriff auf /run/lactd.sock. Prüfe admin_user/admin_group in /etc/lact/config.yaml.") from exc
+            raise LactError("Vitalux GPU-Steuerung: Zugriff auf den Dienst verweigert.") from exc
         except (OSError, TimeoutError) as exc:
-            raise LactError(f"LACT-Verbindung fehlgeschlagen: {exc}") from exc
+            raise LactError(f"Vitalux GPU-Verbindung fehlgeschlagen: {exc}") from exc
         if not line or len(line) > MAX_REPLY_BYTES:
-            raise LactError("LACT hat keine gültige oder eine zu große Antwort geliefert.")
+            raise LactError("Die Vitalux GPU-Steuerung antwortet nicht korrekt.")
         try:
             response = json.loads(line)
         except (UnicodeError, ValueError) as exc:
-            raise LactError("Ungültige Antwort vom LACT-Dienst.") from exc
+            raise LactError("Ungültige Antwort vom GPU-Steuerungsdienst.") from exc
         if not isinstance(response, dict) or response.get("status") not in ("ok", "error"):
-            raise LactError("Unbekanntes LACT-Antwortformat.")
+            raise LactError("Unbekanntes Antwortformat der GPU-Steuerung.")
         if response["status"] == "error":
-            raise LactError(str(response.get("data") or "LACT hat den Befehl abgelehnt."))
+            raise LactError(str(response.get("data") or "GPU-Einstellung wurde abgelehnt."))
         return response.get("data")
 
     def devices(self):
         data = self.request("list_devices")
         if not isinstance(data, list):
-            raise LactError("Ungültige LACT-Geräteliste.")
+            raise LactError("Ungültige GPU-Geräteliste.")
         return [item for item in data if isinstance(item, dict) and isinstance(item.get("id"), str)]
 
     def gpu_config(self, gpu_id):
@@ -69,7 +69,7 @@ class LactClient:
         if data is None:
             return {}
         if not isinstance(data, dict):
-            raise LactError("Ungültige LACT-GPU-Konfiguration.")
+            raise LactError("Ungültige GPU-Konfiguration.")
         return data
 
     def device_stats(self, gpu_id):
@@ -92,7 +92,7 @@ class LactClient:
     def profiles(self):
         data = self.request("list_profiles", {"include_state": True})
         if not isinstance(data, dict) or not isinstance(data.get("profiles"), dict):
-            raise LactError("Ungültige LACT-Profilantwort.")
+            raise LactError("Ungültige GPU-Profilantwort.")
         return data
 
     def select_profile(self, name=None, auto=False):
