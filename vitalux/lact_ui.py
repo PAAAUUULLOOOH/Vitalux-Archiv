@@ -7,7 +7,7 @@ from copy import deepcopy
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (QFormLayout, QHBoxLayout, QInputDialog, QLineEdit,
                               QSpinBox, QDoubleSpinBox, QPlainTextEdit, QWidget,
-                              QVBoxLayout, QGroupBox)
+                              QVBoxLayout, QGroupBox, QMenu)
 
 from .ui_locale import QPushButton, QComboBox, QMessageBox, QCheckBox
 from .widgets import Card, label
@@ -25,6 +25,7 @@ class LactTuningCard(Card):
         self.current_config = {}
         self.stats = {}
         self.profile_state = {}
+        self.capabilities = {}
         self._loading = False
         self.pending = False
         self.confirm_timer = QTimer(self)
@@ -97,7 +98,7 @@ class LactTuningCard(Card):
             self.fields[key] = widget
             self.form.addRow(label(title), widget)
         self.performance = QComboBox()
-        for title, value in (("Automatisch", "auto"), ("Niedrig", "low"),
+        for title, value in (("Treiberstandard", None), ("Automatisch", "auto"), ("Niedrig", "low"),
                              ("Hoch", "high"), ("Manuell", "manual")):
             self.performance.addItem(title, value)
         self.form.addRow(label("Leistungsprofil"), self.performance)
@@ -121,7 +122,7 @@ class LactTuningCard(Card):
         self.fan_curve.setPlaceholderText("40: 30\n50: 35\n60: 50\n70: 75\n80: 100")
         self.body.addWidget(self.fan_curve)
 
-        self.body.addWidget(label("Weitere LACT-Optionen (JSON)", "muted"))
+        self.body.addWidget(label("Erweiterte LACT-Optionen (JSON)", "muted"))
         self.extra = QPlainTextEdit()
         self.extra.setMaximumHeight(110)
         self.extra.setToolTip("Erweiterte GPU-Konfiguration; originale LACT-Felder bleiben erhalten.")
@@ -140,6 +141,7 @@ class LactTuningCard(Card):
             "LACT verwirft unbestätigte Änderungen automatisch (standardmäßig nach 5 Sekunden). "
             "Nur unterstützte GPU-Optionen verwenden; Übertaktung kann das System instabil machen.",
             "muted", wrap=True))
+        self.fan_enabled.toggled.connect(self._toggle_fan_controls)
         self._set_access(False)
         self._first_show = True
 
@@ -155,6 +157,14 @@ class LactTuningCard(Card):
                        self.performance, self.fan_enabled, self.fan_mode, self.fan_speed,
                        self.fan_curve, self.extra, *self.fields.values()):
             widget.setEnabled(available and not self.pending)
+        if available and not self.pending:
+            for key, widget in self.fields.items():
+                widget.setEnabled(self.capabilities.get(key, True))
+            self.fan_enabled.setEnabled(self.capabilities.get("fan", False))
+            self._toggle_fan_controls()
+            name = self.profile_combo.currentData()
+            self.rule_save.setEnabled(bool(name))
+            self.delete_btn.setEnabled(bool(name))
         self.apply_btn.setEnabled(available and not self.pending)
         self.confirm_btn.setEnabled(self.pending)
         self.revert_btn.setEnabled(self.pending)
@@ -197,6 +207,11 @@ class LactTuningCard(Card):
                 self.stats = self.client.device_stats(self.gpu_id) or {}
             except LactError:
                 self.stats = {}
+            try:
+                clocks = self.client.device_clocks(self.gpu_id) or {}
+            except LactError:
+                clocks = {}
+            self._detect_capabilities(clocks)
             self._load_fields()
             self._load_profiles()
             self.status.setText("Mit LACT verbunden · GPU-Einstellungen verfügbar")
@@ -205,8 +220,37 @@ class LactTuningCard(Card):
             self._set_access(False)
             self.status.setText(str(exc))
 
+    def _detect_capabilities(self, clocks):
+        """Gate direct editing by hardware information returned by LACT."""
+        cap = self.capabilities = {}
+        table = clocks.get("table") if isinstance(clocks, dict) else None
+        for key in CLOCK_FIELDS:
+            cap[key] = isinstance(table, dict)
+        stats = self.stats if isinstance(self.stats, dict) else {}
+        power = stats.get("power") or {}
+        if not isinstance(power, dict):
+            power = {}
+        cap["power_cap"] = any(power.get(k) is not None
+                               for k in ("cap_min", "cap_max", "cap_current"))
+        fan = stats.get("fan") or {}
+        cap["fan"] = isinstance(fan, dict) and (
+            fan.get("speed_max") is not None or
+            fan.get("pwm_max") is not None or fan.get("control_enabled") is True)
+        device_name = (self.device_combo.currentText() or "").lower()
+        if "nvidia" in device_name or "geforce" in device_name:
+            cap["voltage_offset"] = False
+            cap["min_voltage"] = False
+            cap["max_voltage"] = False
+        else:
+            cap["voltage_boost"] = False
+
     def _load_fields(self):
         config = self.current_config
+        power = (self.stats.get("power") or {}) if isinstance(self.stats, dict) else {}
+        if isinstance(power, dict):
+            lo, hi = power.get("cap_min"), power.get("cap_max")
+            if lo is not None and hi is not None and 0 < lo < hi:
+                self.fields["power_cap"].setRange(float(lo), float(hi))
         for key, widget in self.fields.items():
             value = config.get(key)
             widget.setValue(value if value is not None else widget.minimum())
@@ -218,13 +262,13 @@ class LactTuningCard(Card):
                 widget.customContextMenuRequested.disconnect()
             except (RuntimeError, TypeError):
                 pass
-            widget.customContextMenuRequested.connect(lambda _pos, w=widget: self._clear_field(w))
+            widget.customContextMenuRequested.connect(lambda pos, w=widget: self._show_clear_menu(w, pos))
             try:
                 widget.valueChanged.disconnect()
             except (RuntimeError, TypeError):
                 pass
             widget.valueChanged.connect(lambda _v, w=widget: w.setProperty("lact_null", False))
-        performance = self.performance.findData(config.get("performance_level", "auto"))
+        performance = self.performance.findData(config.get("performance_level"))
         self.performance.setCurrentIndex(max(0, performance))
         self.fan_enabled.setChecked(bool(config.get("fan_control_enabled", False)))
         settings = config.get("fan_control_settings") or {}
@@ -237,9 +281,17 @@ class LactTuningCard(Card):
             {k: v for k, v in config.items() if k not in handled},
             ensure_ascii=False, indent=2))
 
-    def _clear_field(self, widget):
-        widget.setValue(widget.minimum())
-        widget.setProperty("lact_null", True)
+    def _toggle_fan_controls(self, *_):
+        enabled = not self.pending and self.capabilities.get("fan", False)
+        for widget in (self.fan_mode, self.fan_speed, self.fan_curve):
+            widget.setEnabled(enabled and self.fan_enabled.isChecked())
+
+    def _show_clear_menu(self, widget, pos):
+        menu = QMenu(widget)
+        reset = menu.addAction(tr("Auf Treiberstandard zurücksetzen"))
+        if menu.exec(widget.mapToGlobal(pos)) == reset:
+            widget.setValue(widget.minimum())
+            widget.setProperty("lact_null", True)
 
     def _load_profiles(self):
         self.profile_state = self.client.profiles()
