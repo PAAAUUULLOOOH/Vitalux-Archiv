@@ -709,3 +709,10 @@ EN_MORE.update({
     "GPU-Takt": "GPU clock",
     "GPU-Leistung": "GPU power"
 })
+
+# Native comparison chart and cross-session hardware safety.
+EN_MORE.update({
+    "Performance-Verlauf": "Performance history",
+    "Gemeinsamer Verlauf der Auslastung. Zeitraum und Datenreihen frei wählbar.": "Combined load history with selectable time window and visible series.",
+    "Unterschiedliche Grafikkarten – Messungen nicht direkt vergleichbar.": "Different graphics cards – readings are not directly comparable."
+})
