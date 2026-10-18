@@ -669,3 +669,32 @@ EN_MORE.update({
 })
 
 EN_MORE["Im Grafik-Reiter siehst du GPU-Werte; mit installiertem LACT-Dienst kannst du Takte, Lüfter und Profile einstellen."] = "The Graphics tab shows GPU data; when LACT is installed, you can tune clocks, fans and profiles."
+
+# Vitalux-integrated GPU service and built-in guide.
+EN_MORE.update({
+    "Vitalux GPU-Tuning": "Vitalux GPU tuning",
+    "Vitalux erkennt deine Grafikkarte.": "Vitalux is detecting your graphics card.",
+    "GPU-Steuerung einrichten": "Set up GPU tuning",
+    "Installiert den mit Vitalux mitgelieferten GPU-Dienst. Einmalige Administratorbestätigung erforderlich.": "Sets up the GPU engine bundled with Vitalux. One-time administrator approval required.",
+    "Profile automatisch wechseln": "Switch profiles automatically",
+    "Experten-Einstellungen (JSON)": "Advanced settings (JSON)",
+    "Erweiterte GPU-Konfiguration; bestehende Einstellungen bleiben erhalten.": "Advanced GPU settings; existing options are preserved.",
+    "Vitalux setzt unbestätigte Änderungen automatisch zurück (standardmäßig nach 5 Sekunden). Nur unterstützte GPU-Optionen verwenden; Übertaktung kann das System instabil machen.": "Vitalux automatically reverts unconfirmed changes (5 seconds by default). Only use supported GPU settings; overclocking may destabilize your system.",
+    "Vitalux GPU-Steuerung noch nicht eingerichtet.": "Vitalux GPU tuning is not set up.",
+    "Vitalux GPU-Steuerung: Zugriff auf den Dienst verweigert.": "Vitalux GPU control: service access denied.",
+    "Vitalux GPU-Steuerung aktiv · Einstellungen verfügbar": "Vitalux GPU tuning active · Settings available",
+    "GPU-Einstellungen von Vitalux bestätigt und gespeichert": "GPU settings confirmed and saved by Vitalux",
+    "Bestätigungszeit abgelaufen. Vitalux setzt unbestätigte Änderungen zurück.": "Confirmation time expired. Vitalux reverts unconfirmed settings.",
+    "GPU-Einstellungen jetzt testen? Nicht bestätigte Änderungen werden automatisch zurückgesetzt.": "Test GPU settings now? Unconfirmed changes will be reverted automatically.",
+    "Die Administratorabfrage (pkexec) fehlt auf diesem System.": "The administrator authorization tool (pkexec) is not available.",
+    "Die Vitalux-GPU-Steuerung fehlt im Programm-Paket. Bitte die vollständige neue Vitalux-Version verwenden.": "The GPU engine is missing from the Vitalux package. Please use the latest complete Vitalux release.",
+    "Vitalux GPU-Steuerung wird eingerichtet. Administratorabfrage öffnen.": "Setting up Vitalux GPU control. Opening administrator authorization.",
+    "Vitalux GPU-Steuerung gestartet. Grafikkarte wird verbunden.": "Vitalux GPU control started. Connecting graphics card.",
+    "GPU-Steuerung konnte nicht eingerichtet werden.": "Could not set up GPU control.",
+    "Einrichtung abgebrochen. GPU-Monitoring funktioniert weiterhin.": "Setup cancelled. GPU monitoring remains available.",
+    "Grafikkarte erkannt": "Graphics card detected",
+    "Grafikkarte": "Graphics card",
+    "Für das GPU-Tuning bitte Vitalux GPU-Steuerung einrichten.": "Set up Vitalux GPU tuning to change graphics card settings.",
+    "Noch keine Grafikkarte erkannt.": "No graphics card detected yet.",
+    "Vitalux erkennt deine Grafikkarte automatisch. GPU-Tuning, Lüftersteuerung und Profile kannst du im Grafik-Reiter einmalig einrichten.": "Vitalux automatically detects your graphics card. You can enable GPU tuning, fan control and profiles directly in the Graphics tab."
+})
