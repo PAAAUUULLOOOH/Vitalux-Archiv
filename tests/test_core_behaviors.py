@@ -33,6 +33,21 @@ def test_settings():
             assert not list(Path(settings.PATH).parent.glob('.settings-*'))
             Path(settings.PATH).write_text('{"threshold": 88}')
             assert settings.get('threshold') == 88
+            assert settings.set_many({'cpu_temp': 88, 'gpu_temp': 95})
+            stat_before = Path(settings.PATH).stat()
+            assert settings.get_many({'cpu_temp': 90, 'gpu_temp': 90,
+                                      'ram_usage': 93}) == {
+                'cpu_temp': 88, 'gpu_temp': 95, 'ram_usage': 93}
+            assert settings.set_many({'cpu_temp': 88, 'gpu_temp': 95})
+            assert Path(settings.PATH).stat().st_ino == stat_before.st_ino, (
+                'An unchanged preference should not rewrite the file')
+            assert settings.get('threshold') == 88, (
+                'Batch updates must preserve unrelated user settings')
+            replacement = {'colors': [{'color': '#123456'}]}
+            assert settings.set_many(replacement)
+            replacement['colors'].append({'color': '#ffffff'})
+            assert settings.get('colors') == [{'color': '#123456'}], (
+                'Changes to caller data must not mutate the cached settings')
     finally:
         settings.PATH = original
 
