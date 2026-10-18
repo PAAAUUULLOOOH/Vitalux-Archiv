@@ -98,12 +98,12 @@ jobs:
               "$ROOT_DIR/tests/test_insight_ui.py"
           )
           (cd work/stage && zip -q -r -y '../artifacts/Vitalux-Insights-Experiment-Test.zip' 'Vitalux-Insights-Test')
-          unzip -tq work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
-          test -s work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
+          unzip -tq work/artifacts/Vitalux-Insights-Experiment-Test.zip
+          test -s work/artifacts/Vitalux-Insights-Experiment-Test.zip
       - name: Nur Test-ZIP als GitHub-Actions-Artefakt anbieten
         uses: actions/upload-artifact@v4
         with:
           name: Vitalux-Insights-Experiment-Test
-          path: work/artifacts/Vitalux-Monitoring-Experiment-Test.zip
+          path: work/artifacts/Vitalux-Insights-Experiment-Test.zip
           if-no-files-found: error
           retention-days: 14
