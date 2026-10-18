@@ -411,6 +411,13 @@ class CpuPage(Page):
         lay.addWidget(graph, 3)
         self.content.addLayout(lay)
 
+        self.cpu_temp_card = Card("CPU-Temperatur · Verlauf")
+        self.cpu_temp_graph = ChartPanel(["Temperatur"], [theme.accent()], mode="temperature")
+        self.cpu_temp_card.body.addWidget(self.cpu_temp_graph)
+        self.content.addWidget(self.cpu_temp_card)
+        self.cpu_extrema = KeyValue("CPU-Temperatur · Min/Max seit Start")
+        self.cpu_temp_card.body.addWidget(self.cpu_extrema)
+
         self.cores_card = Card("Threads")
         self.cores_grid = QGridLayout()
         self.cores_grid.setHorizontalSpacing(24)
@@ -430,6 +437,9 @@ class CpuPage(Page):
         self.kv["Last (1 / 5 / 15 Min)"].set(" / ".join(f"{x:.2f}" for x in c["load"]))
         self.gauge.set(c["usage"], f"{c['threads']} {tr('Threads')}")
         self.graph.set_series([(h["cpu"], theme.accent())])
+        self.cpu_temp_graph.set_series([(h.get("cpu_temp", ()), theme.accent())])
+        from .monitor_insights import format_range
+        self.cpu_extrema.set(format_range(d.get("session_extrema") or {}, "cpu_temp", "°C", 1))
         while len(self.core_meters) < len(c["per_core"]):
             i = len(self.core_meters)
             m = Meter(f"Thread {i}")
@@ -841,7 +851,57 @@ class SystemPage(Page):
         perf_card.body.addWidget(self.app_paint)
         self.content.addWidget(perf_card)
 
+        # Mainboard is a real hardware section, not a guessed PC illustration.
+        self.board_card = Card("Mainboard")
+        self.board_info = {}
+        for title, value in (
+            ("Hersteller / Modell", s["board"] or "–"),
+            ("BIOS", s["bios"]),
+        ):
+            kv = KeyValue(title)
+            kv.set(value)
+            self.board_card.body.addWidget(kv)
+        self.board_temp = KeyValue("Temperatur")
+        self.board_source = KeyValue("Sensor")
+        self.board_extrema = KeyValue("Temperatur · Min/Max seit Start")
+        for kv in (self.board_temp, self.board_extrema, self.board_source):
+            self.board_card.body.addWidget(kv)
+        self.board_temp_graph = ChartPanel(["Mainboard-Temperatur"], [theme.accent()], mode="temperature")
+        self.board_card.body.addWidget(self.board_temp_graph)
+        self.board_card.body.addWidget(label(
+            "Mainboard-Temperatur nur bei eindeutig zuordenbarem Linux-Sensor. "
+            "Kein Ersatz durch CPU-/GPU-/SSD-Temperaturen.", "muted", wrap=True))
+        self.content.addWidget(self.board_card)
+
+        self.status_card = Card("Hardware-Status")
+        self.status_rows = {title: KeyValue(title) for title in (
+            "CPU", "GPU", "RAM", "Systemlaufwerk")}
+        for row in self.status_rows.values():
+            self.status_card.body.addWidget(row)
+        self.status_card.body.addWidget(label(
+            "Status nach realen Messwerten und eingestellten Warnwerten; "
+            "keine Schätzung des Hardwarezustands.", "muted", wrap=True))
+        self.reset_btn = QPushButton("Min-/Max-Werte zurücksetzen")
+        self.reset_btn.clicked.connect(self._reset_session)
+        self.status_card.body.addWidget(self.reset_btn)
+        self.content.addWidget(self.status_card)
+
+    def _reset_session(self):
+        main = self.window()
+        if hasattr(main, "reset_session_extrema"):
+            main.reset_session_extrema()
+
     def refresh(self, d, h):
+        from .monitor_insights import format_range, hardware_status, valid_number
+        board = d.get("motherboard") or {}
+        temperature = board.get("temperature")
+        self.board_temp.set(f"{temperature:.1f} °C" if valid_number(temperature) else tr("nicht verfügbar"))
+        self.board_source.set(board.get("source") or tr("nicht verfügbar"))
+        self.board_extrema.set(format_range(d.get("session_extrema") or {}, "board_temp", "°C", 1))
+        self.board_temp_graph.set_series([(h.get("board_temp", ()), theme.accent())])
+        status = dict(hardware_status(d))
+        for key, row in self.status_rows.items():
+            row.set(status.get(key, tr("nicht verfügbar")))
         self.render_gpu.set(system_gpu_device(d['gpus']))
         self.render_driver.set(', '.join(dict.fromkeys(str(g.get('driver')) for g in d['gpus'] if g.get('driver'))) or '–')
         app = d.get('app_resources') or {}
