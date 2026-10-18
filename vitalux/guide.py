@@ -46,7 +46,7 @@ SLIDES = [
         "Hier erfährst du, wie stark deine Hardware gerade beansprucht wird.",
         "Beim Prozessor findest du Auslastung, Takt und verfügbare Temperaturen.",
         "Der Grafik-Reiter vereint Auslastung, Videospeicher, Taktraten, Spannung und Temperatur. Technische Details und Live-Diagramme sind aufklappbar.",
-        "Mainboard und CPU besitzen eigene Temperaturverläufe, sofern Linux die Sensoren bereitstellt.",
+        "Der separate Mainboard-Temperaturbereich wurde entfernt; Hardwaredetails bleiben im System-Reiter verfügbar.",
         "hardware",
     ),
     (
