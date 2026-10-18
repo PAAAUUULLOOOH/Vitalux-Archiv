@@ -294,6 +294,9 @@ class MainWindow(QMainWindow):
         self._tray_preview.retheme()
         self._tray.setToolTip(tray_tooltip(self.last_sample))
         retranslate_widgets(self.centralWidget())
+        if self._focus_window is not None:
+            self._focus_window.retranslate()
+            retranslate_widgets(self._focus_window)
         glyph = {"Übersicht":"◈", "Prozessor":"◉", "Grafik":"▣", "Arbeitsspeicher":"▤",
                  "Netzwerk":"◎", "Laufwerke":"▱", "Sensoren":"♨", "System":"⚙",
                  "Einstellungen":"≡", "Updates":"↻", "Info":"ⓘ"}
