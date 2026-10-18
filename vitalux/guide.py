@@ -45,7 +45,7 @@ SLIDES = [
         "CPU, GPU und Arbeitsspeicher",
         "Hier erfährst du, wie stark deine Hardware gerade beansprucht wird.",
         "Beim Prozessor findest du Auslastung, Takt und verfügbare Temperaturen.",
-        "Vitalux erkennt deine Grafikkarte automatisch. GPU-Tuning, Lüftersteuerung und Profile kannst du im Grafik-Reiter einmalig einrichten.",
+        "Im Grafik-Reiter stehen aktuelle GPU-Taktraten, Spannung, Temperatur und Lüfterwerte. GPU-Tuning ist übersichtlich in Profile, Leistung und Lüftersteuerung gegliedert.",
         "Im RAM-Bereich erkennst du belegten, verfügbaren Speicher und Swap.",
         "hardware",
     ),
