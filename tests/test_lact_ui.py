@@ -25,6 +25,9 @@ class FakeLact:
             },
         }
         self.switched = []
+        self.last_sent = None
+        self.confirm_count = 0
+        self.revert_count = 0
 
     def devices(self):
         return [{"id": "gpu-1", "name": "AMD Radeon RX 9070 XT"}]
@@ -62,6 +65,20 @@ class FakeLact:
 
     def select_profile(self, name, auto):
         self.switched.append((name, auto))
+
+    def set_gpu_config(self, gpu_id, config):
+        assert gpu_id == "gpu-1"
+        self.last_sent = config
+        return 5
+
+    def confirm(self):
+        self.confirm_count += 1
+        if self.last_sent is not None:
+            self.config = self.last_sent.copy()
+
+    def revert(self):
+        self.revert_count += 1
+        self.last_sent = None
 
 
 def check_ui():
@@ -111,6 +128,26 @@ def check_ui():
     assert len(fan_change["fan_control_settings"]["curve"]) == 5
     card.fan_temperature.setCurrentIndex(card.fan_temperature.findData("junction"))
     assert card._collect()["fan_control_settings"]["temperature_key"] == "junction"
+    # Actually press the apply/test path; the daemon must receive the full
+    # original mandatory schema before a pending change is confirmed.
+    from vitalux.ui_locale import QMessageBox
+    original_question = QMessageBox.question
+    try:
+        QMessageBox.question = staticmethod(lambda *_a, **_k: QMessageBox.Yes)
+        card._apply()
+        assert card.pending
+        assert fake.last_sent["fan_control_settings"]["temperature_key"] == "junction"
+        assert fake.last_sent["fan_control_settings"]["interval_ms"] == 500
+        assert fake.last_sent["fan_control_enabled"] is True
+        card._revert()
+        assert not card.pending and fake.revert_count == 1
+        card.fan_enabled.setChecked(True)
+        card._apply()
+        assert card.pending
+        card._confirm()
+        assert fake.confirm_count == 1 and not card.pending
+    finally:
+        QMessageBox.question = original_question
     card.fan_enabled.setChecked(False)
     card.advanced_toggle.click()
     assert card.advanced_group.isVisible() or not card.advanced_group.isHidden()
