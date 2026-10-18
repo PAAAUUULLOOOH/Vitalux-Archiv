@@ -51,4 +51,4 @@ jobs:
           echo "c94ca31a1be6e005253a11f3bd02a48d9d08d356f08e2a5a6e9f2565283fca55  lact-headless.deb" | sha256sum --check -
           dpkg-deb -x lact-headless.deb upstream
           test -x upstream/usr/bin/lact
-          upstream/usr/bin/lact --version
+          upstream/usr/bin/lact --help
