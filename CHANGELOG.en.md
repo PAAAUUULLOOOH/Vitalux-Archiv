@@ -4,6 +4,12 @@ Every Vitalux release is documented here. The Updates page displays
 what has changed before you install a new version and keeps the changelog
 of installed and earlier releases available offline.
 
+## [v0.9.3.79] - 2026-10-18
+- **GPU tuning now included in Vitalux:** The original LACT 0.10.1 open-source GPU control backend is bundled with the full ZIP and AppImage and SHA-256 verified. No separate LACT desktop application or package installation is needed.
+- Automatic GPU detection works even before the privileged tuning service is enabled. Click **Set up GPU tuning** and authorize the one-time setup of **vitalux-gpu.service**.
+- Native Vitalux branding throughout Graphics, status messages and setup. Original engine attribution and MIT license remain available in the legal documentation.
+- Improved Qt widget signal management, offline detection, and regression tests for setup, hardware discovery and original upstream binary. Administrator approval and supported hardware drivers remain necessary.
+
 ## [v0.9.3.78] - 2026-10-18
 - **Native GPU tuning in the Graphics tab:** Vitalux-themed frontend communicating with the original local **LACT daemon (lactd)**, while preserving existing live GPU stats.
 - Configure supported clock, voltage, power and fan parameters. Unknown LACT configuration fields are preserved and exposed in an advanced JSON editor. Explicit confirmation is required; unconfirmed changes are reverted by LACT.
