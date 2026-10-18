@@ -469,11 +469,12 @@ class GpuCard(Card):
         self.body.addLayout(technical)
         self.h_use, self.h_vram = deque(maxlen=900), deque(maxlen=900)
 
-    def refresh(self, g):
+    def refresh(self, g, history=None):
         self.name.setText(g["name"])
         self.meta.setText(" · ".join(x for x in (g["vendor"], g.get("driver") and f"{tr('Treiber')} {g['driver']}") if x))
         self.g_use.set(g["usage"], "")
-        pct = g["vram_used"] / g["vram_total"] * 100 if g["vram_total"] else None
+        used, total = g.get("vram_used"), g.get("vram_total")
+        pct = used / total * 100 if isinstance(used, (int, float)) and total and total > 0 else None
         self.g_vram.set(pct, _vram_text(g) or "nicht verfügbar")
         fmt = lambda v, u: f"{v:.0f} {u}" if v is not None else tr("nicht verfügbar")
         self.kv["Temperatur"].set(fmt(g["temp"], "°C"))
@@ -483,9 +484,17 @@ class GpuCard(Card):
         self.kv["Lüfterdrehzahl"].set(fmt(g.get("fan_rpm"), "RPM"))
         self.kv["GPU-Takt"].set(fmt(g["clock"], "MHz"))
         self.kv["Speicher-Takt"].set(fmt(g["clock_mem"], "MHz"))
-        self.h_use.append(g["usage"] or 0)
-        self.h_vram.append(pct or 0)
-        self.graph.set_series([(self.h_use, theme.accent()), (self.h_vram, theme.secondary_accent())])
+        if history is None:
+            # Secondary GPUs keep their own histories. The primary GPU uses
+            # MainWindow.hist, avoiding duplicate sampling/buffers.
+            self.h_use.append(g.get("usage"))
+            self.h_vram.append(pct)
+            usage_values, vram_values = self.h_use, self.h_vram
+        else:
+            usage_values, vram_values = history["gpu"], history["vram"]
+        # Missing telemetry is a gap, not a genuine zero-percent sample.
+        self.graph.set_series([(usage_values, theme.accent()),
+                               (vram_values, theme.secondary_accent())])
 
 
 class GpuPage(Page):
@@ -508,7 +517,7 @@ class GpuPage(Page):
         for i, card in enumerate(self.cards):
             card.setVisible(i < len(gpus))
             if i < len(gpus):
-                card.refresh(gpus[i])
+                card.refresh(gpus[i], h if i == 0 else None)
 
 
 # ------------------------------------------------------------------ Speicher
