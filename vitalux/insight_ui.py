@@ -1,15 +1,13 @@
 """Native, theme-aware, read-only Vitalux Insights panel and focus window."""
 from __future__ import annotations
 
-import json
-from datetime import datetime
 
 from PySide6.QtCore import Qt, QRectF
 from PySide6.QtGui import QColor, QBrush, QPen, QPainter, QFont
 from PySide6.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
     QLineEdit, QListWidget, QListWidgetItem, QGraphicsView, QGraphicsScene,
-    QGraphicsRectItem, QGraphicsSimpleTextItem, QFileDialog, QPlainTextEdit,
+    QGraphicsRectItem, QGraphicsSimpleTextItem, QFileDialog,
     QComboBox, QFrame,
 )
 from .ui_locale import QPushButton, QCheckBox, QMessageBox
@@ -50,6 +48,7 @@ class FocusWindow(QWidget):
         self.entries = []
         for i, key in enumerate(("gpu_usage", "gpu_temp", "cpu_usage", "vram_usage")):
             card = QGroupBox()
+            card.setObjectName("insightGroup")
             col = QVBoxLayout(card)
             choose = QComboBox()
             for metric, (title, _unit) in METRIC_TITLES.items():
@@ -164,6 +163,17 @@ class MonitoringLabPanel(Card):
         dl.addWidget(self.findings)
         self.body.addWidget(self.detector)
 
+        self.trend_group = QGroupBox("Performance-Verlauf")
+        trend_layout = QVBoxLayout(self.trend_group)
+        self.trend_chart = ChartPanel(
+            ["CPU", "GPU", "VRAM"],
+            [theme.accent(), theme.secondary_accent(), theme.TEAL])
+        trend_layout.addWidget(self.trend_chart)
+        trend_layout.addWidget(label(
+            "Gemeinsamer Verlauf der Auslastung. Zeitraum und Datenreihen frei wählbar.",
+            "muted", wrap=True))
+        self.body.addWidget(self.trend_group)
+
         self.record_group = QGroupBox("Gaming Session Analyzer")
         rg = QVBoxLayout(self.record_group)
         controls = QHBoxLayout()
@@ -238,11 +248,14 @@ class MonitoringLabPanel(Card):
         self.show_advanced.toggled.connect(self._advanced_visible)
         # Keep the primary observation on top; other tools can be collapsed.
         self.body.insertWidget(2, self.show_advanced)
-        self._tools = (self.record_group, self.compare_group,
+        self._tools = (self.trend_group, self.record_group, self.compare_group,
                        self.timeline_group, self.hardware_group)
+        for group in (self.detector, *self._tools):
+            group.setObjectName("insightGroup")
         self._advanced_visible(False)
         self.show_advanced.setChecked(False)
         self._update_session()
+        self._update_comparison()
 
     def _advanced_visible(self, shown):
         for widget in getattr(self, "_tools", ()):
@@ -323,11 +336,20 @@ class MonitoringLabPanel(Card):
     def _take_snapshot(self, slot):
         if self.last_sample is None:
             return
-        self.lab.snapshot(slot, self.last_sample)
+        try:
+            self.lab.snapshot(slot, self.last_sample)
+        except (OSError, ValueError) as exc:
+            QMessageBox.warning(self, "Vitalux", str(exc))
+            return
         self._update_comparison()
 
     def _update_comparison(self):
         lines = []
+        if (all(self.lab.snapshots) and
+                self.lab.snapshots[0]["gpu"] != self.lab.snapshots[1]["gpu"]):
+            self.comparison.setText(tr(
+                "Unterschiedliche Grafikkarten – Messungen nicht direkt vergleichbar."))
+            return
         for key, a, b, delta in self.lab.comparison():
             title, unit = METRIC_TITLES[key]
             lines.append(f"{title}: {fmt(a,unit)} → {fmt(b,unit)} "
@@ -384,6 +406,15 @@ class MonitoringLabPanel(Card):
                                              for name, detail, _ in result))
         self._update_session()
         if self.show_advanced.isChecked():
+            rows = list(self.lab.history)[-900:]
+            self.trend_chart.set_series([
+                ([row["metrics"].get(metric) for row in rows], color)
+                for metric, color in (
+                    ("cpu_usage", theme.accent()),
+                    ("gpu_usage", theme.secondary_accent()),
+                    ("vram_usage", theme.TEAL),
+                )
+            ])
             events = tuple((event["time"], event["title"]) for event in self.lab.events)
             if events != self._last_events:
                 self._last_events = events
