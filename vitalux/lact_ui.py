@@ -229,6 +229,7 @@ class LactTuningCard(Card):
         self.refresh_timer.setInterval(4000)
         self.refresh_timer.timeout.connect(self._refresh_live)
         self._set_access(False)
+        self.retranslate()
         self._first_show = True
 
     def showEvent(self, event):
@@ -236,6 +237,16 @@ class LactTuningCard(Card):
         if self._first_show:
             self._first_show = False
             QTimer.singleShot(0, self.reload)
+
+    def retranslate(self):
+        for group, title in (
+            (self.live_group, "Aktuelle GPU-Werte"),
+            (self.profile_group, "GPU-Profile"),
+            (self.clock_group, "Taktraten, Leistung und Spannung"),
+            (self.fan_group, "Lüftersteuerung"),
+            (self.advanced_group, "Experten-Einstellungen (JSON)"),
+        ):
+            group.setTitle(tr(title))
 
     def _toggle_advanced(self, shown):
         self.advanced_group.setVisible(shown)
