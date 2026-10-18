@@ -1,0 +1,40 @@
+name: LACT-Integration testen
+
+on:
+  push:
+    branches: [feature/lact-gpu-tuning]
+    paths:
+      - "vitalux/lact_*.py"
+      - "vitalux/pages.py"
+      - "tests/test_lact_*.py"
+      - ".github/workflows/lact-check.yml"
+  pull_request:
+    paths:
+      - "vitalux/lact_*.py"
+      - "vitalux/pages.py"
+      - "tests/test_lact_*.py"
+      - ".github/workflows/lact-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lact-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Abhängigkeiten für den nativen Qt-Test
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libegl1 libgl1 libopengl0 libxkbcommon0 libxcb-cursor0
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --disable-pip-version-check PySide6
+      - name: Bytecode und LACT-Unit-Tests
+        run: |
+          .venv/bin/python -m compileall -q vitalux
+          .venv/bin/python tests/test_lact_client.py
+      - name: Native Vitalux-Oberfläche ohne Hardware prüfen
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: .venv/bin/python tests/test_lact_ui.py
