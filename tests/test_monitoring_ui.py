@@ -63,17 +63,13 @@ def check_gui():
     system.refresh({"gpus": [gpu()], "cpu": {"model": "CPU"},
                     "uptime": 100, "app_resources": {},
                     "ram": {"percent": 50}, "disks": [{"mount": "/", "percent": 40}],
-                    "motherboard": {"temperature": 34, "source": "nct · SYSTIN"},
-                    "session_extrema": {"board_temp": [28, 38]}},
-                   {"board_temp": [32, 34]})
-    assert system.board_temp.v.text() == "34.0 °C"
-    assert system.board_temp_graph.graph.mode == "temperature"
-    assert system.board_extrema.v.text() == "28.0–38.0 °C"
+                    "session_extrema": {}}, {})
+    assert not hasattr(system, "board_card"), "Separate motherboard section must be gone"
     assert system.status_rows["GPU"].v.text()
     system.close()
     page.close()
     app.processEvents()
-    print("Read-only GPU details, board chart and hardware status Qt smoke: PASS")
+    print("Read-only GPU details, removal of board panel and hardware status Qt smoke: PASS")
 
 
 if __name__ == "__main__":
