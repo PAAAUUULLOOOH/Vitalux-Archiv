@@ -18,6 +18,7 @@ from .smooth_scroll import AdaptiveScrollArea
 from .alerts import AlertMonitor, readings_from_sample
 from .tray_preview import TrayPreview, tray_tooltip
 from .wallpaper_accents import resolve_accent
+from .diagnostics import log_exception
 
 
 class Sampler(QThread):
@@ -26,13 +27,20 @@ class Sampler(QThread):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.interval = int(settings.get('interval', 1) or 1)
+        self._last_error = None
 
     def run(self):
         while not self.isInterruptionRequested():
             try:
                 self.sample.emit(sensors.collect())
+                self._last_error = None
             except Exception as exc:
-                print("Messfehler:", exc)
+                # Retain one timestamped, versioned traceback per distinct
+                # failure instead of flooding logs at one-second intervals.
+                error = (type(exc), str(exc))
+                if error != self._last_error:
+                    log_exception(type(exc), exc, exc.__traceback__)
+                    self._last_error = error
             self.msleep(max(1, self.interval) * 1000)
 
 
@@ -70,6 +78,7 @@ class MainWindow(QMainWindow):
         self._notified_update_version = str(settings.get('last_notified_update_version', ''))
         self._tray_was_maximized = False
         self.last_render_ms = None
+        self._last_refresh_error = None
         # Create the tray icon even when Plasma's StatusNotifier host comes up
         # after Vitalux. Qt automatically registers a visible icon when a host
         # becomes available. Checking isSystemTrayAvailable() here loses that.
@@ -614,8 +623,12 @@ class MainWindow(QMainWindow):
         page = self.pages[self.stack.currentIndex()][1]
         try:
             page.refresh(self.last_sample, self.hist)
-        except (AttributeError, KeyError, TypeError):
-            pass
+            self._last_refresh_error = None
+        except (AttributeError, KeyError, TypeError, ValueError) as exc:
+            signature = (self.stack.currentIndex(), type(exc), str(exc))
+            if signature != self._last_refresh_error:
+                log_exception(type(exc), exc, exc.__traceback__)
+                self._last_refresh_error = signature
 
     def apply_appearance(self):
         """Restyle in-place; keep selected page, benchmark worker and scroll intact."""
@@ -669,12 +682,15 @@ class MainWindow(QMainWindow):
                 pref.refresh_appearance()
 
     def _check_alerts(self, sample):
-        limits = {key: settings.get(key, default) for key, default in (
-            ('cpu_temp', 90), ('gpu_temp', 90), ('ram_usage', 90), ('disk_usage', 95))}
+        preferences = settings.get_many(dict(
+            cpu_temp=90, gpu_temp=90, ram_usage=90, disk_usage=95,
+            alerts_enabled=False))
+        limits = {key: preferences[key] for key in (
+            'cpu_temp', 'gpu_temp', 'ram_usage', 'disk_usage')}
         friendly = {'cpu_temp': tr('CPU-Temperatur'), 'gpu_temp': tr('GPU-Temperatur'),
                     'ram_usage': tr('RAM-Auslastung'), 'disk_usage': tr('Systemlaufwerk-Belegung')}
         for warning in self._alerts.update(readings_from_sample(sample), limits,
-                                           settings.get('alerts_enabled', False)):
+                                           preferences['alerts_enabled']):
             msg = f'{friendly[warning.metric]}: {warning.value:.0f}{warning.unit}  (≥ {warning.limit:.0f}{warning.unit})'
             self.statusBar().showMessage(tr('Grenzwert überschritten') + ' · ' + msg, 16000)
             if self._tray is not None:
@@ -704,12 +720,14 @@ class MainWindow(QMainWindow):
         h["cpu"].append(d["cpu"]["usage"])
         h["ram"].append(d["ram"]["percent"])
         h["gpu"].append(g.get("usage") if g else None)
-        h["vram"].append(g["vram_used"] / g["vram_total"] * 100 if g and g["vram_total"] else None)
+        h["vram"].append(g["vram_used"] / g["vram_total"] * 100
+                         if g and isinstance(g.get("vram_used"), (int, float))
+                         and isinstance(g.get("vram_total"), (int, float))
+                         and g["vram_total"] > 0 else None)
         h["net_down"].append(d["net"]["down"])
         h["net_up"].append(d["net"]["up"])
         h['io_read'].append(d['io']['read'])
         h['io_write'].append(d['io']['write'])
-        interval = int(settings.get('interval', 1) or 1)
         # History is populated above; repaint only the selected page.
         # Switching pages immediately uses the latest sample and all history.
         if self._sidebar_motion is None:
