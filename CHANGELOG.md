@@ -5,6 +5,12 @@ siehst du die Neuerungen schon vor dem Aktualisieren und danach weiterhin den
 Verlauf der installierten Versionen. Die jeweils aktuelle Version wird beim
 Veröffentlichen automatisch als GitHub-Release-Beschreibung übernommen.
 
+## [v0.9.3.80] - 2026-10-18
+- **GPU-Steuerung im AppImage repariert:** Vitalux stellt die mitgelieferten Einrichtungsdateien vor der Administratorabfrage in einem geschützten temporären Verzeichnis bereit. Damit wird der Zugriff auf den für Root nicht lesbaren AppImage-FUSE-Mount vermieden. Temporäre Dateien werden danach entfernt.
+- **Standard-Akzentfarben geschützt:** Rot und alle anderen acht festen Farben bleiben dauerhaft im Auswahlmenü, können weder bearbeitet noch gelöscht werden und werden nach einem Update wiederhergestellt. Veraltete, fälschlich als eigene Farben gespeicherte Presets werden automatisch bereinigt; nur tatsächlich selbst erstellte Akzentfarben sind veränderbar.
+- Der einmalige Hinweis „Vitalux läuft in der Systemleiste weiter“ beim Schließen entfällt. Die Tray-Funktion, Live-Werte und Warnhinweise bleiben bestehen.
+- Nicht mehr benötigte Benachrichtigungszustände, Übersetzungen und Qt-Importe entfernt. Kompakte README, zweisprachige Anleitung und Tests für AppImage-Einrichtung, Farbschutz sowie Tray aktualisiert.
+
 ## [v0.9.3.79] - 2026-10-18
 - **Vitalux GPU-Tuning vollständig in die Anwendung integriert:** Das offizielle, unveränderte Open-Source-GPU-Backend (LACT 0.10.1) wird mit Vollversion und AppImage mitgeliefert, per SHA-256 geprüft und benötigt keine separat installierte LACT-Anwendung.
 - Automatische Grafikkartenerkennung auch ohne aktivierten Steuerungsdienst. Ein einziger Button **GPU-Steuerung einrichten** übernimmt nach einer ausdrücklichen Administratorfreigabe die Einrichtung des integrierten systemd-Dienstes **vitalux-gpu.service**.
