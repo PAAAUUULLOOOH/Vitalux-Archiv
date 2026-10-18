@@ -112,6 +112,7 @@ class LactTuningCard(Card):
         self.fan_speed = QSpinBox()
         self.fan_speed.setRange(0, 100)
         self.fan_speed.setSuffix(" %")
+        self.fan_mode.currentIndexChanged.connect(self._toggle_fan_controls)
         fan_row.addWidget(self.fan_enabled)
         fan_row.addWidget(self.fan_mode)
         fan_row.addWidget(self.fan_speed)
