@@ -46,7 +46,7 @@ SLIDES = [
         "Hier erfährst du, wie stark deine Hardware gerade beansprucht wird.",
         "Beim Prozessor findest du Auslastung, Takt und verfügbare Temperaturen.",
         "Der Grafik-Reiter vereint Auslastung, Videospeicher, Taktraten, Spannung und Temperatur. Technische Details und Live-Diagramme sind aufklappbar.",
-        "Der separate Mainboard-Temperaturbereich wurde entfernt; Hardwaredetails bleiben im System-Reiter verfügbar.",
+        "Unter Vitalux Insights findest du Performance Detective, Gaming-Aufzeichnungen und Vergleichsmessungen.",
         "hardware",
     ),
     (
@@ -86,7 +86,7 @@ SLIDES = [
         "Vitalux prüft automatisch beim Start und etwa alle sechs Stunden auf Updates.",
         "Bei einem Update glüht das Vitalux-Logo in der App und im Tray. Der Updates-Reiter pulsiert; eine Tray-Nachricht nennt die Version.",
         "Vor dem Aktualisieren siehst du die Neuerungen; erst „Jetzt aktualisieren“ startet den Download.",
-        "Unter Einstellungen exportierst du aktuelle Systemberichte lokal als TXT oder JSON; Min-/Max-Werte lassen sich im System-Reiter zurücksetzen.",
+        "Ereignis-Timeline, anklickbare Hardware-Übersicht und Fokusmodus für den zweiten Monitor findest du im Grafik-Reiter unter Vitalux Insights.",
         "updates",
     ),
 ]
