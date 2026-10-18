@@ -105,7 +105,10 @@ def hardware_status(sample, limits=None):
     root = next((disk for disk in disks if disk.get("mount") == "/"), None)
     if root and valid_number(root.get("percent")):
         usage = root["percent"]
-        result.append(("Systemlaufwerk", f"{usage:.0f}% belegt"))
+        threshold = limits.get("disk_usage", 95)
+        result.append(("Systemlaufwerk",
+                       f"Warnwert erreicht: {usage:.0f}%" if valid_number(threshold) and usage >= threshold
+                       else f"{usage:.0f}% belegt"))
     else:
         result.append(("Systemlaufwerk", "Nicht verfügbar"))
     return result
