@@ -580,6 +580,7 @@ class GpuPage(Page):
     def __init__(self, lab=None, open_focus=None):
         super().__init__("Grafik", "GPU-Auslastung, Videospeicher und Sensoren")
         self.cards = []
+        self._mesa = system_static().get("mesa")
         self.none = Card()
         self.none.body.addWidget(label(
             "Keine GPU-Daten gefunden. Unterstützt werden NVIDIA, AMD und Intel, "
@@ -607,7 +608,7 @@ class GpuPage(Page):
                 card.refresh(
                     gpus[i], history=h if i == 0 else None,
                     extrema=d.get("session_extrema") if i == 0 else None,
-                    mesa=system_static().get("mesa"))
+                    mesa=self._mesa)
         if self.lab_panel is not None:
             self.lab_panel.refresh(d)
 
