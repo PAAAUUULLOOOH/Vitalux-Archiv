@@ -410,7 +410,7 @@ class PreferencesPage(Page):
         self.content.addWidget(notifications)
 
         export = Card('Diagnose & Berichte')
-        export.body.addWidget(label('Exportiert alle aktuell erfassten Messwerte in eine lokale JSON-Datei. Enthält auch Host- und Netzwerkangaben.', 'muted', wrap=True))
+        export.body.addWidget(label('Systembericht als TXT oder JSON: Hardware, aktuelle Sensoren, Treiber und Min-/Max-Werte. Ausschließlich lokal gespeichert.', 'muted', wrap=True))
         btn = QPushButton('Systembericht exportieren …')
         btn.setObjectName('ghostBtn')
         btn.clicked.connect(self.export)
@@ -803,19 +803,25 @@ class PreferencesPage(Page):
             QMessageBox.information(self, 'Vitalux', 'Fehlerbericht gespeichert.')
 
     def export(self):
+        """Export an explicit local system snapshot; never upload diagnostics."""
+        from .monitor_insights import report_data, write_report
         if not self.window.last_sample:
-            QMessageBox.information(self, 'Vitalux', 'Warte auf die erste Messung.')
+            QMessageBox.information(self, "Vitalux", tr("Warte auf die erste Messung."))
             return
-        suggested = f'Vitalux-Bericht-{datetime.now():%Y%m%d-%H%M%S}.json'
-        filename, _ = QFileDialog.getSaveFileName(self, 'Systembericht speichern', suggested, 'JSON (*.json)')
+        suggested = f"Vitalux-Bericht-{datetime.now():%Y%m%d-%H%M%S}.txt"
+        filename, selected = QFileDialog.getSaveFileName(
+            self, tr("Systembericht speichern"), suggested,
+            "Text (*.txt);;JSON (*.json)")
         if not filename:
             return
-        data = {'app': 'Vitalux', 'version': __version__, 'captured': datetime.now().astimezone().isoformat(),
-                'system': system_static(), 'sample': self.window.last_sample}
+        if not filename.lower().endswith((".json", ".txt")):
+            filename += ".json" if "JSON" in selected else ".txt"
+        sample = self.window.last_sample
+        report = report_data(sample, system_static(), __version__,
+                             sample.get("session_extrema"))
         try:
-            with open(filename, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False, default=str)
-        except OSError as exc:
-            QMessageBox.warning(self, 'Vitalux', f'Export fehlgeschlagen: {exc}')
+            write_report(filename, report)
+        except (OSError, ValueError) as exc:
+            QMessageBox.warning(self, "Vitalux", tr("Export fehlgeschlagen: {}").format(exc))
         else:
-            QMessageBox.information(self, 'Vitalux', 'Systembericht gespeichert.')
+            QMessageBox.information(self, "Vitalux", tr("Systembericht gespeichert."))
