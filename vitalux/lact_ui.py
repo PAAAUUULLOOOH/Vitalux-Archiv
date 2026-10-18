@@ -286,6 +286,9 @@ class LactTuningCard(Card):
         enabled = not self.pending and self.capabilities.get("fan", False)
         for widget in (self.fan_mode, self.fan_speed, self.fan_curve):
             widget.setEnabled(enabled and self.fan_enabled.isChecked())
+        if enabled and self.fan_enabled.isChecked():
+            self.fan_speed.setEnabled(self.fan_mode.currentData() == "static")
+            self.fan_curve.setEnabled(self.fan_mode.currentData() == "curve")
 
     def _show_clear_menu(self, widget, pos):
         menu = QMenu(widget)
