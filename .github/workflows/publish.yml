@@ -270,6 +270,8 @@ jobs:
           LD_LIBRARY_PATH="$PWD/lib" "$PWD/runtime/bin/python3.12" "$GITHUB_WORKSPACE/tests/test_smart_autoload.py"
       - name: Automatische Wiederherstellung und Shell-Starter testen
         shell: bash
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           set -euo pipefail
           bash -n run.sh packaging/AppRun packaging/build-appimage.sh packaging/appimage-rollback-watch.sh
