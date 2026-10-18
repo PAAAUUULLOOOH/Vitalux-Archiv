@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
     QLineEdit, QListWidget, QListWidgetItem, QGraphicsView, QGraphicsScene,
     QGraphicsRectItem, QGraphicsSimpleTextItem, QFileDialog, QPlainTextEdit,
-    QComboBox,
+    QComboBox, QFrame,
 )
 from .ui_locale import QPushButton, QCheckBox, QMessageBox
 from .widgets import Card, ChartPanel, label
@@ -108,7 +108,7 @@ class HardwareMap(QGraphicsView):
         self.setMinimumHeight(265)
         self.setMaximumHeight(305)
         self.setRenderHint(QPainter.Antialiasing, True)
-        self.setFrameShape(self.NoFrame)
+        self.setFrameShape(QFrame.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setStyleSheet("background: transparent;")
