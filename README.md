@@ -38,7 +38,7 @@
 | Bereich | Inhalt |
 | --- | --- |
 | **Übersicht** | Live-Dashboard mit frei anordenbaren Kacheln, Diagrammen und Systemlaufzeit |
-| **CPU, GPU, RAM** | Auslastung, Taktraten, Speicher, Sensorwerte; optional GPU-Tuning über LACT |
+| **CPU, GPU, RAM** | Auslastung, Taktraten, Speicher, Sensorwerte und integriertes Vitalux GPU-Tuning |
 | **Netzwerk & System** | Schnittstellen, Übertragungsraten, Distribution, Kernel und Treiber |
 | **Laufwerke** | Partitionen, SMART-Analyse und fio-Lese-/Schreibbenchmarks |
 | **Einstellungen** | Farbschemas, eigene Akzentfarben, Hintergründe, Animationen und Warnwerte |
@@ -50,7 +50,7 @@ Scrollen folgt der eingestellten Monitor-Bildwiederholrate (ohne FPS-Garantie); 
 
 Vitalux erkennt AMD-, NVIDIA- und Intel-Grafikkarten wie bisher automatisch über Linux – **auch ohne aktivierte GPU-Steuerung**. Im Grafik-Reiter stehen bei unterstützter Hardware Power-Limit, GPU-/VRAM-Takt, Spannung/Undervolting, Lüftermodus/-kurve und Profile zur Verfügung. Ein separater GPU-Tuning-Desktopclient ist **nicht** nötig.
 
-**Ersteinrichtung in Vitalux:** Der originale GPU-Steuerungsdienst wird **mit der Vitalux-Vollversion (ZIP und AppImage) mitgeliefert**. Auf **GPU-Steuerung einrichten** klicken und die einmalige Administratorabfrage bestätigen. Vitalux legt daraufhin einen eigenen Systemdienst `vitalux-gpu.service` an und erteilt dem aktuellen Benutzer kontrolliert Zugriff. Dafür sind `systemd` und `pkexec` (polkit) auf dem Linux-Host erforderlich. Das AppImage selbst läuft weiterhin ohne Root-Rechte. Der Systemdienst bleibt bei einem Vitalux-Neustart verfügbar; nach einem Vitalux-AppImage-Update ist keine erneute Einrichtung erforderlich, solange die Engine nicht aktualisiert werden muss.
+**Ersteinrichtung in Vitalux:** Der originale GPU-Steuerungsdienst wird **mit der Vitalux-Vollversion (ZIP und AppImage) mitgeliefert**. Auf **GPU-Steuerung einrichten** klicken und die einmalige Administratorabfrage bestätigen. Vitalux legt daraufhin einen eigenen Systemdienst `vitalux-gpu.service` an und erteilt dem aktuellen Benutzer kontrolliert Zugriff. Dafür sind `systemd` und `pkexec` (polkit) auf dem Linux-Host erforderlich. Das AppImage selbst läuft weiterhin ohne Root-Rechte. Für AppImages werden die nötigen Einrichtungsdateien vor der Administratorabfrage sicher außerhalb des temporären AppImage-Mounts bereitgestellt. Der Systemdienst bleibt nach einem Vitalux-Neustart verfügbar.
 
 - Automatische GPU-Auswahl (dedizierte GPUs bevorzugt), bestehendes Live-Monitoring bleibt unverändert.
 - GPU-Parameter und Profile im Vitalux-Farbschema. Prozess-/GameMode-Profilregeln, automatische Auswahl und Expertenparameter.
@@ -65,7 +65,7 @@ Vitalux erkennt AMD-, NVIDIA- und Intel-Grafikkarten wie bisher automatisch übe
 
 - **Farbschemas:** Glass mit Vitalux Blau (Standard), Dark, Light, Black Glass und Minimalistisch.
 - **Hintergründe:** 14 integrierte Optionen plus selbst importierte PNG-, JPEG-, WebP- und BMP-Bilder mit Füllen, Einpassen, Strecken, Zentrieren und Kacheln. Nur **Funkeln** ist animiert.
-- **Akzentfarben:** Presets, Distributionsfarbe, eigene Farben und **Hintergrundfarbe automatisch** im selben Menü.
+- **Akzentfarben:** Acht geschützte, nicht löschbare Standardfarben, Distributionsfarbe, eigene bearbeitbare/löschbare Farben und **Hintergrundfarbe automatisch**.
 - **Rendering:** CPU (Standard), OpenGL und Qt Quick (GPU-Tests) über **Einstellungen → Grafik-Rendering**; per **Jetzt neu starten** wechseln. GPU-Modi beschleunigen bisher nur den Hintergrund bzw. die Komposition, nicht alle Qt-Widgets und Diagramme.
 
 **630 integrierte Kombinationen:** 5 Farbschemas × 14 Hintergründe × 9 Akzentoptionen (davon 8 feste Farben). Eigene Farben erweitern die Auswahl; manche Kombinationen können optisch identisch sein.
