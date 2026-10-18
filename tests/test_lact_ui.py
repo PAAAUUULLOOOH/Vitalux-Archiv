@@ -99,7 +99,7 @@ def check_ui():
         card.client = Offline()
         card.reload()
         assert card.device_combo.itemText(0) == "AMD Radeon RX 9070 XT"
-        assert card.setup_button.isVisible() is False or not card.setup_button.isHidden()
+        assert not card.setup_button.isHidden()
         assert not card.apply_btn.isEnabled()
     finally:
         sensors.gpu_info = previous_gpu_info
