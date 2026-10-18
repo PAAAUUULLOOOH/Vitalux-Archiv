@@ -460,8 +460,8 @@ class LactTuningCard(Card):
         power = (self.stats.get("power") or {}) if isinstance(self.stats, dict) else {}
         if isinstance(power, dict):
             lo, hi = power.get("cap_min"), power.get("cap_max")
-            if lo is not None and hi is not None and 0 < lo < hi:
-                self.fields["power_cap"].setRange(float(lo), float(hi))
+            if isinstance(lo, (int, float)) and isinstance(hi, (int, float)) and lo < hi and hi > 0:
+                self.fields["power_cap"].setRange(max(1.0, float(lo)), float(hi))
         for key, widget in self.fields.items():
             value = config.get(key)
             widget.blockSignals(True)
@@ -469,15 +469,36 @@ class LactTuningCard(Card):
             widget.blockSignals(False)
             widget.setProperty("lact_null", value is None)
             widget.setToolTip("Wert einstellen. Mit 'Zurücksetzen' im Kontextmenü wieder auf Standard.")
+        table = (self.clock_info.get("table") or {}).get("value") or {}
+        data = table.get("data") or {} if isinstance(table, dict) else {}
+        offsets = config.get("gpu_clock_offsets") or {}
+        active_offset = offsets.get("0", data.get("sclk_offset", 0)) if isinstance(offsets, dict) else 0
+        self.gpu_offset.blockSignals(True)
+        self.gpu_offset.setValue(int(active_offset or 0))
+        self.gpu_offset.blockSignals(False)
+        self.gpu_offset.setProperty("lact_null", not isinstance(offsets, dict) or "0" not in offsets)
+        self.performance.blockSignals(True)
         performance = self.performance.findData(config.get("performance_level"))
         self.performance.setCurrentIndex(max(0, performance))
-        self.fan_enabled.setChecked(bool(config.get("fan_control_enabled", False)))
+        self.performance.blockSignals(False)
         settings = config.get("fan_control_settings") or {}
+        fan = self.stats.get("fan") or {} if isinstance(self.stats, dict) else {}
+        keys = fan_temperature_sources(self.stats)
+        selected = settings.get("temperature_key") or fan.get("temperature_key") or ("edge" if "edge" in keys else keys[0])
+        if selected not in keys:
+            keys.append(selected)
+        self.fan_temperature.blockSignals(True)
+        self.fan_temperature.clear()
+        for key in keys:
+            self.fan_temperature.addItem(key.capitalize(), key)
+        self.fan_temperature.setCurrentIndex(max(0, self.fan_temperature.findData(selected)))
+        self.fan_temperature.blockSignals(False)
+        self.fan_enabled.setChecked(bool(config.get("fan_control_enabled", False)))
         self.fan_mode.setCurrentIndex(max(0, self.fan_mode.findData(settings.get("mode", "curve"))))
         self.fan_speed.setValue(round(float(settings.get("static_speed", 0.5)) * 100))
         self.fan_curve.setPlainText(format_fan_curve(settings.get("curve")))
         handled = {"power_cap", "performance_level", "fan_control_enabled",
-                   "fan_control_settings", *CLOCK_FIELDS}
+                   "fan_control_settings", "gpu_clock_offsets", *CLOCK_FIELDS}
         self.extra.setPlainText(json.dumps(
             {k: v for k, v in config.items() if k not in handled},
             ensure_ascii=False, indent=2))
@@ -591,6 +612,12 @@ class LactTuningCard(Card):
             value = None if widget.property("lact_null") else widget.value()
             if value != self.current_config.get(key):
                 overrides[key] = value
+        if self.gpu_offset.isEnabled() and not self.gpu_offset.property("lact_null"):
+            old_offsets = self.current_config.get("gpu_clock_offsets") or {}
+            new_offsets = deepcopy(old_offsets)
+            new_offsets["0"] = self.gpu_offset.value()
+            if new_offsets != old_offsets:
+                overrides["gpu_clock_offsets"] = new_offsets
         mode = self.performance.currentData()
         if mode != self.current_config.get("performance_level"):
             overrides["performance_level"] = mode
@@ -602,20 +629,26 @@ class LactTuningCard(Card):
                 old_fan = self.current_config.get("fan_control_settings") or {}
                 mode = self.fan_mode.currentData()
                 old_speed = round(float(old_fan.get("static_speed", 0.5)) * 100)
+                current_temp = old_fan.get("temperature_key")
+                temperature_changed = (
+                    mode == "curve" and self.fan_temperature.currentData() !=
+                    (current_temp or (self.stats.get("fan") or {}).get("temperature_key") or "edge"))
                 dirty = (
                     not self.current_config.get("fan_control_enabled")
                     or mode != old_fan.get("mode", "curve")
+                    or any(key not in old_fan for key in ("temperature_key", "interval_ms", "curve"))
                     or (mode == "static" and self.fan_speed.value() != old_speed)
-                    or (mode == "curve" and self.fan_curve.toPlainText()
-                        != format_fan_curve(old_fan.get("curve")))
+                    or (mode == "curve" and (temperature_changed or
+                        self.fan_curve.toPlainText() != format_fan_curve(old_fan.get("curve"))))
                 )
                 if dirty:
-                    fan = deepcopy(old_fan)
-                    fan["mode"] = mode
-                    if mode == "static":
-                        fan["static_speed"] = self.fan_speed.value() / 100.0
-                    else:
-                        fan["curve"] = parse_fan_curve(self.fan_curve.toPlainText())
+                    curve = (parse_fan_curve(self.fan_curve.toPlainText())
+                             if mode == "curve" else old_fan.get("curve"))
+                    fan = complete_fan_settings(
+                        old_fan, self.stats, mode=mode,
+                        speed_percent=self.fan_speed.value(), curve=curve)
+                    if mode == "curve":
+                        fan["temperature_key"] = self.fan_temperature.currentData()
                     overrides["fan_control_settings"] = fan
         config = merged_gpu_config(self.current_config, overrides)
         advanced = json.loads(self.extra.toPlainText() or "{}")
